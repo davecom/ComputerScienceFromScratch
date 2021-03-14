@@ -1,4 +1,4 @@
-# tokenizer.py
+# NanoBASIC/tokenizer.py
 # From Fun Computer Science Projects in Python
 # Copyright 2021 David Kopec
 #
@@ -13,48 +13,85 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations # can delete in 3.9
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union, TextIO
+import re
+from dataclasses import dataclass
 
 
-class Token(Enum):
-    COMMENT = (r"rem.*", False)
-    WHITESPACE = (r"[ \t\n\r]", False)
-    PRINT = (r"print", False)
-    IF_T = (r"if", False)
-    THEN = (r"then", False)
-    LET = (r"let", False)
-    GOTO = (r"goto", False)
-    GOSUB = (r"gosub", False)
-    RETURN_T = (r"return", False)
-    COMMA = (r",", False)
-    EQUAL = (r"=", False)
-    NOT_EQUAL = (r"<>|><", False)
-    LESS = (r"<", False)
-    LESS_EQUAL = (r"<=", False)
-    GREATER = (r">", False)
-    GREATER_EQUAL = (r">=", False)
-    PLUS = (r"\+", False)
-    MINUS = (r"-", False)
-    MULTIPLY = (r"\*", False)
-    DIVIDE = (r"/", False)
-    OPEN_PAREN = (r"\(", False)
-    CLOSE_PAREN = (r"\)", False)
-    VARIABLE = (r"[A-Za-z_]*", True)
-    NUMBER = (r"-?[0-9]+", True)
-    STRING = (r"\"[a-zA-Z0-9 ]*\"", True)
+class TokenType(Enum):
+    COMMENT = (r'rem.*', False)
+    WHITESPACE = (r'[ \t\n\r]', False)
+    PRINT = (r'print', False)
+    IF_T = (r'if', False)
+    THEN = (r'then', False)
+    LET = (r'let', False)
+    GOTO = (r'goto', False)
+    GOSUB = (r'gosub', False)
+    RETURN_T = (r'return', False)
+    COMMA = (r',', False)
+    EQUAL = (r'=', False)
+    NOT_EQUAL = (r'<>|><', False)
+    LESS = (r'<', False)
+    LESS_EQUAL = (r'<=', False)
+    GREATER = (r'>', False)
+    GREATER_EQUAL = (r'>=', False)
+    PLUS = (r'\+', False)
+    MINUS = (r'-', False)
+    MULTIPLY = (r'\*', False)
+    DIVIDE = (r'/', False)
+    OPEN_PAREN = (r'\(', False)
+    CLOSE_PAREN = (r'\)', False)
+    VARIABLE = (r'[A-Za-z_]+', True)
+    NUMBER = (r'-?[0-9]+', True)
+    STRING = (r'"[a-zA-Z0-9 ]*"', True)
 
     def __init__(self, pattern: str, has_associated_value: bool):
-        self._pattern: str = pattern
-        self._has_associated_value: bool = has_associated_value
-        self.associated_value: Optional[str] = None
+        self.pattern = pattern
+        self.has_associated_value = has_associated_value
 
-    @property
-    def pattern(self) -> str:
-        return self._pattern
+    def __repr__(self) -> str:
+        return self.name
 
-    @property
-    def has_associated_value(self) -> bool:
-        return self._has_associated_value
 
+@dataclass(frozen=True)
+class Token:
+    type: TokenType
+    line_num: int
+    col_start: int
+    col_end: int
+    associated_value: Optional[Union[str, int]]
+
+
+def tokenize(text_file: TextIO) -> list[Token]:
+    tokens: list[Token] = []
+    for line_num, line in enumerate(text_file.readlines(), start=1):
+        col_start: int = 1
+        while len(line) > 0:
+            found: Optional[re.Match] = None
+            for possibility in TokenType:
+                # Try each pattern on the beginning of the text case-insensitive
+                # if it's found, store the match in *found*
+                found = re.match(possibility.pattern, line, re.IGNORECASE)
+                if found:
+                    col_end: int = col_start + found.end() - 1
+                    # Store tokens other than comments and whitespace
+                    if possibility is not TokenType.WHITESPACE and possibility is not TokenType.COMMENT:
+                        associated_value: Optional[Union[str, int]] = None
+                        if possibility.has_associated_value:
+                            associated_value = found.group(0)
+                            if possibility is TokenType.NUMBER:
+                                associated_value = int(associated_value)
+                        tokens.append(Token(possibility, line_num, col_start, col_end, associated_value))
+                    # Continue search from place in line after token
+                    line = line[found.end():]
+                    col_start = col_end + 1
+                    break  # Go around again for next token
+            # If we went through all of the tokens and none of them were a match
+            # then this must be an invalid token
+            if not found:
+                print(f"Syntax error on line {line_num} and column {col_start}")
+                break
+
+    return tokens
