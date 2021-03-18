@@ -13,6 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# DESCRIPTION
+# This file defines the nodes that the parser can create. Nodes are meaningful
+# chunks of a program for the interpreter to interpret. For example, generally
+# each statement will become a node.
 from dataclasses import dataclass
 from typing import Union
 from tokenizer import TokenType
@@ -30,11 +35,6 @@ class Statement:
     line_num: int
     col_start: int
     col_end: int
-
-
-# There are a couple places in the program where we will need multiple
-# statements together, and it's nice to have a type alias for that
-StatementList = list[Statement]
 
 
 # A numeric expression is something that can be computed into a number

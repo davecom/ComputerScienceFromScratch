@@ -13,7 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import annotations # can delete in 3.9
+#
+# DESCRIPTION
+# The tokenizer takes a string of source code (the contents of a source code
+# file basically) and turns it into tokens. The tokens represent all of the
+# smallest individual chunks of a program that can be processed. The valid
+# tokens in a programming language are specified by a grammar. We have a grammar
+# file in the repository as well. It is grammar.txt. Please keep it open as you
+# read tokenizer.py and parser.py.
+from __future__ import annotations  # can delete in 3.9
 from enum import Enum
 from typing import Optional, Union, TextIO
 import re
@@ -57,7 +65,7 @@ class TokenType(Enum):
 
 @dataclass(frozen=True)
 class Token:
-    type: TokenType
+    kind: TokenType
     line_num: int
     col_start: int
     col_end: int
