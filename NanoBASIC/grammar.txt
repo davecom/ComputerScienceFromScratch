@@ -1,0 +1,34 @@
+NanoBASIC Grammar
+
+The NanoBASIC grammar is a modified version of the TinyBASIC grammar, originally courtesy of Wikipedia:
+https://en.wikipedia.org/wiki/Tiny_BASIC
+
+Some items have been removed from the original Tiny BASIC grammar to simplify the language even further. Notably INPUT and the accompanying var-list. As well as REPL control statements like CLEAR, LIST, RUN, and END. Also all non-comment lines must start with a number. Note that the literal COMMENT in the below can be any text of any kind
+
+line ::= number statement \n | REM COMMENT \n
+ 
+statement ::= PRINT expr-list
+              IF expression relop expression THEN statement
+              GOTO expression
+              LET var = expression
+              GOSUB expression
+              RETURN
+ 
+expr-list ::= (string|expression) (, (string|expression) )*
+ 
+expression ::= (-|ε) term ((+|-) term)*
+ 
+term ::= factor ((*|/) factor)*
+ 
+factor ::= var | number | (expression)
+ 
+var ::= A | B | C ... | Y | Z
+ 
+number ::= digit digit*
+ 
+digit ::= 0 | 1 | 2 | 3 | ... | 8 | 9
+ 
+relop ::= < (>|=|ε) | > (<|=|ε) | =
+
+string ::= " (a|b|c ... |x|y|z|A|B|C ... |X|Y|Z|digit)* "
+
