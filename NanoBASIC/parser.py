@@ -26,9 +26,10 @@
 # is being analyzed is expected to be a part of another production rule, the
 # recursive descent parser just calls the function representing that other production rule.
 # The recursive descent functions return respective nodes when they are successful.
-from tokenizer import Token, TokenType
+from __future__ import annotations  # can delete in 3.9
+from .tokenizer import Token, TokenType
 from typing import Optional
-from nodes import *
+from .nodes import *
 
 
 class Parser:
@@ -62,12 +63,12 @@ class Parser:
         return self.token_index >= len(self.tokens)
 
     def match(self, kind: TokenType) -> bool:
-        if self.current_token.kind is kind:
+        if not self.out_of_tokens and self.current.kind is kind:
             return True
         return False
 
     def consume(self, kind: TokenType) -> Token:
-        if self.current_token.kind is kind:
+        if self.current.kind is kind:
             self.token_index += 1
             return self.previous
         raise Parser.ParserError(f"Expected {kind} after {self.previous}"
@@ -75,7 +76,8 @@ class Parser:
 
     def parse(self) -> list[Statement]:
         statements: list[Statement] = []
-        while statement := self.parse_line():
+        while not self.out_of_tokens:
+            statement = self.parse_line()
             statements.append(statement)
         return statements
 
@@ -124,27 +126,27 @@ class Parser:
     # IF BOOLEAN_EXPRESSION THEN STATEMENT
     def parse_if(self, line_id: int) -> IfStatement:
         if_token = self.consume(TokenType.IF_T)
-        boolean_expression = self.parse_boolean_expression(line_id)
+        boolean_expression = self.parse_boolean_expression()
         self.consume(TokenType.THEN)
         statement = self.parse_statement(line_id)
         return IfStatement(line_id=line_id, line_num=if_token.line_num,
                            col_start=if_token.col_start, col_end=statement.col_end,
-                           boolean_expression=boolean_expression)
+                           boolean_expression=boolean_expression, then_statement=statement)
 
     # LET VARIABLE = VALUE
     def parse_let(self, line_id: int) -> LetStatement:
         let_token = self.consume(TokenType.LET)
         variable = self.consume(TokenType.VARIABLE)
         self.consume(TokenType.EQUAL)
-        expression = self.parse_numeric_expression(line_id)
+        expression = self.parse_numeric_expression()
         return LetStatement(line_id=line_id, line_num=let_token.line_num,
                             col_start=let_token.col_start, col_end=expression.col_end,
-                            variable=variable, value=expression)
+                            name=variable, value=expression)
 
     # GOTO NUMERIC_EXPRESSION
     def parse_goto(self, line_id: int) -> GoToStatement:
         goto_token = self.consume(TokenType.GOTO)
-        expression = self.parse_numeric_expression(line_id)
+        expression = self.parse_numeric_expression()
         return GoToStatement(line_id=line_id, line_num=goto_token.line_num,
                             col_start=goto_token.col_start, col_end=expression.col_end,
                             goto_line_id=expression)
@@ -164,83 +166,83 @@ class Parser:
                              col_start=return_token.col_start, col_end=return_token.col_end)
 
     # NUMERIC_EXPRESSION BOOLEAN_OPERATOR NUMERIC_EXPRESSION
-    def parse_boolean_expression(self, line_id: int) -> BooleanExpression:
-        left = self.parse_numeric_expression(line_id)
+    def parse_boolean_expression(self) -> BooleanExpression:
+        left = self.parse_numeric_expression()
         if self.current.kind in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.EQUAL,
                                  TokenType.LESS, TokenType.LESS_EQUAL]:
             operator = self.consume(self.current.kind)
-            right = self.parse_numeric_expression(line_id)
-            return BooleanExpression(line_id=line_id, line_num=left.line_num,
+            right = self.parse_numeric_expression()
+            return BooleanExpression(line_num=left.line_num,
                                      col_start=left.col_start, col_end=right.col_end,
                                      operator=operator.kind, left=left, right=right)
         raise Parser.ParserError("Expected boolean operator inside boolean expression.", self.current)
 
-    def parse_numeric_expression(self, line_id: int) -> NumericExpression:
-        left = self.parse_term(line_id)
+    def parse_numeric_expression(self) -> NumericExpression:
+        left = self.parse_term()
         # Keep parsing +s and -s until there are no more
         while True:
             if self.out_of_tokens:  # What if expression is end of file?
                 return left
             if self.match(TokenType.PLUS):
                 self.consume(TokenType.PLUS)
-                right = self.parse_term(line_id)
-                left = BinaryOperation(line_id=line_id, line_num=left.line_num,
+                right = self.parse_term()
+                left = BinaryOperation(line_num=left.line_num,
                                        col_start=left.col_start, col_end=right.col_end,
                                        operator=TokenType.PLUS, left=left, right=right)
             elif self.match(TokenType.MINUS):
                 self.consume(TokenType.MINUS)
-                right = self.parse_term(line_id)
-                left = BinaryOperation(line_id=line_id, line_num=left.line_num,
+                right = self.parse_term()
+                left = BinaryOperation(line_num=left.line_num,
                                        col_start=left.col_start, col_end=right.col_end,
                                        operator=TokenType.MINUS, left=left, right=right)
             else:
                 break  # No more, must be end of expression
         return left
 
-    def parse_term(self, line_id: int) -> NumericExpression:
-        left = self.parse_factor(line_id)
+    def parse_term(self) -> NumericExpression:
+        left = self.parse_factor()
         # Keep parsing *s and /s until there are no more
         while True:
             if self.out_of_tokens:  # What if expression is end of file?
                 return left
             if self.match(TokenType.MULTIPLY):
                 self.consume(TokenType.MULTIPLY)
-                right = self.parse_factor(line_id)
-                left = BinaryOperation(line_id=line_id, line_num=left.line_num,
+                right = self.parse_factor()
+                left = BinaryOperation(line_num=left.line_num,
                                        col_start=left.col_start, col_end=right.col_end,
                                        operator=TokenType.MULTIPLY, left=left, right=right)
             elif self.match(TokenType.DIVIDE):
                 self.consume(TokenType.DIVIDE)
-                right = self.parse_factor(line_id)
-                left = BinaryOperation(line_id=line_id, line_num=left.line_num,
+                right = self.parse_factor()
+                left = BinaryOperation(line_num=left.line_num,
                                        col_start=left.col_start, col_end=right.col_end,
                                        operator=TokenType.DIVIDE, left=left, right=right)
             else:
                 break  # No more, must be end of expression
         return left
 
-    def parse_factor(self, line_id: int) -> NumericExpression:
+    def parse_factor(self) -> NumericExpression:
         if self.match(TokenType.VARIABLE):
             variable = self.consume(TokenType.VARIABLE)
-            return VarRetrieve(line_id=line_id, line_num=variable.line_num,
+            return VarRetrieve(line_num=variable.line_num,
                                col_start=variable.col_start, col_end=variable.col_end,
                                name=variable.associated_value)
         elif self.match(TokenType.NUMBER):
             number = self.consume(TokenType.NUMBER)
-            return NumberLiteral(line_id=line_id, line_num=number.line_num,
+            return NumberLiteral(line_num=number.line_num,
                                  col_start=number.col_start, col_end=number.col_end,
                                  number=number.associated_value)
         elif self.match(TokenType.OPEN_PAREN):
             self.consume(TokenType.OPEN_PAREN)
-            expression = self.parse_numeric_expression(line_id)
+            expression = self.parse_numeric_expression()
             if not self.match(TokenType.CLOSE_PAREN):
                 raise Parser.ParserError("Expected matching closing parenthesis.", self.current)
             self.consume(TokenType.CLOSE_PAREN)
             return expression
         elif self.match(TokenType.MINUS):
             minus = self.consume(TokenType.MINUS)
-            expression = self.parse_factor(line_id)
-            return UnaryOperation(line_id=line_id, line_num=minus.line_num,
+            expression = self.parse_factor()
+            return UnaryOperation(line_num=minus.line_num,
                                   col_start=minus.col_start, col_end=expression.col_end,
                                   operator=TokenType.MINUS, value=expression)
         raise Parser.ParserError("Couldn't parse numeric expression, unexpected token.", self.current)

@@ -20,7 +20,8 @@
 # an abstract syntax tree. In NanoBASIC, the data structure that the interpreter receives is
 # just an array of statement nodes; each node is something of a tree in itself. The interpreter
 # translates the meaning of each statement node into Python code that can be run "live."
-from nodes import *
+from __future__ import annotations  # can delete in 3.9
+from .nodes import *
 from collections import deque
 from typing import cast, Optional, Union
 
@@ -109,7 +110,7 @@ class Interpreter:
             else:
                 self.statement_index += 1
         else:
-            raise Interpreter.InterpreterError("Unexpected item in statement list.", self.current)
+            raise Interpreter.InterpreterError(f"Unexpected item {self.current} in statement list.", self.current)
 
     def evaluate_numeric(self, numeric_expression: NumericExpression) -> int:
         if numeric_expression is NumberLiteral:

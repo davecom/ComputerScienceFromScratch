@@ -18,9 +18,10 @@
 # This file defines the nodes that the parser can create. Nodes are meaningful
 # chunks of a program for the interpreter to interpret. For example, generally
 # each statement will become a node.
+from __future__ import annotations  # can delete in 3.9
 from dataclasses import dataclass
 from typing import Union
-from tokenizer import TokenType
+from .tokenizer import TokenType
 
 
 # All statements in NanoBASIC have a line number identifier
