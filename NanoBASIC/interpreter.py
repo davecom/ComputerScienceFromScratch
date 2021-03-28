@@ -52,7 +52,7 @@ class Interpreter:
         low: int = 0
         high: int = len(self.statements) - 1
         while low <= high:
-            mid: int = (low + high) / 2
+            mid: int = (low + high) // 2
             if self.statements[mid].line_id < line_id:
                 low = mid + 1
             elif self.statements[mid].line_id > line_id:
@@ -61,25 +61,24 @@ class Interpreter:
                 return mid
         return None
 
-
     def run(self):
         while self.statement_index < len(self.statements):
             self.interpret(self.current)
 
     def interpret(self, statement: Statement):
-        if statement is LetStatement:
+        if isinstance(statement, LetStatement):
             let_statement = cast(LetStatement, statement)
             value = self.evaluate_numeric(let_statement.value)
             self.variable_table[let_statement.name] = value
             self.statement_index += 1
-        elif statement is GoToStatement:
+        elif isinstance(statement, GoToStatement):
             goto_statement = cast(GoToStatement, statement)
             go_to_line_id = self.evaluate_numeric(goto_statement.goto_line_id)
             if (line_index := self.find_line_index(go_to_line_id)) is not None:
                 self.statement_index = line_index
             else:
                 raise Interpreter.InterpreterError("Couldn't find goto line id.", self.current)
-        elif statement is GoSubStatement:
+        elif isinstance(statement, GoSubStatement):
             gosub_statement = cast(GoSubStatement, statement)
             go_to_line_id = self.evaluate_numeric(gosub_statement.goto_line_id)
             if (line_index := self.find_line_index(go_to_line_id)) is not None:
@@ -87,23 +86,23 @@ class Interpreter:
                 self.statement_index = line_index
             else:
                 raise Interpreter.InterpreterError("Couldn't find gosub line id.", self.current)
-        elif statement is ReturnStatement:
+        elif isinstance(statement, ReturnStatement):
             if not self.subroutine_stack:  # Check if the stack is empty
                 raise Interpreter.InterpreterError("Return with no prior corresponding gosub.", self.current)
             self.statement_index = self.subroutine_stack.pop()
-        elif statement is PrintStatement:
+        elif isinstance(statement, PrintStatement):
             print_statement = cast(PrintStatement, statement)
             accumulated_string: str = ""
             for index, printable in enumerate(print_statement.printables):
                 if index > 0:  # Put tabs between items in the list
                     accumulated_string += "\t"
-                if printable is NumericExpression:
-                    accumulated_string += self.evaluate_numeric(printable)
+                if isinstance(printable, NumericExpression):
+                    accumulated_string += str(self.evaluate_numeric(printable))
                 else:  # Otherwise it's a string, because that's the only other thing we allow
-                    accumulated_string += printable
-                print(accumulated_string)
+                    accumulated_string += str(printable)
+            print(accumulated_string)
             self.statement_index += 1
-        elif statement is IfStatement:
+        elif isinstance(statement, IfStatement):
             if_statement = cast(IfStatement, statement)
             if self.evaluate_boolean(if_statement.boolean_expression):
                 self.interpret(if_statement.then_statement)
@@ -113,28 +112,28 @@ class Interpreter:
             raise Interpreter.InterpreterError(f"Unexpected item {self.current} in statement list.", self.current)
 
     def evaluate_numeric(self, numeric_expression: NumericExpression) -> int:
-        if numeric_expression is NumberLiteral:
+        if isinstance(numeric_expression, NumberLiteral):
             number_literal = cast(NumberLiteral, numeric_expression)
             return number_literal.number
-        elif numeric_expression is VarRetrieve:
+        elif isinstance(numeric_expression, VarRetrieve):
             var_retrieve = cast(VarRetrieve, numeric_expression)
             if var_retrieve.name in self.variable_table:
                 return self.variable_table[var_retrieve.name]
             else:
                 raise Interpreter.InterpreterError(f"Var {var_retrieve.name} used before initialized.", var_retrieve)
-        elif numeric_expression is UnaryOperation:
+        elif isinstance(numeric_expression, UnaryOperation):
             unary_operation = cast(UnaryOperation, numeric_expression)
             if unary_operation.operator is TokenType.MINUS:
                 return -self.evaluate_numeric(unary_operation.value)
             else:
                 raise Interpreter.InterpreterError(f"Expected - but got {unary_operation.operator}.", unary_operation)
-        elif numeric_expression is UnaryOperation:
+        elif isinstance(numeric_expression, UnaryOperation):
             unary_operation = cast(UnaryOperation, numeric_expression)
             if unary_operation.operator is TokenType.MINUS:
                 return -self.evaluate_numeric(unary_operation.value)
             else:
                 raise Interpreter.InterpreterError(f"Expected - but got {unary_operation.operator}.", unary_operation)
-        elif numeric_expression is BinaryOperation:
+        elif isinstance(numeric_expression, BinaryOperation):
             binary_operation = cast(BinaryOperation, numeric_expression)
             if binary_operation.operator is TokenType.PLUS:
                 return self.evaluate_numeric(binary_operation.left) \
@@ -147,7 +146,7 @@ class Interpreter:
                        * self.evaluate_numeric(binary_operation.right)
             elif binary_operation.operator is TokenType.DIVIDE:
                 return self.evaluate_numeric(binary_operation.left) \
-                       / self.evaluate_numeric(binary_operation.right)
+                       // self.evaluate_numeric(binary_operation.right)
             else:
                 raise Interpreter.InterpreterError(f"Unexpected binary operator {binary_operation.operator}.", binary_operation)
         else:

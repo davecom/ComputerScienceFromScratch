@@ -1,4 +1,4 @@
-# NanoBASIC/__main__.py
+# NanoBASIC/executioner.py
 # From Fun Computer Science Projects in Python
 # Copyright 2021 David Kopec
 #
@@ -13,12 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from argparse import ArgumentParser
-from .executioner import execute
+from .tokenizer import tokenize
+from .parser import Parser
+from .interpreter import Interpreter
 
-if __name__ == "__main__":
-    # Parse the file argument
-    file_parser = ArgumentParser("NanoBASIC")
-    file_parser.add_argument("basic_file", help="A text file containing NanoBASIC source code.")
-    arguments = file_parser.parse_args()
-    execute(arguments.basic_file)
+def execute(file_name: str):
+    # Load the text file from the argument
+    # Tokenize, parse, and execute it
+    with open(file_name, "r") as text_file:
+        tokens = tokenize(text_file)
+        ast = Parser(tokens).parse()
+        Interpreter(ast).run()

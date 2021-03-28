@@ -41,10 +41,10 @@ class TokenType(Enum):
     COMMA = (r',', False)
     EQUAL = (r'=', False)
     NOT_EQUAL = (r'<>|><', False)
-    LESS = (r'<', False)
     LESS_EQUAL = (r'<=', False)
-    GREATER = (r'>', False)
     GREATER_EQUAL = (r'>=', False)
+    LESS = (r'<', False)
+    GREATER = (r'>', False)
     PLUS = (r'\+', False)
     MINUS = (r'-', False)
     MULTIPLY = (r'\*', False)
@@ -91,6 +91,8 @@ def tokenize(text_file: TextIO) -> list[Token]:
                             associated_value = found.group(0)
                             if possibility is TokenType.NUMBER:
                                 associated_value = int(associated_value)
+                            elif possibility is TokenType.STRING:  # Remove quote characters
+                                associated_value = associated_value[1:-1]
                         tokens.append(Token(possibility, line_num, col_start, col_end, associated_value))
                     # Continue search from place in line after token
                     line = line[found.end():]

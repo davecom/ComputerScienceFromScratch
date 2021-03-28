@@ -28,7 +28,7 @@
 # The recursive descent functions return respective nodes when they are successful.
 from __future__ import annotations  # can delete in 3.9
 from .tokenizer import Token, TokenType
-from typing import Optional
+from typing import Optional, Union
 from .nodes import *
 
 
@@ -107,7 +107,7 @@ class Parser:
         last_col: int = print_token.col_end
         while True:  # Keep finding things to print
             if self.match(TokenType.STRING):
-                string = self.consume(TokenType.string)
+                string = self.consume(TokenType.STRING)
                 printables.append(string.associated_value)
                 last_col = string.col_end
             elif (expression := self.parse_numeric_expression()) is not None:
@@ -141,7 +141,7 @@ class Parser:
         expression = self.parse_numeric_expression()
         return LetStatement(line_id=line_id, line_num=let_token.line_num,
                             col_start=let_token.col_start, col_end=expression.col_end,
-                            name=variable, value=expression)
+                            name=variable.associated_value, value=expression)
 
     # GOTO NUMERIC_EXPRESSION
     def parse_goto(self, line_id: int) -> GoToStatement:
@@ -154,28 +154,29 @@ class Parser:
     # GOSUB NUMERIC_EXPRESSION
     def parse_gosub(self, line_id: int) -> GoSubStatement:
         gosub_token = self.consume(TokenType.GOSUB)
-        expression = self.parse_numeric_expression(line_id)
-        return GoToStatement(line_id=line_id, line_num=gosub_token.line_num,
+        expression = self.parse_numeric_expression()
+        return GoSubStatement(line_id=line_id, line_num=gosub_token.line_num,
                              col_start=gosub_token.col_start, col_end=expression.col_end,
                              goto_line_id=expression)
 
     # RETURN
     def parse_return(self, line_id: int) -> ReturnStatement:
-        return_token = self.consume(TokenType.GOSUB)
-        return GoToStatement(line_id=line_id, line_num=return_token.line_num,
+        return_token = self.consume(TokenType.RETURN_T)
+        return ReturnStatement(line_id=line_id, line_num=return_token.line_num,
                              col_start=return_token.col_start, col_end=return_token.col_end)
 
     # NUMERIC_EXPRESSION BOOLEAN_OPERATOR NUMERIC_EXPRESSION
     def parse_boolean_expression(self) -> BooleanExpression:
         left = self.parse_numeric_expression()
         if self.current.kind in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.EQUAL,
-                                 TokenType.LESS, TokenType.LESS_EQUAL]:
+                                 TokenType.LESS, TokenType.LESS_EQUAL, TokenType.NOT_EQUAL]:
             operator = self.consume(self.current.kind)
             right = self.parse_numeric_expression()
             return BooleanExpression(line_num=left.line_num,
                                      col_start=left.col_start, col_end=right.col_end,
                                      operator=operator.kind, left=left, right=right)
-        raise Parser.ParserError("Expected boolean operator inside boolean expression.", self.current)
+        raise Parser.ParserError(f"Expected boolean operator inside boolean expression but found {self.current.kind}.",
+                                 self.current)
 
     def parse_numeric_expression(self) -> NumericExpression:
         left = self.parse_term()
