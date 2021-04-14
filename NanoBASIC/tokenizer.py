@@ -88,11 +88,12 @@ def tokenize(text_file: TextIO) -> list[Token]:
                     if possibility is not TokenType.WHITESPACE and possibility is not TokenType.COMMENT:
                         associated_value: Optional[Union[str, int]] = None
                         if possibility.has_associated_value:
-                            associated_value = found.group(0)
                             if possibility is TokenType.NUMBER:
-                                associated_value = int(associated_value)
+                                associated_value = int(found.group(0))
+                            elif possibility is TokenType.VARIABLE:
+                                associated_value = found.group()
                             elif possibility is TokenType.STRING:  # Remove quote characters
-                                associated_value = associated_value[1:-1]
+                                associated_value = found.group(0)[1:-1]
                         tokens.append(Token(possibility, line_num, col_start, col_end, associated_value))
                     # Continue search from place in line after token
                     line = line[found.end():]

@@ -47,16 +47,12 @@ class Parser:
         self.token_index: int = 0
 
     @property
-    def current(self) -> Optional[Token]:
-        if self.token_index < len(self.tokens):
-            return self.tokens[self.token_index]
-        return None
+    def current(self) -> Token:
+        return self.tokens[self.token_index]
 
     @property
-    def previous(self) -> Optional[Token]:
-        if self.token_index - 1 >= 0:
-            return self.tokens[self.token_index - 1]
-        return None
+    def previous(self) -> Token:
+        return self.tokens[self.token_index - 1]
 
     @property
     def out_of_tokens(self) -> bool:

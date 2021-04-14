@@ -40,7 +40,7 @@ class Interpreter:
         self.statements = statements
         self.variable_table: dict[str, int] = {}
         self.statement_index: int = 0
-        self.subroutine_stack: deque[int] = []
+        self.subroutine_stack: deque[int] = deque()
 
     @property
     def current(self) -> Statement:
