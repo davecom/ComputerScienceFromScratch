@@ -18,7 +18,6 @@ class Brainfuck:
         # Open text file and store in instance variable, execute
         with open(file_name, "r") as text_file:
             self.source_code: str = text_file.read()
-            self.execute()
 
     # Find the location of the corresponding matching bracket to the one at start
     # If forward is true go to the right looking for a matching "]"
@@ -40,7 +39,6 @@ class Brainfuck:
         # Didn't find a match
         print(f"Error: could not find matching bracket for {start_bracket} at {start}.")
         return start
-
 
     def execute(self):
         # Setup state

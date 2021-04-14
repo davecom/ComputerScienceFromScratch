@@ -49,16 +49,16 @@ class BrainfuckTestCase(unittest.TestCase):
         expected = "1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89"
         self.assertEqual(program_output, expected)
 
-    # def test_cell_size(self):
-    #     program_output = run("Examples/cell_size.bf")
-    #     expected = "8 bit cells\n"
-    #     self.assertEqual(program_output, expected)
+    def test_cell_size(self):
+        program_output = run("Examples/cell_size.bf")
+        expected = "32 bit cells\n"
+        self.assertEqual(program_output, expected)
 
-    # def test_beer(self):
-    #     program_output = run("Examples/beer.bf")
-    #     with open("Examples/beer.out", "r") as text_file:
-    #         expected = text_file.read()
-    #         self.assertEqual(program_output, expected)
+    def test_beer(self):
+        program_output = run("Examples/beer.bf")
+        with open("Examples/beer.out", "r") as text_file:
+            expected = text_file.read()
+            self.assertEqual(program_output, expected)
 
 
 if __name__ == "__main__":
