@@ -51,7 +51,7 @@ class BrainfuckTestCase(unittest.TestCase):
 
     def test_cell_size(self):
         program_output = run("Examples/cell_size.bf")
-        expected = "32 bit cells\n"
+        expected = "8 bit cells\n"
         self.assertEqual(program_output, expected)
 
     def test_beer(self):
