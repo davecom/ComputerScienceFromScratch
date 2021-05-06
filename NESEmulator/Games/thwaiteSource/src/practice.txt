@@ -1,0 +1,14 @@
+thwaite: practice
+
+Day:  S M T W R F S
+
+Hour: 1 2 3 4 5
+
+  Ammo  Speed  Delay
+
+
+Side: Left  Right
+
+      Both  2 Players
+
+(Cancel)   (Play)

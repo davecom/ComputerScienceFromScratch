@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from .brainfuck import execute
+from .brainfuck import Brainfuck
 
 if __name__ == "__main__":
     # Parse the file argument
     file_parser = ArgumentParser("NanoBASIC")
     file_parser.add_argument("brainfuck_file", help="A text file containing Brainfuck source code.")
     arguments = file_parser.parse_args()
-    execute(arguments.basic_file)
+    Brainfuck(arguments.basic_file).execute()

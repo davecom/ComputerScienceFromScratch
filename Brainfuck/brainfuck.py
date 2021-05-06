@@ -39,7 +39,7 @@ class Brainfuck:
             elif instruction == ".":
                 print(chr(cells[data_pointer]), end='', flush=True)
             elif instruction == ",":
-                cells[data_pointer] = int(input())
+                cells[data_pointer] = clamp0_255_wraparound(int(input()))
             elif instruction == "[":
                 if cells[data_pointer] == 0:
                     instruction_pointer = self.find_bracket_match(instruction_pointer, True)

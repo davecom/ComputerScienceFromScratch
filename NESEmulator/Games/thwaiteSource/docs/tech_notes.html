@@ -1,0 +1,272 @@
+<!DOCTYPE HTML><html lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Thwaite tech notes</title>
+<meta name="author" content="Damian Yerrick">
+<meta name="description" content="Guide to the internals of Thwaite, a video game for NES">
+<link href='de.css' rel='stylesheet' type='text/css'>
+<!-- add html5 elements --><!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head><body>
+<h1>thwaite notes</h1>
+<p>
+By Damian Yerrick
+</p><p>
+When making Thwaite better, it is important to know how it works.
+</p>
+<ul class="toc">
+<li><a href="#Characters">Characters</a></li>
+<li><a href="#Missiles">Missiles</a> (<a href="#Waves">Waves</a>, <a href="#Missile_types">Types</a>, <a href="#Gimmick_waves">Gimmick waves</a>)</li>
+<li><a href="#Scheduling">Scheduling</a></li>
+<li><a href="#Scurrying_villagers">Scurrying villagers</a> (<a href="#Check">Check</a>, <a href="#Villager_behavior">Behavior</a>, <a href="#Villager_display">Display</a>)</li>
+<li><a href="#Game_states">Game states</a> (<a href="#STATE_NEW_LEVEL">New level</a>, <a href="#STATE_ACTIVE">Active</a>, <a href="#STATE_LEVEL_REWARD">Reward</a>, <a href="#STATE_REBUILD_SILO">Rebuild silo</a>, <a href="#STATE_CUTSCENE">Cut scene</a>, <a href="#STATE_REBUILD_HOUSE">Rebuild house</a>, <a href="#STATE_GAMEOVER">Game over</a>)</li>
+<li><a href="#Cut_scenes">Cut scenes</a> (<a href="#Choice_of_actors">Choice of actors</a>, <a href="#Town_damage_classes">Town damage</a>, <a href="#TAS_mockery">TAS mockery</a>, <a href="#Choice_of_cut_scene">Choice of cut scene</a>, <a href="#Cut_scene_data_format">Data format</a>)</li>
+<li><a href="#Calling_convention">Calling convention</a></li>
+<li><a href="#Music_inspiration">Music inspiration</a></li>
+<li><a href="#Legal">Legal</a>
+</ul>
+
+<h2><a id="Characters">Characters</a></h2>
+<p>
+There are ten houses and two missile silos.  Each non-player character (NPC) has a specific role in cut scenes.
+</p>
+<table class="datatable"><thead>
+<tr><th>#</th><th>Name</th><th>Sex</th><th>Role</th></tr>
+</thead><tbody>
+<tr><td class="numalign">0</td><td>Tilda</td><td>F</td><td>Paranoid</td></tr>
+<tr><td class="numalign">1</td><td>Meg</td><td>F</td><td>Laid back</td></tr>
+<tr><td class="numalign">2</td><td>Milo</td><td>M</td><td>Player 1</td></tr>
+<tr><td class="numalign">3</td><td>Isca</td><td>F</td><td>Detective</td></tr>
+<tr><td class="numalign">4</td><td>Gnivad</td><td>M</td><td>Detective</td></tr>
+<tr><td class="numalign">5</td><td>Justin</td><td>M</td><td>Laid back</td></tr>
+<tr><td class="numalign">6</td><td>Briar</td><td>F</td><td>Paranoid</td></tr>
+<tr><td class="numalign">7</td><td>Acha</td><td>F</td><td>Detective</td></tr>
+<tr><td class="numalign">8</td><td>Torben</td><td>M</td><td>Paranoid</td></tr>
+<tr><td class="numalign">9</td><td>Staisy</td><td>F</td><td>Player 2</td></tr>
+<tr><td class="numalign">10</td><td>Thad</td><td>M</td><td>Laid back</td></tr>
+<tr><td class="numalign">11</td><td>Oliver</td><td>M</td><td>Detective</td></tr>
+</tbody></table><p>
+The NPC personalities correspond loosely to the three personalities for each sex in <i>Animal Crossing</i> series:
+</p><ul>
+<li>Paranoid: Cranky/Snooty</li>
+<li>Detective: Jock/Valley girl</li>
+<li>Laid back: Lazy/Normal</li>
+</ul><p>
+To avoid any appearance of impropriety, I intentionally avoided using <a href="http://nookipedia.com/wiki/Category:Villagers">any names from <i>Animal Crossing</i> series</a>. Villagers 5 and 8 were the last to be named. <a href="http://pmcomics.deviantart.com/">Snowy</a> suggested "Trop", "Justin", "Willie", and one other that I forget. I chose "Torben" for 8, which sounds like "Trop" but doesn't call to mind <a href="http://tvtropes.org/">TV Tropes</a>, and I used "Justin" for 5, leading to plenty of <a href="http://en.wikipedia.org/wiki/Justin_Bieber">Justin Bieber</a> jokes among play testers who would intentionally let Justin's house get blown up. Interestingly enough, there were no <a href="http://en.wikipedia.org/wiki/Justin_Timberlake">Justin Timberlake</a> jokes, proving once again that <a href="http://tvtropes.org/pmwiki/pmwiki.php/Main/NOHAMOTYO">no one has a memory over two years old</a>.
+</p>
+
+<h2><a id="Missiles">Missiles</a></h2>
+<h3><a id="Waves">Waves</a></h3>
+<p>
+The game consists of seven days: Sunday through Saturday.
+Each day consists of five waves, one in each hour from 01: to 05:
+</p>
+<h3><a id="Missile_types">Missile types</a></h3>
+<p>
+There are seven types of salvo: 1 to 5 normal missiles, one balloon, and one MIRV missile. Each wave has from 10 to 40 incoming enemy missiles, with a few exceptions. A new salvo is generated once every time period that the wave specifies.
+</p>
+<h4><a id="Normal_missiles">Normal missiles</a></h4>
+<p>
+Each of one to five missiles in a salvo is generated at a random (start X, destination target).
+</p>
+<h4><a id="Balloons">Balloons</a></h4>
+<p>
+Instead of a salvo of missiles, occasionally a balloon carrying a crate slowly drifts in from the left. It moves at half the speed of an ordinary missile. This costs two missiles and is timed to activate over a randomly chosen house (1-10). If the player doesn't blow it up, it drops a missile over that house, one to the left, and one to the right. Creating a balloon costs two missiles.
+</p>
+<h4><a id="MIRV">MIRV</a></h4>
+<p>
+Occasionally, the first missile in a salvo is replaced with a MIRV (stands for "multiple independent reentry vehicles").  When a MIRV crosses 128 pixels above the impact line, it becomes three missiles.  One follows the original track, another aims two houses to one side, and the third aims either two houses to the other side or (if that'd be off the playfield) between the two. Creating a MIRV costs two missiles.
+</p><p>
+The original formula for targeting the MIRVs was as follows.
+</p><pre>
+building_dx = building_x[target[new]] - building_x[target[old]]
+yspeed[new] = yspeed[old]
+xspeed[new] = xspeed[old] + yspeed[old] * building_dx
+</pre>
+<h3><a id="Gimmick_waves">Gimmick waves</a></h3>
+<p>
+There are a couple special kinds of waves intended to provide a change of pace that surprises complacent players. <strong>Fast waves</strong> are shorter and have smaller salvos of 1 and 2 missiles that have substantially increased travel speeds to test the player's reaction time and speed of precise ABM placement. <strong>Balloon Fever waves</strong> have  a salvo set of 75% balloons and 25% MIRV, moderately increased travel rates, and substantially increased missile (40 to 50) balanced by the higher cost of splitting missiles. Because all balloons come in from the left, the player is tempted to overuse Milo's silo and leave Staisy's underused. (They're named after <a href="http://www.google.com/search?q=maximizer+balloon+fever">an inside joke on a <i>Dance Dance Revolution</i> fan forum</a>.)
+</p>
+
+<h2><a id="Scheduling">Scheduling</a></h2>
+<p>
+Each second is split into ten tenths, and each tenth is split into six (NTSC) or five (PAL) frames.  To spread the CPU load across multiple frames, some parts of the logic execute only on one frame of the tenth.
+</p><ol>
+<!-- Zero-based lists display correctly in Firefox but incorrectly in Chrome and Safari.
+http://code.google.com/p/chromium/issues/detail?id=43565 -->
+<li value="0">Spawn new missiles</li>
+<li>Look for threatened buildings (scurry.s)</li>
+<li>Remove expired tip from screen</li>
+<li>Move half the villagers by one step (scurry.s)</li>
+<li>Nothing yet</li>
+<li>Do not schedule anything for this frame, as it doesn't exist on PAL.</li>
+</ol>
+
+<h2><a id="Scurrying_villagers">Scurrying villagers</a></h2>
+<h3><a id="Check">Check</a></h3>
+<p>
+A building is threatened (or in "check") when all of the following are true:
+</p><ul>
+<li>missile is active (YHi &gt; 0)</li>
+<li>missile is descending (DYHi,DYLo &gt; 0)</li>
+<li>target building exists and is not threatened (<code>housesStanding[Target] = 1</code>)</li>
+<li>either the missile is descending super-rapidly (missileDYHi &gt; 1)
+  or it will arrive within three seconds
+  (3 * FPS * missileDYLo / 256 + missileYHi &gt; blast line)</li>
+</ul><p>
+When a missile aimed at a threatened building collides with an
+explosion, the building it was targeting is removed from threat.  Its
+state may change back to threat on the next frame if another missile
+is targeting it as well. But because regular missiles are subject to
+LRU limits on attacking a single building, this usually happens for
+missiles split from MIRVs and balloons.
+</p>
+<h3><a id="Villager_behavior">Villager behavior</a></h3>
+<p>
+There are 12 villagers, one for each building. Each starts in its own
+building. If not inside its target building, each villager takes a step toward its target building every two tenths of a second. If a villager is inside a threatened building in check, the villager will run toward a nearby building that is not threatened.
+</p>
+<h3><a id="Villager_display">Villager display</a></h3>
+<p>
+For dropout control purposes, out villagers should be drawn odd first then even first in alternate frames, but this shouldn't matter too much until the player is almost dead anyway.
+</p>
+
+<h2><a id="Game_states">Game states</a></h2>
+<h3><a id="STATE_NEW_LEVEL"><code>STATE_NEW_LEVEL</code></a></h3>
+<p>
+Start displaying the level's tip and copy the wave's data into the level registers.
+</p>
+<h3><a id="STATE_ACTIVE"><code>STATE_ACTIVE</code></a></h3>
+<p>
+Player and enemy missiles launch only during this state.  Track whether the player has lost a building during the level.  Once all enemy missiles have been destroyed, stop the music, and if there is at least one silo and at least one house, go to <code>STATE_LEVEL_REWARD</code>; otherwise go to <code>STATE_GAMEOVER</code>.
+</p>
+<h3><a id="STATE_LEVEL_REWARD"><code>STATE_LEVEL_REWARD</code></a></h3>
+<p>
+Calculate 10 points for each missile and 100 for each house, add it to the player's score, and display a tip:
+</p><pre class="tip">
+         Nice Job!
+Left: 10&#8962; 12&#11019;   Bonus: 11200
+</pre><p>
+Once the tip finishes, go to STATE_REBUILD_SILO.
+</p>
+<h3><a id="STATE_REBUILD_SILO"><code>STATE_REBUILD_SILO</code></a></h3>
+<p>
+If the player has not lost a building during the wave or the wave is the fifth in the day, and there is only one silo left, repair the other silo and display a tip "Silo repair complete". Once the tip finishes displaying, go to <code>STATE_CUTSCENE</code>.
+</p>
+<h3><a id="STATE_CUTSCENE"><code>STATE_CUTSCENE</code></a></h3>
+<p>
+Go to the next hour. If we haven't passed 05:59, go to <code>STATE_NEW_LEVEL</code>. If a house has been destroyed for the first time, and the house's owner is not the current paranoid actor, choose new actors as described in "Choice of actors" below. Then choose the cut scene based on the first of the following rules that applies: If no building has been destroyed, show the cut scene for the current day from the perfect sequence. If the damage class has increased since last cut scene, show the cut scene for the new damage class. Otherwise, show the next cut scene from the investigation sequence and then go to <code>STATE_REBUILD_HOUSE</code>.
+</p>
+<h3><a id="STATE_REBUILD_HOUSE"><code>STATE_REBUILD_HOUSE</code></a></h3>
+<p>
+If this is not the last day (SAT), and at least one house is destroyed, choose a house that is destroyed, rebuild it, and display a tip "House rebuilt".  Otherwise go to <code>STATE_NEW_LEVEL</code>.  But if the tip has been displayed, then wait for it to end, and go to <code>STATE_NEW_LEVEL</code>.
+</p>
+<h3><a id="STATE_GAMEOVER"><code>STATE_GAMEOVER</code></a></h3>
+<p>
+Display a tip "GAME OVER", and zero out the game state. Once state is zeroed, the game loop ends.
+</p>
+
+<h2><a id="Cut_scenes">Cut scenes</a></h2>
+<p>
+After the 5 AM round of each day, the game shows a scene with the center 6 houses drawn twice as big (4x4 tiles each instead of 2x2), with their left tile at x=1, 6, 11, 16, 21, 26. (This is slightly biased to the left, but the NES's video signal is biased to the right anyway.) Houses destroyed in the game are shown destroyed in the cut scene. Villagers are standing in front, also twice as big but still only 8px tall.
+</p>
+<h3><a id="Choice_of_actors">Choice of actors</a></h3>
+<p>
+There are ten villagers with two sexes and four personalities (see villager names.txt).  At two points in the game, the program chooses one character of each personality. And if the paranoid and laid-back character are the same sex, the detective has to be of the opposite sex.  The steps are as follows:
+</p><ol>
+<li>Choose the paranoid one</li>
+<li>Choose the laid-back one</li>
+<li>Choose the detective</li>
+<li>If all three are of the same sex, choose a different detective</li>
+</ol>
+<p>
+Once a house is blown up for the first time, if it isn't the one belonging to the chosen paranoid, then set the owner of that house as the new paranoid and choose a new laid-back and detective.
+</p>
+<h3><a id="Town_damage_classes">Town damage classes</a></h3>
+<p>
+The dialog between 6 AM and the next night depends on how well the player is defending buildings.  The value in Y after jsr countHousesLeft can be
+</p><ul>
+<li>10: Perfect</li>
+<li>4-9: Some buildings damaged</li>
+<li>1-3: Most buildings damaged</li>
+</ul><p>
+Each damage class has dialogue for the first day it was seen.
+</p><p>
+The script has two branches: perfect and at least one mistake.  In the later stages of perfect (Wed-next Sun), it toys with the TASing player. (<code>grep tas /usr/share/dict/words</code>)
+</p>
+<h4><a id="TAS_mockery">TAS mockery</a></h4>
+<p>
+To get on track for the canon ending, the player must do well but not perfect. Player doesn't learn who's behind this until something is blown up. If the player stays perfect even through Wednesday, the villagers begin to suspect something about the silos. Are they robotic?
+</p><p>
+A 100% run will not reveal the culprit, not even in the ending. The troubador returns to the Roost and continues to play as if nothing had happened that week. Next Sunday, the game runs for 20 seconds without a missile in sight.
+</p>
+<h3><a id="Choice_of_cut_scene">Choice of cut scene</a></h3>
+<p>
+At the end of a game day, the game calculates the town's damage class and displays a cut scene based on the first rule that applies:
+</p><ol>
+<li>If the damage class has remained perfect the whole game, display this hour's perfect cut scene.</li>
+<li>If the day is Saturday, display the ending cut scene.</li>
+<li>If the damage class has increased (from perfect to some or from perfect or some to most), show the appropriate cut scene for this damage class.</li>
+<li>Show the next cut scene in the "investigation" track.</li>
+</ol>
+<h3><a id="Cut_scene_data_format">Cut scene data format</a></h3>
+<p>
+Each scene starts with 4 bytes representing actors:
+</p><ul>
+<li>'A'-'L': hardcoded villager id</li>
+<li>'C': player 1</li>
+<li>'J': player 2</li>
+<li>'M': musician/perpetrator</li>
+<li>'N': subcreator god</li>
+<li>'X': Replaced with the paranoid actor</li>
+<li>'Y': Replaced with the detective actor</li>
+<li>'Z': Replaced with the laid-back actor</li>
+</ul><p>
+Most scenes will start with 'XYZM' or the like.
+</p><p>
+Following that is a set of control codes:
+</p>
+<dl>
+<dt>$00</dt><dd>Fade out and end cut scene.</dd>
+<dt>$1A nn</dt><dd>Unknown</dd>
+<dt>$09 nn xx</dt><dd>Actor n ('A'-'Z') walks toward horizontal position x ($00-$FF). Not yet implemented.</dd>
+<dt>$0A</dt><dd>Advance subtitle cursor to next line.</dd>
+<dt>$0C nn</dt><dd>Clear subtitle area and write actor name n ($31-$38).</dd>
+<dt>$24 nn</dt><dd>Write name of actor n ('A'-'Z') to subtitle</dd>
+<dt>$24 $24</dt><dd>Write '$' to subtitle</dd>
+<dt>$20-$FF</dt><dd>Add character to subtitle</dd>
+</dl>
+
+<p>
+Ultimately, the player will see the house rebuilt as the sun rises and sets.
+http://iweb.tntech.edu/rhaggard/4120s10/Project/missile_command_specs.htm
+</p>
+
+<h2><a id="Calling_convention">Calling convention</a></h2>
+<p>
+Once, I ran into a problem where temporary variables used for collision were getting overwritten by the subroutine that starts a sound effect. After that, I established a calling convention, which I call "LOCAL-8": 
+</p><ul>
+<li>Subroutines MAY modify $0000-$0007.  Caller MUST NOT rely on their being preserved across JSRs.</li>
+<li>Subroutines MUST NOT modify $0008-$000F without saving and restoring them.</li>
+<li>A subroutine's doc comment MAY indicate that it leaves X or Y undisturbed.</li>
+</ul>
+
+<h2><a id="Music_inspiration">Music inspiration</a></h2>
+<p>
+The music is a so-called <a href="http://tvtropes.org/pmwiki/pmwiki.php/Main/TheJimmyHartVersion">Jimmy Hart Version</a> of the early morning music from <i>Animal Crossing</i> series, with several of the melodies replaced by pieces of Ludwig Beethoven's <a href="http://en.wikipedia.org/wiki/Piano_Sonata_No._8_(Beethoven)"><i>Piano Sonata No. 8 in C minor</i> (Path&eacute;tique)</a>. All music is in compound (swung) time at 100 (dotted?) quarter notes per minute, mostly cut time. The <a href="http://tvtropes.org/pmwiki/pmwiki.php/Main/SoundtrackDissonance">dissonance between the action and the music</a> parallels the <a href="http://tvtropes.org/pmwiki/pmwiki.php/Main/SugarApocalypse">dissonance between the action and the ordinary experience</a> during the wee hours of the morning in a sleepy little village.
+</p><dl>
+<dt>Daytime</dt><dd><i>ACPG</i> 4 AM, mixed with a song from episode "7 Continents for 7 Koopas</i> from <i>The Adventures of Super Mario Bros. 3</i>. (Double Crossing anyone?)</dd>
+<dt>1 AM</dt><dd>Not yet composed; uses 4 AM</dd>
+<dt>2 AM</dt><dd><i>Path&eacute;tique</i>, second movement, borrowing rhythm from <i>ACWW</i> 2 AM</dd>
+<dt>3 AM</dt><dd><i>ACPG</i> 4 AM</dd>
+<dt>4 AM</dt><dd><i>ACWW</i> 4 AM, mixed with <i>ACWW</i> 12 AM</dd>
+<dt>5 AM</dt><dd>Not yet transcribed; uses 3 AM. A song has been prototyped in S3M that uses <i>Path&eacute;tique</i>, third movement, mixed with <i>ACPG</i> 5 AM.</dd>
+</dl>
+
+<h2><a id="Legal">Legal</a></h2>
+<p>
+Copyright &#169; 2011 Damian Yerrick. Copying and distribution of this file, with or without modification, are permitted in any medium without royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+</p>
+
+</body></html>
+

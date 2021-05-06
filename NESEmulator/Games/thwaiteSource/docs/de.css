@@ -1,0 +1,36 @@
+/* stylesheet for Thwaite docs
+
+Copyright 2011 Damian Yerrick
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+*/
+ 
+/* load body text fonts */
+@import url('http://fonts.googleapis.com/css?family=Droid+Sans:400,700|Droid+Sans+Mono');
+
+html { background: #000 }
+body { background: #FFF; color: #000; margin: 0.5em auto; padding: 1em 2em; max-width: 40em; font-family: 'Droid Sans', sans-serif; }
+html>body code, html>body tt, html>body pre, html>body kbd { font-family: "Droid Sans Mono", monospace; font-weight: normal; font-size: 90% }
+h1,h2,h3,h4 { font-family: FinkHeavy, Rockwell, Lubalin Graph; font-weight: normal; margin: 1em 0 0.4em 0 }
+h2 { clear: right }
+p, pre, ul, ol, dl { margin: 0.7em 0 }
+pre.tip { display: table; margin: 0.7em auto; padding: 0.5em 1em; letter-spacing: 0.1em; background: #000; color: #FFF }
+ul.toc { border: 1px solid #AAA; padding: 1em }
+ul.toc li { list-style-type: none; padding: 0; margin: 0 1em 0 0; display: inline }
+ul.toc li:last-child { margin-right: 0 }
+ul.toc a { white-space: nowrap }
+
+.floatscreen { border: 1px solid black; width: 276px; float: right; margin: 0 0 1em 1em; padding: 0 8px 0.5em 8px }
+.floatscreen img { margin: 0 -8px 0.5em -8px; width: 292px; height: 224px; display: block }
+
+.mainscreen { border: 1px solid black; margin: 0 auto; width: 568px; padding: 0 8px 0.5em 8px; position: relative }
+.mainscreen img.back { margin: 0 -8px 0.5em -8px; width: 584px; height: 448px; display: block }
+.mainscreen img.front { position: absolute; top: 0; left: 0; width: 584px; height: 448px; display: block; z-index: 1 }
+
+table.datatable { border: 1px solid #AAA; border-collapse: collapse; border-spacing: 0 }
+table.datatable th { background-color: #EEE; padding: 0.1em 0.3em }
+table.datatable td { border: 1px solid #AAA; padding: 0.1em 0.3em }
+td.numalign { text-align: right }

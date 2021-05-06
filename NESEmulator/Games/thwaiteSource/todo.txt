@@ -1,0 +1,14 @@
+Thwaite 0.03
+
+© 2011 Damian YERRICK
+<thwaite@pineight.com>
+
+Comes with ABSOLUTELY NO 
+WARRANTY.  This is free
+software, and you are
+welcome to share it under
+certain conditions.
+For deta¯s, see gpl-3.0.txt
+
+
+     Press Start Button

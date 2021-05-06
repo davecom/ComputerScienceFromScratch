@@ -1,0 +1,113 @@
+<!DOCTYPE HTML><html lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Thwaite</title>
+<meta name="author" content="Damian Yerrick">
+<meta name="description" content="Manual for Thwaite, a video game for NES">
+<link href="docs/de.css" rel="stylesheet" type="text/css">
+<!-- add html5 elements --><!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script type="text/javascript">
+function TWtogglevis(elid, newvis) {
+  if (!document.getElementById) return;
+  var el = document.getElementById(elid);
+  if (!el || !el.style) return;
+  if (!newvis) newvis = (el.style.visibility === 'hidden' ? 'visible' : 'hidden');
+  el.style.visibility = newvis;
+}
+</script>
+</head><body onload="TWtogglevis('legend1','hidden')">
+<h1>thwaite</h1>
+<p>
+By Damian Yerrick
+</p><p>
+Missiles are falling from the sky. Shoot them down with your fireworks.
+</p>
+<ul class="toc">
+<li><a href="#Requirements">Requirements</a></li>
+<li><a href="#Starting_the_game">Starting</a></li>
+<li><a href="#Objective">Objective</a></li>
+<li><a href="#Controls">Controls</a></li>
+<li><a href="#Scoring">Scoring</a></li>
+<li><a href="#Practice">Practice</a></li>
+<li><a href="#Legal">Legal</a></li>
+</ul>
+
+<h2><a id="Requirements">Requirements</a></h2>
+<p>
+Thwaite has been tested and runs fine on a Nintendo Entertainment System using a <a href="http://www.retrousb.com/product_info.php?products_id=34">PowerPak</a> and on the FCEUX, Mednafen, Nestopia, and Nintendulator emulators. It attempts to adapt the music and game speed when played on an NTSC or PAL NES. If you can solder, and you want to put it on a permanent NES or Famicom cartridge, you can use a <a href="http://www.retrousb.com/product_info.php?products_id=42">ReproPak board</a> or any NROM-128 game's board (see <a href="http://bootgod.dyndns.org:7777/search.php?cartsize_op=%3D`%40`&amp;cartsize=24&amp;pcb_op=LIKE+`%25%40%25`&amp;pcb=NROM&amp;field=2&amp;order=asc&amp;rfa=1+2+11+3+9+20+41+53">list from NesCartDB</a>).
+</p><p>
+To compile Thwaite from source code, you'll need to install these:
+</p><ul>
+<li>GNU Make and GNU Coreutils (Windows: install <a href="http://www.mingw.org/">MSYS</a>; Ubuntu: <kbd>sudo apt-get install build-essential</kbd>)</li>
+<li><a href="http://www.python.org/">Python</a> 2.5 or later</li>
+<li><a href="http://www.pythonware.com/products/pil/">Python Imaging Library</a> (Ubuntu: <kbd>sudo apt-get install python-imaging-tk</kbd>)</li>
+<li>ca65 and ld65 from the <a href="http://www.cc65.org/">cc65 distribution</a></li>
+</ul>
+
+<h2><a id="Starting_the_game">Starting the game</a></h2>
+<div class="floatscreen"><img src="docs/manual_title.png">Title screen</div>
+<p>
+Insert the Game Pak into the NES Control Deck, push it down, and turn on the NES. (Or load <code>thwaite.nes</code> into an NES emulator.) Press Start to skip the legal notice and development status screen. Press Up or Down to select between a single-player game and a 2-player cooperative game, and press Start.
+</p><p>
+Thwaite supports a Super NES Mouse connected to port 1 or 2 through an adapter. In a 1-player game, plug the mouse into either port and click "1 Player". In a 2-player game, replace one or both controllers with a mouse and click "2 Players". When a mouse is detected, an icon to change the sensitivity is shown; click this to change the sensitivity (slow, medium, fast).
+</p>
+
+<h2><a id="Objective">Objective</a></h2>
+<p>
+A hippie guitarist who has visited your small town for years has gone rogue and launched ICBMs toward your town. Break out the fireworks that you had been saving for Independence Day, turn them into makeshift anti-ballistic missiles (ABMs), and shoot down the incoming missiles. Each of two silos starts with 15 ABMs. Place the aiming cursor in front of the incoming missile and fire an ABM to destroy it. Defend the town for seven nights (Sunday through Saturday) and you win!
+</p>
+<div class="mainscreen"><img class="back" onclick="TWtogglevis('legend1');return false" src="docs/manual_ingame.png"><img id="legend1" onclick="TWtogglevis('legend1');return false" class="front" src="docs/manual_legend.png" alt="Screen shows cursor, missiles, balloon, MIRV, explosions, ammo, score, and time.">Game play screen. Click to show or hide names of the game objects.</div>
+<p>
+You have to lead your shot a bit because it takes a split second for the ABM to arrive. But the explosion of an ABM is wide enough to destroy several missiles, so aim where the incoming missiles' paths are about to cross. Balloons and multiple independent reentry vehicle (MIRV) missiles will release a payload of multiple missiles if not shot down promptly.
+</p><p>
+At the end of each round, the silos are refilled with ABMs: 15 each or 20 if only one silo remains. A destroyed silo will get rebuilt at the end of a night or once you've lasted one round with no destroyed houses. And if a house has been destroyed, one house will be rebuilt the next day. Later in the week, when more houses are gone, you need not worry about missiles aimed at wreckage.
+</p><p>
+The game is over once both silos or all ten houses have been destroyed, or once you have survived all seven nights.
+</p>
+
+<h2><a id="Controls">Controls</a></h2>
+<dl>
+<dt>Control Pad</dt><dd>Move the aiming cursor</dd>
+<dt>B Button or left mouse button</dt><dd>Fire an ABM from Milo's missile silo (left)</dd>
+<dt>A Button or right mouse button</dt><dd>Fire an ABM from Staisy's missile silo (right)</dd>
+<dt>Start Button (Player 1)</dt><dd>Pause or resume the game</dd>
+<dt>Select Button (Player 1)</dt><dd>End the game (practice mode only)</dd>
+</dl><p>
+A 2-player game requires two controllers. In a 2-player game, both B and A Buttons of each controller fire from the same silo. Player 1 controls Milo's cursor, and player 2 controls Staisy's cursor.
+</p><p>
+Because a Control Pad is less precise than the mouse or trackball that other point-and-shoot games use, Thwaite uses acceleration and braking for the cursor. To move short distances, make short taps; to move farther, hold a direction longer. Let go to stop the cursor.
+</p>
+
+<h2><a id="Scoring">Scoring</a></h2>
+<p>
+At the end of each round, your team gets 100 points for each house and 10 points for each remaining ABM in your silos. There is no bonus for shooting down missiles, but destroying two or three missiles with one ABM can make more ammo available.
+</p><p>
+Can you reach the end of the game with 300,000 points?
+</p>
+
+<h2><a id="Practice">Practice</a></h2>
+<div class="floatscreen"><img src="docs/manual_practice.png">Practice menu</div>
+<p>
+At the title screen, choose "Practice" to begin a readiness drill. This allows practicing any of the 35 waves with buildings on the left side, the right side, or both sides. Select a day, hour, and side by pointing at it and pressing A or the mouse button, then choose Play to begin. After you select a day and hour, you can see the types of ammo and how fast the missiles will come. You will return to the practice menu if you complete the wave, fail, or press the Select button while paused.
+</p>
+
+<h2><a id="Credits">Credits</a></h2>
+<ul><li>program, graphics, music: Damian Yerrick</li><li>extra music: Ludwig van Beethoven</li><li>testers: Jeroen, Shiru, NovaYoshi</li><li>tools: Python Software Foundation, Canonical, Secret Labs, Ullrich von Bassewitz</li><li>original game concept: Dave Theurer / Atari</li><li>setting inspiration: Nintendo</li></ul>
+
+<h2><a id="Legal">Legal</a></h2>
+<p>
+Copyright &#169; 2011 Damian Yerrick. Copying and distribution of this file, with or without modification, are permitted in any medium without royalty provided the copyright notice and this notice are preserved.  This file is offered as-is, without any warranty.
+</p><p>
+The accompanying game program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+</p><p>
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+</p><p>
+You should have received a copy of the GNU General Public License along with this program.  If not, see <a href="http://www.gnu.org/licenses/"><code>http://www.gnu.org/licenses/</code></a>.
+</p><p>
+Thwaite makes explosions and smoke appear translucent by flickering them. A very small percentage of people have <a href="http://en.wikipedia.org/wiki/Photosensitive_epilepsy">seizures after looking at flickering patterns</a> in television and video games. If you have had convulsions or loss of awareness of surroundings, see a health care professional before playing any video game.
+</p><p>
+Intense video games can be tiring and <a href="http://en.wikipedia.org/wiki/Nintendo_thumb">cause repetitive strain injury</a>. Take a five-minute break at least every half hour or so, and don't play when you need sleep.
+</p>
+
+</body></html>

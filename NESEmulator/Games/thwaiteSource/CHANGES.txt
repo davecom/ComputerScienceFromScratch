@@ -1,0 +1,25 @@
+0.03 (2011-12-08)
+* Fixed crosshair braking failure
+* Can play game with a Super NES Mouse in either controller port
+* Switched to non-DPCM-safe controller reading code because the mouse
+  needs it
+* A button icon blinks after cut scenes dialogue finishes drawing
+* Practice mode to start on any level
+* Draws much of 3x3-tile explosions with sprite flipping to save CHR
+* CHR rearranged to allow for more distinct tiles in cut scenes
+* Music for 05:00
+* Two ! alert sounds don't play at the same time
+* Some later levels are harder
+* I am within 256 bytes of filling PRG ROM
+
+0.02 (2011-08-26)
+* Includes source code, partly under GPLv3 and partly under an
+  all-permissive license
+* Added HTML5 manual
+* Added music for 04:00 and daytime
+* Dual channel drums for stronger kick and snare
+* Villagers warp to houses after each hour, making it clearer that an
+  hour has passed
+
+0.01 (2011-06-01)
+* initial release for nesdevcompo
