@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from .executioner import execute
+from rom import ROM
 
 if __name__ == "__main__":
     # Parse the file argument
     file_parser = ArgumentParser("NESEmulator")
     file_parser.add_argument("rom_file", help="A file containing an NES game in iNES format.")
     arguments = file_parser.parse_args()
-    execute(arguments.basic_file)
+    game = ROM(arguments.rom_file)
