@@ -19,6 +19,9 @@ from collections import namedtuple
 Header = namedtuple("Header", "signature prg_rom_size chr_rom_size flags6 flags7 flags8 flags9 flags10 unused")
 HEADER_SIZE = 16
 TRAINER_SIZE = 512
+PRG_ROM_BASE_UNIT_SIZE = 16384
+CHR_ROM_BASE_UNIT_SIZE = 8192
+
 
 class ROM:
     def __init__(self, filename: str):
@@ -32,10 +35,24 @@ class ROM:
             # Untangle Mapper - one nybble in flags6 and one nybble in flags7
             self.mapper = (self.header.flags7 & 0xF0) | ((self.header.flags6 & 0xF0) >> 4)
             print(f"Mapper {self.mapper}")
+            if self.mapper != 0:
+                print("Invalid Mapper: Only Mapper 0 is Implemented")
+            self.read_cartridge = self.read_mapper0
             # Check if there's a trainer (4th bit flags6) and read it
             self.has_trainer = bool(self.header.flags6 & 4)
             if self.has_trainer:
                 self.trainer_data = file.read(TRAINER_SIZE)
             # Read PRG_ROM and CHR_ROM, these are in multiples of 16K and 8K respectively
-            self.prg_rom = file.read(16384 * self.header.prg_rom_size)
-            self.chr_rom = file.read(8192 * self.header.chr_rom_size)
+            self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE * self.header.prg_rom_size)
+            self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE * self.header.chr_rom_size)
+
+    def read_mapper0(self, address: int) -> int:
+        if address < 0x2000:
+            return self.chr_rom[address]
+        elif address >= 0x8000:
+            if self.header.prg_rom_size > 1:
+                return self.prg_rom[address - 0x8000]
+            else:
+                return self.prg_rom[(address - 0x8000) % PRG_ROM_BASE_UNIT_SIZE]
+        else:
+            print(f"Tried to read from cartridge at invalid address {address:X}")

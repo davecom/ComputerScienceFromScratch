@@ -22,3 +22,4 @@ if __name__ == "__main__":
     file_parser.add_argument("rom_file", help="A file containing an NES game in iNES format.")
     arguments = file_parser.parse_args()
     game = ROM(arguments.rom_file)
+
