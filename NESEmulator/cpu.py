@@ -33,7 +33,7 @@ InstructionType = Enum("InstructionType", "ADC AHX ALR ANC AND ARR ASL AXS BCC B
                                           "TXS TYA XAA")
 
 
-class InstructionInfo(NamedTuple):
+class Instruction(NamedTuple):
     type: InstructionType
     mode: MemMode
     length: int
@@ -41,263 +41,263 @@ class InstructionInfo(NamedTuple):
     page_ticks: int
 
 
-Instructions: list[InstructionInfo] = [
-    InstructionInfo(InstructionType.BRK, MemMode.IMPLIED, 1, 7, 0), 			# 00
-    InstructionInfo(InstructionType.ORA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 01
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 02
-    InstructionInfo(InstructionType.SLO, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 03
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 04
-    InstructionInfo(InstructionType.ORA, MemMode.ZEROPAGE, 2, 3, 0), 			# 05
-    InstructionInfo(InstructionType.ASL, MemMode.ZEROPAGE, 2, 5, 0), 			# 06
-    InstructionInfo(InstructionType.SLO, MemMode.ZEROPAGE, 0, 5, 0), 			# 07
-    InstructionInfo(InstructionType.PHP, MemMode.IMPLIED, 1, 3, 0), 			# 08
-    InstructionInfo(InstructionType.ORA, MemMode.IMMEDIATE, 2, 2, 0), 			# 09
-    InstructionInfo(InstructionType.ASL, MemMode.ACCUMULATOR, 1, 2, 0), 		# 0a
-    InstructionInfo(InstructionType.ANC, MemMode.IMMEDIATE, 0, 2, 0), 			# 0b
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE, 3, 4, 0), 			# 0c
-    InstructionInfo(InstructionType.ORA, MemMode.ABSOLUTE, 3, 4, 0), 			# 0d
-    InstructionInfo(InstructionType.ASL, MemMode.ABSOLUTE, 3, 6, 0), 			# 0e
-    InstructionInfo(InstructionType.SLO, MemMode.ABSOLUTE, 0, 6, 0), 			# 0f
-    InstructionInfo(InstructionType.BPL, MemMode.RELATIVE, 2, 2, 1), 			# 10
-    InstructionInfo(InstructionType.ORA, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 11
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 12
-    InstructionInfo(InstructionType.SLO, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 13
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 14
-    InstructionInfo(InstructionType.ORA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 15
-    InstructionInfo(InstructionType.ASL, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 16
-    InstructionInfo(InstructionType.SLO, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 17
-    InstructionInfo(InstructionType.CLC, MemMode.IMPLIED, 1, 2, 0), 			# 18
-    InstructionInfo(InstructionType.ORA, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 19
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 1a
-    InstructionInfo(InstructionType.SLO, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 1b
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 1c
-    InstructionInfo(InstructionType.ORA, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 1d
-    InstructionInfo(InstructionType.ASL, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 1e
-    InstructionInfo(InstructionType.SLO, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 1f
-    InstructionInfo(InstructionType.JSR, MemMode.ABSOLUTE, 3, 6, 0), 			# 20
-    InstructionInfo(InstructionType.AND, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 21
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 22
-    InstructionInfo(InstructionType.RLA, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 23
-    InstructionInfo(InstructionType.BIT, MemMode.ZEROPAGE, 2, 3, 0), 			# 24
-    InstructionInfo(InstructionType.AND, MemMode.ZEROPAGE, 2, 3, 0), 			# 25
-    InstructionInfo(InstructionType.ROL, MemMode.ZEROPAGE, 2, 5, 0), 			# 26
-    InstructionInfo(InstructionType.RLA, MemMode.ZEROPAGE, 0, 5, 0), 			# 27
-    InstructionInfo(InstructionType.PLP, MemMode.IMPLIED, 1, 4, 0), 			# 28
-    InstructionInfo(InstructionType.AND, MemMode.IMMEDIATE, 2, 2, 0), 			# 29
-    InstructionInfo(InstructionType.ROL, MemMode.ACCUMULATOR, 1, 2, 0),         # 2a
-    InstructionInfo(InstructionType.ANC, MemMode.IMMEDIATE, 0, 2, 0), 			# 2b
-    InstructionInfo(InstructionType.BIT, MemMode.ABSOLUTE, 3, 4, 0), 			# 2c
-    InstructionInfo(InstructionType.AND, MemMode.ABSOLUTE, 3, 4, 0), 			# 2d
-    InstructionInfo(InstructionType.ROL, MemMode.ABSOLUTE, 3, 6, 0), 			# 2e
-    InstructionInfo(InstructionType.RLA, MemMode.ABSOLUTE, 0, 6, 0), 			# 2f
-    InstructionInfo(InstructionType.BMI, MemMode.RELATIVE, 2, 2, 1), 			# 30
-    InstructionInfo(InstructionType.AND, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 31
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 32
-    InstructionInfo(InstructionType.RLA, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 33
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 34
-    InstructionInfo(InstructionType.AND, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 35
-    InstructionInfo(InstructionType.ROL, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 36
-    InstructionInfo(InstructionType.RLA, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 37
-    InstructionInfo(InstructionType.SEC, MemMode.IMPLIED, 1, 2, 0), 			# 38
-    InstructionInfo(InstructionType.AND, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 39
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 3a
-    InstructionInfo(InstructionType.RLA, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 3b
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 3c
-    InstructionInfo(InstructionType.AND, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 3d
-    InstructionInfo(InstructionType.ROL, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 3e
-    InstructionInfo(InstructionType.RLA, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 3f
-    InstructionInfo(InstructionType.RTI, MemMode.IMPLIED, 1, 6, 0), 			# 40
-    InstructionInfo(InstructionType.EOR, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 41
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 42
-    InstructionInfo(InstructionType.SRE, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 43
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 44
-    InstructionInfo(InstructionType.EOR, MemMode.ZEROPAGE, 2, 3, 0), 			# 45
-    InstructionInfo(InstructionType.LSR, MemMode.ZEROPAGE, 2, 5, 0), 			# 46
-    InstructionInfo(InstructionType.SRE, MemMode.ZEROPAGE, 0, 5, 0), 			# 47
-    InstructionInfo(InstructionType.PHA, MemMode.IMPLIED, 1, 3, 0), 			# 48
-    InstructionInfo(InstructionType.EOR, MemMode.IMMEDIATE, 2, 2, 0), 			# 49
-    InstructionInfo(InstructionType.LSR, MemMode.ACCUMULATOR, 1, 2, 0),         # 4a
-    InstructionInfo(InstructionType.ALR, MemMode.IMMEDIATE, 0, 2, 0), 			# 4b
-    InstructionInfo(InstructionType.JMP, MemMode.ABSOLUTE, 3, 3, 0), 			# 4c
-    InstructionInfo(InstructionType.EOR, MemMode.ABSOLUTE, 3, 4, 0), 			# 4d
-    InstructionInfo(InstructionType.LSR, MemMode.ABSOLUTE, 3, 6, 0), 			# 4e
-    InstructionInfo(InstructionType.SRE, MemMode.ABSOLUTE, 0, 6, 0), 			# 4f
-    InstructionInfo(InstructionType.BVC, MemMode.RELATIVE, 2, 2, 1), 			# 50
-    InstructionInfo(InstructionType.EOR, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 51
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 52
-    InstructionInfo(InstructionType.SRE, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 53
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 54
-    InstructionInfo(InstructionType.EOR, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 55
-    InstructionInfo(InstructionType.LSR, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 56
-    InstructionInfo(InstructionType.SRE, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 57
-    InstructionInfo(InstructionType.CLI, MemMode.IMPLIED, 1, 2, 0), 			# 58
-    InstructionInfo(InstructionType.EOR, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 59
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 5a
-    InstructionInfo(InstructionType.SRE, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 5b
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 5c
-    InstructionInfo(InstructionType.EOR, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 5d
-    InstructionInfo(InstructionType.LSR, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 5e
-    InstructionInfo(InstructionType.SRE, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 5f
-    InstructionInfo(InstructionType.RTS, MemMode.IMPLIED, 1, 6, 0), 			# 60
-    InstructionInfo(InstructionType.ADC, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 61
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 62
-    InstructionInfo(InstructionType.RRA, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 63
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 64
-    InstructionInfo(InstructionType.ADC, MemMode.ZEROPAGE, 2, 3, 0), 			# 65
-    InstructionInfo(InstructionType.ROR, MemMode.ZEROPAGE, 2, 5, 0), 			# 66
-    InstructionInfo(InstructionType.RRA, MemMode.ZEROPAGE, 0, 5, 0), 			# 67
-    InstructionInfo(InstructionType.PLA, MemMode.IMPLIED, 1, 4, 0), 			# 68
-    InstructionInfo(InstructionType.ADC, MemMode.IMMEDIATE, 2, 2, 0), 			# 69
-    InstructionInfo(InstructionType.ROR, MemMode.ACCUMULATOR, 1, 2, 0), 		# 6a
-    InstructionInfo(InstructionType.ARR, MemMode.IMMEDIATE, 0, 2, 0), 			# 6b
-    InstructionInfo(InstructionType.JMP, MemMode.INDIRECT, 3, 5, 0), 			# 6c
-    InstructionInfo(InstructionType.ADC, MemMode.ABSOLUTE, 3, 4, 0), 			# 6d
-    InstructionInfo(InstructionType.ROR, MemMode.ABSOLUTE, 3, 6, 0), 			# 6e
-    InstructionInfo(InstructionType.RRA, MemMode.ABSOLUTE, 0, 6, 0), 			# 6f
-    InstructionInfo(InstructionType.BVS, MemMode.RELATIVE, 2, 2, 1), 			# 70
-    InstructionInfo(InstructionType.ADC, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 71
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 72
-    InstructionInfo(InstructionType.RRA, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 73
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 74
-    InstructionInfo(InstructionType.ADC, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 75
-    InstructionInfo(InstructionType.ROR, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 76
-    InstructionInfo(InstructionType.RRA, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 77
-    InstructionInfo(InstructionType.SEI, MemMode.IMPLIED, 1, 2, 0), 			# 78
-    InstructionInfo(InstructionType.ADC, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 79
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 7a
-    InstructionInfo(InstructionType.RRA, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 7b
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 7c
-    InstructionInfo(InstructionType.ADC, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 7d
-    InstructionInfo(InstructionType.ROR, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 7e
-    InstructionInfo(InstructionType.RRA, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 7f
-    InstructionInfo(InstructionType.NOP, MemMode.IMMEDIATE, 2, 2, 0), 			# 80
-    InstructionInfo(InstructionType.STA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 81
-    InstructionInfo(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# 82
-    InstructionInfo(InstructionType.SAX, MemMode.INDEXED_INDIRECT, 0, 6, 0), 	# 83
-    InstructionInfo(InstructionType.STY, MemMode.ZEROPAGE, 2, 3, 0), 			# 84
-    InstructionInfo(InstructionType.STA, MemMode.ZEROPAGE, 2, 3, 0), 			# 85
-    InstructionInfo(InstructionType.STX, MemMode.ZEROPAGE, 2, 3, 0), 			# 86
-    InstructionInfo(InstructionType.SAX, MemMode.ZEROPAGE, 0, 3, 0), 			# 87
-    InstructionInfo(InstructionType.DEY, MemMode.IMPLIED, 1, 2, 0), 			# 88
-    InstructionInfo(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# 89
-    InstructionInfo(InstructionType.TXA, MemMode.IMPLIED, 1, 2, 0), 			# 8a
-    InstructionInfo(InstructionType.XAA, MemMode.IMMEDIATE, 0, 2, 0), 			# 8b
-    InstructionInfo(InstructionType.STY, MemMode.ABSOLUTE, 3, 4, 0), 			# 8c
-    InstructionInfo(InstructionType.STA, MemMode.ABSOLUTE, 3, 4, 0), 			# 8d
-    InstructionInfo(InstructionType.STX, MemMode.ABSOLUTE, 3, 4, 0), 			# 8e
-    InstructionInfo(InstructionType.SAX, MemMode.ABSOLUTE, 0, 4, 0), 			# 8f
-    InstructionInfo(InstructionType.BCC, MemMode.RELATIVE, 2, 2, 1), 			# 90
-    InstructionInfo(InstructionType.STA, MemMode.INDIRECT_INDEXED, 2, 6, 0), 	# 91
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 92
-    InstructionInfo(InstructionType.AHX, MemMode.INDIRECT_INDEXED, 0, 6, 0), 	# 93
-    InstructionInfo(InstructionType.STY, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 94
-    InstructionInfo(InstructionType.STA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 95
-    InstructionInfo(InstructionType.STX, MemMode.ZEROPAGE_Y, 2, 4, 0), 			# 96
-    InstructionInfo(InstructionType.SAX, MemMode.ZEROPAGE_Y, 0, 4, 0), 			# 97
-    InstructionInfo(InstructionType.TYA, MemMode.IMPLIED, 1, 2, 0), 			# 98
-    InstructionInfo(InstructionType.STA, MemMode.ABSOLUTE_Y, 3, 5, 0), 			# 99
-    InstructionInfo(InstructionType.TXS, MemMode.IMPLIED, 1, 2, 0), 			# 9a
-    InstructionInfo(InstructionType.TAS, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9b
-    InstructionInfo(InstructionType.SHY, MemMode.ABSOLUTE_X, 0, 5, 0), 			# 9c
-    InstructionInfo(InstructionType.STA, MemMode.ABSOLUTE_X, 3, 5, 0), 			# 9d
-    InstructionInfo(InstructionType.SHX, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9e
-    InstructionInfo(InstructionType.AHX, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9f
-    InstructionInfo(InstructionType.LDY, MemMode.IMMEDIATE, 2, 2, 0), 			# a0
-    InstructionInfo(InstructionType.LDA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# a1
-    InstructionInfo(InstructionType.LDX, MemMode.IMMEDIATE, 2, 2, 0), 			# a2
-    InstructionInfo(InstructionType.LAX, MemMode.INDEXED_INDIRECT, 0, 6, 0), 	# a3
-    InstructionInfo(InstructionType.LDY, MemMode.ZEROPAGE, 2, 3, 0), 			# a4
-    InstructionInfo(InstructionType.LDA, MemMode.ZEROPAGE, 2, 3, 0), 			# a5
-    InstructionInfo(InstructionType.LDX, MemMode.ZEROPAGE, 2, 3, 0), 			# a6
-    InstructionInfo(InstructionType.LAX, MemMode.ZEROPAGE, 0, 3, 0), 			# a7
-    InstructionInfo(InstructionType.TAY, MemMode.IMPLIED, 1, 2, 0), 			# a8
-    InstructionInfo(InstructionType.LDA, MemMode.IMMEDIATE, 2, 2, 0), 			# a9
-    InstructionInfo(InstructionType.TAX, MemMode.IMPLIED, 1, 2, 0), 			# aa
-    InstructionInfo(InstructionType.LAX, MemMode.IMMEDIATE, 0, 2, 0), 			# ab
-    InstructionInfo(InstructionType.LDY, MemMode.ABSOLUTE, 3, 4, 0), 			# ac
-    InstructionInfo(InstructionType.LDA, MemMode.ABSOLUTE, 3, 4, 0), 			# ad
-    InstructionInfo(InstructionType.LDX, MemMode.ABSOLUTE, 3, 4, 0), 			# ae
-    InstructionInfo(InstructionType.LAX, MemMode.ABSOLUTE, 0, 4, 0), 			# af
-    InstructionInfo(InstructionType.BCS, MemMode.RELATIVE, 2, 2, 1), 			# b0
-    InstructionInfo(InstructionType.LDA, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# b1
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# b2
-    InstructionInfo(InstructionType.LAX, MemMode.INDIRECT_INDEXED, 0, 5, 1), 	# b3
-    InstructionInfo(InstructionType.LDY, MemMode.ZEROPAGE_X, 2, 4, 0), 			# b4
-    InstructionInfo(InstructionType.LDA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# b5
-    InstructionInfo(InstructionType.LDX, MemMode.ZEROPAGE_Y, 2, 4, 0), 			# b6
-    InstructionInfo(InstructionType.LAX, MemMode.ZEROPAGE_Y, 0, 4, 0), 			# b7
-    InstructionInfo(InstructionType.CLV, MemMode.IMPLIED, 1, 2, 0), 			# b8
-    InstructionInfo(InstructionType.LDA, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# b9
-    InstructionInfo(InstructionType.TSX, MemMode.IMPLIED, 1, 2, 0), 			# ba
-    InstructionInfo(InstructionType.LAS, MemMode.ABSOLUTE_Y, 0, 4, 1), 			# bb
-    InstructionInfo(InstructionType.LDY, MemMode.ABSOLUTE_X, 3, 4, 1), 			# bc
-    InstructionInfo(InstructionType.LDA, MemMode.ABSOLUTE_X, 3, 4, 1), 			# bd
-    InstructionInfo(InstructionType.LDX, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# be
-    InstructionInfo(InstructionType.LAX, MemMode.ABSOLUTE_Y, 0, 4, 1), 			# bf
-    InstructionInfo(InstructionType.CPY, MemMode.IMMEDIATE, 2, 2, 0), 			# c0
-    InstructionInfo(InstructionType.CMP, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# c1
-    InstructionInfo(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# c2
-    InstructionInfo(InstructionType.DCP, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# c3
-    InstructionInfo(InstructionType.CPY, MemMode.ZEROPAGE, 2, 3, 0), 			# c4
-    InstructionInfo(InstructionType.CMP, MemMode.ZEROPAGE, 2, 3, 0), 			# c5
-    InstructionInfo(InstructionType.DEC, MemMode.ZEROPAGE, 2, 5, 0), 			# c6
-    InstructionInfo(InstructionType.DCP, MemMode.ZEROPAGE, 0, 5, 0), 			# c7
-    InstructionInfo(InstructionType.INY, MemMode.IMPLIED, 1, 2, 0), 			# c8
-    InstructionInfo(InstructionType.CMP, MemMode.IMMEDIATE, 2, 2, 0), 			# c9
-    InstructionInfo(InstructionType.DEX, MemMode.IMPLIED, 1, 2, 0), 			# ca
-    InstructionInfo(InstructionType.AXS, MemMode.IMMEDIATE, 0, 2, 0), 			# cb
-    InstructionInfo(InstructionType.CPY, MemMode.ABSOLUTE, 3, 4, 0), 			# cc
-    InstructionInfo(InstructionType.CMP, MemMode.ABSOLUTE, 3, 4, 0), 			# cd
-    InstructionInfo(InstructionType.DEC, MemMode.ABSOLUTE, 3, 6, 0), 			# ce
-    InstructionInfo(InstructionType.DCP, MemMode.ABSOLUTE, 0, 6, 0), 			# cf
-    InstructionInfo(InstructionType.BNE, MemMode.RELATIVE, 2, 2, 1), 			# d0
-    InstructionInfo(InstructionType.CMP, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# d1
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# d2
-    InstructionInfo(InstructionType.DCP, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# d3
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# d4
-    InstructionInfo(InstructionType.CMP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# d5
-    InstructionInfo(InstructionType.DEC, MemMode.ZEROPAGE_X, 2, 6, 0), 			# d6
-    InstructionInfo(InstructionType.DCP, MemMode.ZEROPAGE_X, 0, 6, 0), 			# d7
-    InstructionInfo(InstructionType.CLD, MemMode.IMPLIED, 1, 2, 0), 			# d8
-    InstructionInfo(InstructionType.CMP, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# d9
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# da
-    InstructionInfo(InstructionType.DCP, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# db
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# dc
-    InstructionInfo(InstructionType.CMP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# dd
-    InstructionInfo(InstructionType.DEC, MemMode.ABSOLUTE_X, 3, 7, 0), 			# de
-    InstructionInfo(InstructionType.DCP, MemMode.ABSOLUTE_X, 0, 7, 0), 			# df
-    InstructionInfo(InstructionType.CPX, MemMode.IMMEDIATE, 2, 2, 0), 			# e0
-    InstructionInfo(InstructionType.SBC, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# e1
-    InstructionInfo(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# e2
-    InstructionInfo(InstructionType.ISC, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# e3
-    InstructionInfo(InstructionType.CPX, MemMode.ZEROPAGE, 2, 3, 0), 			# e4
-    InstructionInfo(InstructionType.SBC, MemMode.ZEROPAGE, 2, 3, 0), 			# e5
-    InstructionInfo(InstructionType.INC, MemMode.ZEROPAGE, 2, 5, 0), 			# e6
-    InstructionInfo(InstructionType.ISC, MemMode.ZEROPAGE, 0, 5, 0), 			# e7
-    InstructionInfo(InstructionType.INX, MemMode.IMPLIED, 1, 2, 0), 			# e8
-    InstructionInfo(InstructionType.SBC, MemMode.IMMEDIATE, 2, 2, 0), 			# e9
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# ea
-    InstructionInfo(InstructionType.SBC, MemMode.IMMEDIATE, 0, 2, 0), 			# eb
-    InstructionInfo(InstructionType.CPX, MemMode.ABSOLUTE, 3, 4, 0), 			# ec
-    InstructionInfo(InstructionType.SBC, MemMode.ABSOLUTE, 3, 4, 0), 			# ed
-    InstructionInfo(InstructionType.INC, MemMode.ABSOLUTE, 3, 6, 0), 			# ee
-    InstructionInfo(InstructionType.ISC, MemMode.ABSOLUTE, 0, 6, 0), 			# ef
-    InstructionInfo(InstructionType.BEQ, MemMode.RELATIVE, 2, 2, 1), 			# f0
-    InstructionInfo(InstructionType.SBC, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# f1
-    InstructionInfo(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# f2
-    InstructionInfo(InstructionType.ISC, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# f3
-    InstructionInfo(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# f4
-    InstructionInfo(InstructionType.SBC, MemMode.ZEROPAGE_X, 2, 4, 0), 			# f5
-    InstructionInfo(InstructionType.INC, MemMode.ZEROPAGE_X, 2, 6, 0), 			# f6
-    InstructionInfo(InstructionType.ISC, MemMode.ZEROPAGE_X, 0, 6, 0), 			# f7
-    InstructionInfo(InstructionType.SED, MemMode.IMPLIED, 1, 2, 0), 			# f8
-    InstructionInfo(InstructionType.SBC, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# f9
-    InstructionInfo(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# fa
-    InstructionInfo(InstructionType.ISC, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# fb
-    InstructionInfo(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# fc
-    InstructionInfo(InstructionType.SBC, MemMode.ABSOLUTE_X, 3, 4, 1), 			# fd
-    InstructionInfo(InstructionType.INC, MemMode.ABSOLUTE_X, 3, 7, 0), 			# fe
-    InstructionInfo(InstructionType.ISC, MemMode.ABSOLUTE_X, 0, 7, 0), 			# ff
+Instructions: list[Instruction] = [
+    Instruction(InstructionType.BRK, MemMode.IMPLIED, 1, 7, 0), 			# 00
+    Instruction(InstructionType.ORA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 01
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 02
+    Instruction(InstructionType.SLO, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 03
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 04
+    Instruction(InstructionType.ORA, MemMode.ZEROPAGE, 2, 3, 0), 			# 05
+    Instruction(InstructionType.ASL, MemMode.ZEROPAGE, 2, 5, 0), 			# 06
+    Instruction(InstructionType.SLO, MemMode.ZEROPAGE, 0, 5, 0), 			# 07
+    Instruction(InstructionType.PHP, MemMode.IMPLIED, 1, 3, 0), 			# 08
+    Instruction(InstructionType.ORA, MemMode.IMMEDIATE, 2, 2, 0), 			# 09
+    Instruction(InstructionType.ASL, MemMode.ACCUMULATOR, 1, 2, 0), 		# 0a
+    Instruction(InstructionType.ANC, MemMode.IMMEDIATE, 0, 2, 0), 			# 0b
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE, 3, 4, 0), 			# 0c
+    Instruction(InstructionType.ORA, MemMode.ABSOLUTE, 3, 4, 0), 			# 0d
+    Instruction(InstructionType.ASL, MemMode.ABSOLUTE, 3, 6, 0), 			# 0e
+    Instruction(InstructionType.SLO, MemMode.ABSOLUTE, 0, 6, 0), 			# 0f
+    Instruction(InstructionType.BPL, MemMode.RELATIVE, 2, 2, 1), 			# 10
+    Instruction(InstructionType.ORA, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 11
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 12
+    Instruction(InstructionType.SLO, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 13
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 14
+    Instruction(InstructionType.ORA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 15
+    Instruction(InstructionType.ASL, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 16
+    Instruction(InstructionType.SLO, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 17
+    Instruction(InstructionType.CLC, MemMode.IMPLIED, 1, 2, 0), 			# 18
+    Instruction(InstructionType.ORA, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 19
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 1a
+    Instruction(InstructionType.SLO, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 1b
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 1c
+    Instruction(InstructionType.ORA, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 1d
+    Instruction(InstructionType.ASL, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 1e
+    Instruction(InstructionType.SLO, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 1f
+    Instruction(InstructionType.JSR, MemMode.ABSOLUTE, 3, 6, 0), 			# 20
+    Instruction(InstructionType.AND, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 21
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 22
+    Instruction(InstructionType.RLA, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 23
+    Instruction(InstructionType.BIT, MemMode.ZEROPAGE, 2, 3, 0), 			# 24
+    Instruction(InstructionType.AND, MemMode.ZEROPAGE, 2, 3, 0), 			# 25
+    Instruction(InstructionType.ROL, MemMode.ZEROPAGE, 2, 5, 0), 			# 26
+    Instruction(InstructionType.RLA, MemMode.ZEROPAGE, 0, 5, 0), 			# 27
+    Instruction(InstructionType.PLP, MemMode.IMPLIED, 1, 4, 0), 			# 28
+    Instruction(InstructionType.AND, MemMode.IMMEDIATE, 2, 2, 0), 			# 29
+    Instruction(InstructionType.ROL, MemMode.ACCUMULATOR, 1, 2, 0),         # 2a
+    Instruction(InstructionType.ANC, MemMode.IMMEDIATE, 0, 2, 0), 			# 2b
+    Instruction(InstructionType.BIT, MemMode.ABSOLUTE, 3, 4, 0), 			# 2c
+    Instruction(InstructionType.AND, MemMode.ABSOLUTE, 3, 4, 0), 			# 2d
+    Instruction(InstructionType.ROL, MemMode.ABSOLUTE, 3, 6, 0), 			# 2e
+    Instruction(InstructionType.RLA, MemMode.ABSOLUTE, 0, 6, 0), 			# 2f
+    Instruction(InstructionType.BMI, MemMode.RELATIVE, 2, 2, 1), 			# 30
+    Instruction(InstructionType.AND, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 31
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 32
+    Instruction(InstructionType.RLA, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 33
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 34
+    Instruction(InstructionType.AND, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 35
+    Instruction(InstructionType.ROL, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 36
+    Instruction(InstructionType.RLA, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 37
+    Instruction(InstructionType.SEC, MemMode.IMPLIED, 1, 2, 0), 			# 38
+    Instruction(InstructionType.AND, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 39
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 3a
+    Instruction(InstructionType.RLA, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 3b
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 3c
+    Instruction(InstructionType.AND, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 3d
+    Instruction(InstructionType.ROL, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 3e
+    Instruction(InstructionType.RLA, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 3f
+    Instruction(InstructionType.RTI, MemMode.IMPLIED, 1, 6, 0), 			# 40
+    Instruction(InstructionType.EOR, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 41
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 42
+    Instruction(InstructionType.SRE, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 43
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 44
+    Instruction(InstructionType.EOR, MemMode.ZEROPAGE, 2, 3, 0), 			# 45
+    Instruction(InstructionType.LSR, MemMode.ZEROPAGE, 2, 5, 0), 			# 46
+    Instruction(InstructionType.SRE, MemMode.ZEROPAGE, 0, 5, 0), 			# 47
+    Instruction(InstructionType.PHA, MemMode.IMPLIED, 1, 3, 0), 			# 48
+    Instruction(InstructionType.EOR, MemMode.IMMEDIATE, 2, 2, 0), 			# 49
+    Instruction(InstructionType.LSR, MemMode.ACCUMULATOR, 1, 2, 0),         # 4a
+    Instruction(InstructionType.ALR, MemMode.IMMEDIATE, 0, 2, 0), 			# 4b
+    Instruction(InstructionType.JMP, MemMode.ABSOLUTE, 3, 3, 0), 			# 4c
+    Instruction(InstructionType.EOR, MemMode.ABSOLUTE, 3, 4, 0), 			# 4d
+    Instruction(InstructionType.LSR, MemMode.ABSOLUTE, 3, 6, 0), 			# 4e
+    Instruction(InstructionType.SRE, MemMode.ABSOLUTE, 0, 6, 0), 			# 4f
+    Instruction(InstructionType.BVC, MemMode.RELATIVE, 2, 2, 1), 			# 50
+    Instruction(InstructionType.EOR, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 51
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 52
+    Instruction(InstructionType.SRE, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 53
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 54
+    Instruction(InstructionType.EOR, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 55
+    Instruction(InstructionType.LSR, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 56
+    Instruction(InstructionType.SRE, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 57
+    Instruction(InstructionType.CLI, MemMode.IMPLIED, 1, 2, 0), 			# 58
+    Instruction(InstructionType.EOR, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 59
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 5a
+    Instruction(InstructionType.SRE, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 5b
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 5c
+    Instruction(InstructionType.EOR, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 5d
+    Instruction(InstructionType.LSR, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 5e
+    Instruction(InstructionType.SRE, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 5f
+    Instruction(InstructionType.RTS, MemMode.IMPLIED, 1, 6, 0), 			# 60
+    Instruction(InstructionType.ADC, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 61
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 62
+    Instruction(InstructionType.RRA, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# 63
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE, 2, 3, 0), 			# 64
+    Instruction(InstructionType.ADC, MemMode.ZEROPAGE, 2, 3, 0), 			# 65
+    Instruction(InstructionType.ROR, MemMode.ZEROPAGE, 2, 5, 0), 			# 66
+    Instruction(InstructionType.RRA, MemMode.ZEROPAGE, 0, 5, 0), 			# 67
+    Instruction(InstructionType.PLA, MemMode.IMPLIED, 1, 4, 0), 			# 68
+    Instruction(InstructionType.ADC, MemMode.IMMEDIATE, 2, 2, 0), 			# 69
+    Instruction(InstructionType.ROR, MemMode.ACCUMULATOR, 1, 2, 0), 		# 6a
+    Instruction(InstructionType.ARR, MemMode.IMMEDIATE, 0, 2, 0), 			# 6b
+    Instruction(InstructionType.JMP, MemMode.INDIRECT, 3, 5, 0), 			# 6c
+    Instruction(InstructionType.ADC, MemMode.ABSOLUTE, 3, 4, 0), 			# 6d
+    Instruction(InstructionType.ROR, MemMode.ABSOLUTE, 3, 6, 0), 			# 6e
+    Instruction(InstructionType.RRA, MemMode.ABSOLUTE, 0, 6, 0), 			# 6f
+    Instruction(InstructionType.BVS, MemMode.RELATIVE, 2, 2, 1), 			# 70
+    Instruction(InstructionType.ADC, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# 71
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 72
+    Instruction(InstructionType.RRA, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# 73
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 74
+    Instruction(InstructionType.ADC, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 75
+    Instruction(InstructionType.ROR, MemMode.ZEROPAGE_X, 2, 6, 0), 			# 76
+    Instruction(InstructionType.RRA, MemMode.ZEROPAGE_X, 0, 6, 0), 			# 77
+    Instruction(InstructionType.SEI, MemMode.IMPLIED, 1, 2, 0), 			# 78
+    Instruction(InstructionType.ADC, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# 79
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# 7a
+    Instruction(InstructionType.RRA, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# 7b
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 7c
+    Instruction(InstructionType.ADC, MemMode.ABSOLUTE_X, 3, 4, 1), 			# 7d
+    Instruction(InstructionType.ROR, MemMode.ABSOLUTE_X, 3, 7, 0), 			# 7e
+    Instruction(InstructionType.RRA, MemMode.ABSOLUTE_X, 0, 7, 0), 			# 7f
+    Instruction(InstructionType.NOP, MemMode.IMMEDIATE, 2, 2, 0), 			# 80
+    Instruction(InstructionType.STA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 81
+    Instruction(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# 82
+    Instruction(InstructionType.SAX, MemMode.INDEXED_INDIRECT, 0, 6, 0), 	# 83
+    Instruction(InstructionType.STY, MemMode.ZEROPAGE, 2, 3, 0), 			# 84
+    Instruction(InstructionType.STA, MemMode.ZEROPAGE, 2, 3, 0), 			# 85
+    Instruction(InstructionType.STX, MemMode.ZEROPAGE, 2, 3, 0), 			# 86
+    Instruction(InstructionType.SAX, MemMode.ZEROPAGE, 0, 3, 0), 			# 87
+    Instruction(InstructionType.DEY, MemMode.IMPLIED, 1, 2, 0), 			# 88
+    Instruction(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# 89
+    Instruction(InstructionType.TXA, MemMode.IMPLIED, 1, 2, 0), 			# 8a
+    Instruction(InstructionType.XAA, MemMode.IMMEDIATE, 0, 2, 0), 			# 8b
+    Instruction(InstructionType.STY, MemMode.ABSOLUTE, 3, 4, 0), 			# 8c
+    Instruction(InstructionType.STA, MemMode.ABSOLUTE, 3, 4, 0), 			# 8d
+    Instruction(InstructionType.STX, MemMode.ABSOLUTE, 3, 4, 0), 			# 8e
+    Instruction(InstructionType.SAX, MemMode.ABSOLUTE, 0, 4, 0), 			# 8f
+    Instruction(InstructionType.BCC, MemMode.RELATIVE, 2, 2, 1), 			# 90
+    Instruction(InstructionType.STA, MemMode.INDIRECT_INDEXED, 2, 6, 0), 	# 91
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 92
+    Instruction(InstructionType.AHX, MemMode.INDIRECT_INDEXED, 0, 6, 0), 	# 93
+    Instruction(InstructionType.STY, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 94
+    Instruction(InstructionType.STA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# 95
+    Instruction(InstructionType.STX, MemMode.ZEROPAGE_Y, 2, 4, 0), 			# 96
+    Instruction(InstructionType.SAX, MemMode.ZEROPAGE_Y, 0, 4, 0), 			# 97
+    Instruction(InstructionType.TYA, MemMode.IMPLIED, 1, 2, 0), 			# 98
+    Instruction(InstructionType.STA, MemMode.ABSOLUTE_Y, 3, 5, 0), 			# 99
+    Instruction(InstructionType.TXS, MemMode.IMPLIED, 1, 2, 0), 			# 9a
+    Instruction(InstructionType.TAS, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9b
+    Instruction(InstructionType.SHY, MemMode.ABSOLUTE_X, 0, 5, 0), 			# 9c
+    Instruction(InstructionType.STA, MemMode.ABSOLUTE_X, 3, 5, 0), 			# 9d
+    Instruction(InstructionType.SHX, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9e
+    Instruction(InstructionType.AHX, MemMode.ABSOLUTE_Y, 0, 5, 0), 			# 9f
+    Instruction(InstructionType.LDY, MemMode.IMMEDIATE, 2, 2, 0), 			# a0
+    Instruction(InstructionType.LDA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# a1
+    Instruction(InstructionType.LDX, MemMode.IMMEDIATE, 2, 2, 0), 			# a2
+    Instruction(InstructionType.LAX, MemMode.INDEXED_INDIRECT, 0, 6, 0), 	# a3
+    Instruction(InstructionType.LDY, MemMode.ZEROPAGE, 2, 3, 0), 			# a4
+    Instruction(InstructionType.LDA, MemMode.ZEROPAGE, 2, 3, 0), 			# a5
+    Instruction(InstructionType.LDX, MemMode.ZEROPAGE, 2, 3, 0), 			# a6
+    Instruction(InstructionType.LAX, MemMode.ZEROPAGE, 0, 3, 0), 			# a7
+    Instruction(InstructionType.TAY, MemMode.IMPLIED, 1, 2, 0), 			# a8
+    Instruction(InstructionType.LDA, MemMode.IMMEDIATE, 2, 2, 0), 			# a9
+    Instruction(InstructionType.TAX, MemMode.IMPLIED, 1, 2, 0), 			# aa
+    Instruction(InstructionType.LAX, MemMode.IMMEDIATE, 0, 2, 0), 			# ab
+    Instruction(InstructionType.LDY, MemMode.ABSOLUTE, 3, 4, 0), 			# ac
+    Instruction(InstructionType.LDA, MemMode.ABSOLUTE, 3, 4, 0), 			# ad
+    Instruction(InstructionType.LDX, MemMode.ABSOLUTE, 3, 4, 0), 			# ae
+    Instruction(InstructionType.LAX, MemMode.ABSOLUTE, 0, 4, 0), 			# af
+    Instruction(InstructionType.BCS, MemMode.RELATIVE, 2, 2, 1), 			# b0
+    Instruction(InstructionType.LDA, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# b1
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# b2
+    Instruction(InstructionType.LAX, MemMode.INDIRECT_INDEXED, 0, 5, 1), 	# b3
+    Instruction(InstructionType.LDY, MemMode.ZEROPAGE_X, 2, 4, 0), 			# b4
+    Instruction(InstructionType.LDA, MemMode.ZEROPAGE_X, 2, 4, 0), 			# b5
+    Instruction(InstructionType.LDX, MemMode.ZEROPAGE_Y, 2, 4, 0), 			# b6
+    Instruction(InstructionType.LAX, MemMode.ZEROPAGE_Y, 0, 4, 0), 			# b7
+    Instruction(InstructionType.CLV, MemMode.IMPLIED, 1, 2, 0), 			# b8
+    Instruction(InstructionType.LDA, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# b9
+    Instruction(InstructionType.TSX, MemMode.IMPLIED, 1, 2, 0), 			# ba
+    Instruction(InstructionType.LAS, MemMode.ABSOLUTE_Y, 0, 4, 1), 			# bb
+    Instruction(InstructionType.LDY, MemMode.ABSOLUTE_X, 3, 4, 1), 			# bc
+    Instruction(InstructionType.LDA, MemMode.ABSOLUTE_X, 3, 4, 1), 			# bd
+    Instruction(InstructionType.LDX, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# be
+    Instruction(InstructionType.LAX, MemMode.ABSOLUTE_Y, 0, 4, 1), 			# bf
+    Instruction(InstructionType.CPY, MemMode.IMMEDIATE, 2, 2, 0), 			# c0
+    Instruction(InstructionType.CMP, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# c1
+    Instruction(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# c2
+    Instruction(InstructionType.DCP, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# c3
+    Instruction(InstructionType.CPY, MemMode.ZEROPAGE, 2, 3, 0), 			# c4
+    Instruction(InstructionType.CMP, MemMode.ZEROPAGE, 2, 3, 0), 			# c5
+    Instruction(InstructionType.DEC, MemMode.ZEROPAGE, 2, 5, 0), 			# c6
+    Instruction(InstructionType.DCP, MemMode.ZEROPAGE, 0, 5, 0), 			# c7
+    Instruction(InstructionType.INY, MemMode.IMPLIED, 1, 2, 0), 			# c8
+    Instruction(InstructionType.CMP, MemMode.IMMEDIATE, 2, 2, 0), 			# c9
+    Instruction(InstructionType.DEX, MemMode.IMPLIED, 1, 2, 0), 			# ca
+    Instruction(InstructionType.AXS, MemMode.IMMEDIATE, 0, 2, 0), 			# cb
+    Instruction(InstructionType.CPY, MemMode.ABSOLUTE, 3, 4, 0), 			# cc
+    Instruction(InstructionType.CMP, MemMode.ABSOLUTE, 3, 4, 0), 			# cd
+    Instruction(InstructionType.DEC, MemMode.ABSOLUTE, 3, 6, 0), 			# ce
+    Instruction(InstructionType.DCP, MemMode.ABSOLUTE, 0, 6, 0), 			# cf
+    Instruction(InstructionType.BNE, MemMode.RELATIVE, 2, 2, 1), 			# d0
+    Instruction(InstructionType.CMP, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# d1
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# d2
+    Instruction(InstructionType.DCP, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# d3
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# d4
+    Instruction(InstructionType.CMP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# d5
+    Instruction(InstructionType.DEC, MemMode.ZEROPAGE_X, 2, 6, 0), 			# d6
+    Instruction(InstructionType.DCP, MemMode.ZEROPAGE_X, 0, 6, 0), 			# d7
+    Instruction(InstructionType.CLD, MemMode.IMPLIED, 1, 2, 0), 			# d8
+    Instruction(InstructionType.CMP, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# d9
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# da
+    Instruction(InstructionType.DCP, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# db
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# dc
+    Instruction(InstructionType.CMP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# dd
+    Instruction(InstructionType.DEC, MemMode.ABSOLUTE_X, 3, 7, 0), 			# de
+    Instruction(InstructionType.DCP, MemMode.ABSOLUTE_X, 0, 7, 0), 			# df
+    Instruction(InstructionType.CPX, MemMode.IMMEDIATE, 2, 2, 0), 			# e0
+    Instruction(InstructionType.SBC, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# e1
+    Instruction(InstructionType.NOP, MemMode.IMMEDIATE, 0, 2, 0), 			# e2
+    Instruction(InstructionType.ISC, MemMode.INDEXED_INDIRECT, 0, 8, 0), 	# e3
+    Instruction(InstructionType.CPX, MemMode.ZEROPAGE, 2, 3, 0), 			# e4
+    Instruction(InstructionType.SBC, MemMode.ZEROPAGE, 2, 3, 0), 			# e5
+    Instruction(InstructionType.INC, MemMode.ZEROPAGE, 2, 5, 0), 			# e6
+    Instruction(InstructionType.ISC, MemMode.ZEROPAGE, 0, 5, 0), 			# e7
+    Instruction(InstructionType.INX, MemMode.IMPLIED, 1, 2, 0), 			# e8
+    Instruction(InstructionType.SBC, MemMode.IMMEDIATE, 2, 2, 0), 			# e9
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# ea
+    Instruction(InstructionType.SBC, MemMode.IMMEDIATE, 0, 2, 0), 			# eb
+    Instruction(InstructionType.CPX, MemMode.ABSOLUTE, 3, 4, 0), 			# ec
+    Instruction(InstructionType.SBC, MemMode.ABSOLUTE, 3, 4, 0), 			# ed
+    Instruction(InstructionType.INC, MemMode.ABSOLUTE, 3, 6, 0), 			# ee
+    Instruction(InstructionType.ISC, MemMode.ABSOLUTE, 0, 6, 0), 			# ef
+    Instruction(InstructionType.BEQ, MemMode.RELATIVE, 2, 2, 1), 			# f0
+    Instruction(InstructionType.SBC, MemMode.INDIRECT_INDEXED, 2, 5, 1), 	# f1
+    Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# f2
+    Instruction(InstructionType.ISC, MemMode.INDIRECT_INDEXED, 0, 8, 0), 	# f3
+    Instruction(InstructionType.NOP, MemMode.ZEROPAGE_X, 2, 4, 0), 			# f4
+    Instruction(InstructionType.SBC, MemMode.ZEROPAGE_X, 2, 4, 0), 			# f5
+    Instruction(InstructionType.INC, MemMode.ZEROPAGE_X, 2, 6, 0), 			# f6
+    Instruction(InstructionType.ISC, MemMode.ZEROPAGE_X, 0, 6, 0), 			# f7
+    Instruction(InstructionType.SED, MemMode.IMPLIED, 1, 2, 0), 			# f8
+    Instruction(InstructionType.SBC, MemMode.ABSOLUTE_Y, 3, 4, 1), 			# f9
+    Instruction(InstructionType.NOP, MemMode.IMPLIED, 1, 2, 0), 			# fa
+    Instruction(InstructionType.ISC, MemMode.ABSOLUTE_Y, 0, 7, 0), 			# fb
+    Instruction(InstructionType.NOP, MemMode.ABSOLUTE_X, 3, 4, 1), 			# fc
+    Instruction(InstructionType.SBC, MemMode.ABSOLUTE_X, 3, 4, 1), 			# fd
+    Instruction(InstructionType.INC, MemMode.ABSOLUTE_X, 3, 7, 0), 			# fe
+    Instruction(InstructionType.ISC, MemMode.ABSOLUTE_X, 0, 7, 0), 			# ff
 ]
 
 
@@ -335,6 +335,75 @@ class CPU:
         # Connections to Other Parts of the Console
         self.ppu: PPU = ppu
         self.rom: ROM = rom
+
+
+    def cycle(self):
+        if self.stall > 0:
+            self.stall -= 1
+            self.cpu_ticks += 1
+            return
+
+        self.instruction_count += 1
+        opcode = self.read_memory(self.PC, MemMode.ABSOLUTE)
+        self.page_crossed = False
+        jumped = False
+        instruction = Instructions[opcode]
+        data = 0
+        for i in range(1, instruction.length):
+            data |= (self.read_memory(self.PC + i, MemMode.ABSOLUTE) << ((i - 1) * 8))
+
+        # debug print
+
+        # Switch this to match statement in Python 3.10
+        if instruction.type == InstructionType.ADC: # add memory to accumulator with carry
+            src = self.read_memory(data, instruction.mode)
+            signed_result = src + self.A + self.C
+            self.V = bool(~(self.A ^ src) & (self.A ^ signed_result) & 0x80)
+            self.A = (self.A + src + self.C) % 255
+            self.C = signed_result > 0xFF
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.AND: # bitwise AND with accumulator
+            src = self.read_memory(data, instruction.mode)
+            self.A = bool(self.A & src)
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.ASL: # arithmetic shift left
+            src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+            self.C = bool(src >> 7) # carry is set to 7th bit
+            src = (src << 1) & 0xFF
+            self.setZN(src)
+            if instruction.mode == MemMode.ACCUMULATOR:
+                self.A = src
+            else:
+                self.write_memory(data, instruction.mode, src)
+        elif instruction.type == InstructionType.BCC: # branch if carry clear
+            if not self.C:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BCS: # branch if carry set
+            if self.C:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BEQ: # branch on result zero
+            if self.Z:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BIT: # bit test bits in memory with accumulator
+            src = self.read_memory(data, instruction.mode)
+            self.V = bool((src >> 6) & 1)
+            self.Z = ((src & self.A) == 0)
+            self.N = ((src >> 7) == 1)
+        elif instruction.type == InstructionType.BMI: # branch on result minus
+            if self.N:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BNE: # branch on result not zero
+            if not self.Z:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BPL: # branch on result plus
+            if not self.N:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
 
 
     def address_for_mode(self, data: int, mode: MemMode) -> int:
@@ -418,5 +487,6 @@ class CPU:
             # We haven't implemented support for cartridge RAM
             return #self.rom.write_cartridge(address)
 
-
-
+    def setZN(self, value: int):
+        self.Z = (value == 0)
+        self.N = bool(value & 0x80)
