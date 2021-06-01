@@ -336,7 +336,6 @@ class CPU:
         self.ppu: PPU = ppu
         self.rom: ROM = rom
 
-
     def cycle(self):
         if self.stall > 0:
             self.stall -= 1
@@ -404,7 +403,77 @@ class CPU:
             if not self.N:
                 self.PC = self.address_for_mode(data, instruction.mode)
                 jumped = True
-
+        elif instruction.Type == InstructionType.BRK: # force break
+            self.PC += 2
+            # push pc to stack
+            self.ram[(0x100 | self.SP)] = (self.PC >> 8) & 0xFF
+            self.SP -= 1
+            self.ram[(0x100 | self.SP)] = self.PC & 0xFF
+            self.SP -= 1
+            # push status to stack
+            self.ram[(0x100 | self.SP)] = self.status
+            self.SP -= 1
+            self.B = False
+            # set PC to reset vector
+            self.PC = (self.read_memory(IRQ_BRK_VECTOR, MemMode.ABSOLUTE)) | \
+                      (self.read_memory(IRQ_BRK_VECTOR + 1, MemMode.ABSOLUTE) << 8)
+            jumped = True
+        elif instruction.type == InstructionType.BVC: # branch on overflow clear
+            if not self.V:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.BVS: # branch on overflow set
+            if self.V:
+                self.PC = self.address_for_mode(data, instruction.mode)
+                jumped = True
+        elif instruction.type == InstructionType.CLC: # clear carry
+            self.C = False
+        elif instruction.type == InstructionType.CLD: # clear decimal
+            self.D = False
+        elif instruction.type == InstructionType.CLI: # clear interrupt
+            self.I = False
+        elif instruction.type == InstructionType.CLV: # clear overflow
+            self.V = False
+        elif instruction.type == InstructionType.CMP: # compare accumulator
+            src = self.read_memory(data, instruction.mode)
+            self.C = self.A >= src
+            self.setZN(self.A - src)
+        elif instruction.type == InstructionType.CPX:  # compare X register
+            src = self.read_memory(data, instruction.mode)
+            self.C = self.X >= src
+            self.setZN(self.X - src)
+        elif instruction.type == InstructionType.CPY:  # compare Y register
+            src = self.read_memory(data, instruction.mode)
+            self.C = self.Y >= src
+            self.setZN(self.Y - src)
+        elif instruction.type == InstructionType.DEC:  # decrement memory
+            src = self.read_memory(data, instruction.mode)
+            src -= 1
+            self.write_memory(data, instruction.mode, src)
+            self.setZN(src)
+        elif instruction.type == InstructionType.DEX:  # decrement X
+            self.X -= 1
+            self.setZN(self.X)
+        elif instruction.type == InstructionType.DEY:  # decrement Y
+            self.Y -= 1
+            self.setZN(self.Y)
+        elif instruction.type == InstructionType.EOR:  # exclusive or memory with accumulator
+            self.A ^= self.read_memory(data, instruction.mode)
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.INC:  # increment memory
+            src = self.read_memory(data, instruction.mode)
+            src += 1
+            self.write_memory(data, instruction.mode, src)
+            self.setZN(src)
+        elif instruction.type == InstructionType.INX:  # increment X
+            self.X += 1
+            self.setZN(self.X)
+        elif instruction.type == InstructionType.INY:  # increment Y
+            self.Y += 1
+            self.setZN(self.Y)
+        elif instruction.type == InstructionType.JMP: # jump
+            self.PC = self.address_for_mode(data, instruction.mode)
+            jumped = True
 
     def address_for_mode(self, data: int, mode: MemMode) -> int:
         def different_pages(address1: int, address2: int) -> bool:
@@ -489,4 +558,9 @@ class CPU:
 
     def setZN(self, value: int):
         self.Z = (value == 0)
-        self.N = bool(value & 0x80)
+        self.N = bool(value & 0x80) or (value < 0)
+
+    @property
+    def status(self) -> int:
+        return (self.C | self.Z << 1 | self.I << 2 | self.D << 3 |
+                self.B << 4 | 1 << 5 | self.V << 6 | self.N << 7)
