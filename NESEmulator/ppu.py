@@ -13,8 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from array import array
+
+SPR_RAM_SIZE = 256
 
 class PPU:
+    def __init__(self):
+        self.spr = array('B', [0] * SPR_RAM_SIZE) # sprite ram
 
     def read_register(self, address: int) -> int:
         return 0 # Replace later

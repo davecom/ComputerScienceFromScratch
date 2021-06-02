@@ -16,7 +16,7 @@
 from enum import Enum
 from typing import NamedTuple
 from array import array
-from ppu import PPU
+from ppu import PPU, SPR_RAM_SIZE
 from rom import ROM
 
 MemMode = Enum("MemMode", "DUMMY ABSOLUTE ABSOLUTE_X ABSOLUTE_Y ACCUMULATOR IMMEDIATE "
@@ -301,7 +301,8 @@ Instructions: list[Instruction] = [
 ]
 
 
-STACK_START = 0xFD
+STACK_POINTER_RESET = 0xFD
+STACK_START = 0x100
 RESET_VECTOR = 0xFFFC
 NMI_VECTOR = 0xFFFA
 IRQ_BRK_VECTOR = 0xFFFE
@@ -316,7 +317,7 @@ class CPU:
         self.A: int = 0
         self.X: int = 0
         self.Y: int = 0
-        self.SP: int = STACK_START
+        self.SP: int = STACK_POINTER_RESET
         self.PC: int = self.read_memory(RESET_VECTOR, MemMode.ABSOLUTE) | \
                        (self.read_memory(RESET_VECTOR + 1, MemMode.ABSOLUTE) << 8)
         # Flags
@@ -406,13 +407,10 @@ class CPU:
         elif instruction.Type == InstructionType.BRK: # force break
             self.PC += 2
             # push pc to stack
-            self.ram[(0x100 | self.SP)] = (self.PC >> 8) & 0xFF
-            self.SP -= 1
-            self.ram[(0x100 | self.SP)] = self.PC & 0xFF
-            self.SP -= 1
+            self.stack_push((self.PC >> 8) & 0xFF)
+            self.stack_push(self.PC & 0xFF)
             # push status to stack
-            self.ram[(0x100 | self.SP)] = self.status
-            self.SP -= 1
+            self.stack_push(self.status)
             self.B = False
             # set PC to reset vector
             self.PC = (self.read_memory(IRQ_BRK_VECTOR, MemMode.ABSOLUTE)) | \
@@ -474,6 +472,131 @@ class CPU:
         elif instruction.type == InstructionType.JMP: # jump
             self.PC = self.address_for_mode(data, instruction.mode)
             jumped = True
+        elif instruction.type == InstructionType.JSR: # jump to subroutine
+            self.PC += 2
+            # push pc to stack
+            self.stack_push((self.PC >> 8) & 0xFF)
+            self.stack_push(self.PC & 0xFF)
+            # jump to subroutine
+            self.PC = self.address_for_mode(data, instruction.mode)
+            jumped = True
+        elif instruction.type == InstructionType.LDA:  # load accumulator with memory
+            self.A = self.read_memory(data, instruction.mode)
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.LDX:  # load X with memory
+            self.X = self.read_memory(data, instruction.mode)
+            self.setZN(self.X)
+        elif instruction.type == InstructionType.LDY:  # load Y with memory
+            self.Y = self.read_memory(data, instruction.mode)
+            self.setZN(self.Y)
+        elif instruction.type == InstructionType.LSR:  # logical shift right
+            src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+            self.C = bool(src & 1)  # carry is set to 0th bit
+            src >>= 1
+            self.setZN(src)
+            if instruction.mode == MemMode.ACCUMULATOR:
+                self.A = src
+            else:
+                self.write_memory(data, instruction.mode, src)
+        elif instruction.type == InstructionType.NOP:  # no op
+            pass
+        elif instruction.type == InstructionType.ORA:  # or memory with accumulator
+            self.A |= self.read_memory(data, instruction.mode)
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.PHA:  # push accumulator
+            self.stack_push(self.A)
+        elif instruction.type == InstructionType.PHP:  # push status
+            self.B = True # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+            self.stack_push(self.status)
+            self.B = False
+        elif instruction.type == InstructionType.PLA: # pull accumulator
+            self.A = self.stack_pop()
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.PLP: # pull status
+            self.set_status(self.stack_pop())
+        elif instruction.type == InstructionType.ROL:  # rotate one bit left
+            src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+            old_c = self.C
+            self.C = bool((src >> 7) & 1)  # carry is set to 7th bit
+            src = ((src << 1) | old_c) & 0xFF
+            self.setZN(src)
+            if instruction.mode == MemMode.ACCUMULATOR:
+                self.A = src
+            else:
+                self.write_memory(data, instruction.mode, src)
+        elif instruction.type == InstructionType.ROR:  # rotate one bit right
+            src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+            old_c = self.C
+            self.C = bool(src & 1)  # carry is set to 0th bit
+            src = ((src >> 1) | (old_c << 7)) & 0xFF
+            self.setZN(src)
+            if instruction.mode == MemMode.ACCUMULATOR:
+                self.A = src
+            else:
+                self.write_memory(data, instruction.mode, src)
+        elif instruction.type == InstructionType.RTI: # return from interrupt
+            # pull Status out
+            self.set_status(self.stack_pop())
+            # pull PC out
+            lb = self.stack_pop()
+            hb = self.stack_pop()
+            self.PC = ((hb << 8) | lb)
+            jumped = True
+        elif instruction.type == InstructionType.RTS:  # return from subroutine
+            # pull PC out
+            lb = self.stack_pop()
+            hb = self.stack_pop()
+            self.PC = ((hb << 8) | lb) + 1 # 1 past last instruction
+            jumped = True
+        elif instruction.type == InstructionType.SBC:  # subtract with carry
+            src = self.read_memory(data, instruction.mode)
+            signed_result = self.A - src - (1 - self.C)
+            self.V = bool((self.A ^ src) & (self.A ^ signed_result) & 0x80) # set overflow
+            self.A = (self.A - src - (1 - self.C)) % 255
+            self.C = not (signed_result < 0) # set carry
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.SEC: # set carry
+            self.C = True
+        elif instruction.type == InstructionType.SED: # set decimal
+            self.D = True
+        elif instruction.type == InstructionType.SEI: # set interrupt
+            self.I = True
+        elif instruction.type == InstructionType.STA: # store accumulator
+            self.write_memory(data, instruction.mode, self.A)
+        elif instruction.type == InstructionType.STX: # store X register
+            self.write_memory(data, instruction.mode, self.X)
+        elif instruction.type == InstructionType.STY: # store Y register
+            self.write_memory(data, instruction.mode, self.Y)
+        elif instruction.type == InstructionType.TAX: # transfer A to X
+            self.X = self.A
+            self.setZN(self.X)
+        elif instruction.type == InstructionType.TAY: # transfer A to Y
+            self.Y = self.A
+            self.setZN(self.Y)
+        elif instruction.type == InstructionType.TSX: # transfer stack pointer to X
+            self.X = self.SP
+            self.setZN(self.X)
+        elif instruction.type == InstructionType.TXA: # transfer X to A
+            self.A = self.X
+            self.setZN(self.A)
+        elif instruction.type == InstructionType.TXS: # transfer X to SP
+            self.SP = self.X
+        elif instruction.type == InstructionType.TYA: # transfer Y to A
+            self.A = self.Y
+            self.setZN(self.A)
+        else:
+            print(f"Unimplemented Opcode: {Instruction}")
+
+        if not jumped:
+            self.PC += instruction.length
+        else:
+            if instruction.type in [InstructionType.BCC, InstructionType.BCS, InstructionType.BEQ, InstructionType.BMI,
+                                    InstructionType.BNE, InstructionType.BPL, InstructionType.BVC, InstructionType.BVS]:
+                # branch instructions are +1 ticks if they succeeded
+                self.cpu_ticks += 1
+        self.cpu_ticks += instruction.ticks
+        if self.page_crossed:
+            self.cpu_ticks += instruction.page_ticks
 
     def address_for_mode(self, data: int, mode: MemMode) -> int:
         def different_pages(address1: int, address2: int) -> bool:
@@ -536,7 +659,8 @@ class CPU:
             self.ram[location] = value
             return
 
-        address = self.address_for_mode(location, mode)
+        address = self.a
+        ddress_for_mode(location, mode)
         # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
         if address < 0x2000:  # main ram 2 KB goes up to 0x800
             self.ram[address % 0x800] = value  # mirrors for next 6 KB
@@ -544,7 +668,9 @@ class CPU:
             temp = ((address % 8) | 0x2000)  # write data to ppu register
             self.ppu.write_register(temp)
         elif address == 0x4014:  # DMA Transfer of Sprite Data
-            # Do transfer... call ppu.dma_transfer
+            from_address = value * 0x100 # this is the address to start copying from
+            for i in range(SPR_RAM_SIZE): # copy all 256 bytes over to sprite ram
+                self.ppu.spr[i] = self.read_memory((from_address + i), MemMode.ABSOLUTE)
             # stall for 512 cycles while this completes
             self.stall = 512
         elif address == 0x4016:
@@ -560,7 +686,36 @@ class CPU:
         self.Z = (value == 0)
         self.N = bool(value & 0x80) or (value < 0)
 
+    def stack_push(self, value: int):
+        self.ram[(0x100 | self.SP)] = value
+        self.SP -= 1
+
+    def stack_pop(self) -> int:
+        self.SP += 1
+        return self.ram[(0x100 | self.SP)]
+
     @property
     def status(self) -> int:
         return (self.C | self.Z << 1 | self.I << 2 | self.D << 3 |
                 self.B << 4 | 1 << 5 | self.V << 6 | self.N << 7)
+
+    def set_status(self, temp: int):
+        self.C = bool(temp & 0b00000001)
+        self.Z = bool(temp & 0b00000010)
+        self.I = bool(temp & 0b00000100)
+        self.D = bool(temp & 0b00001000)
+        self.B = False # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        self.V = bool(temp & 0b01000000)
+        self.N = bool(temp & 0b10000000)
+
+    def trigger_NMI(self):
+        self.stack_push((self.PC >> 8) & 0xFF)
+        self.stack_push(self.PC & 0xFF)
+        self.B = True # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        self.stack_push(self.status)
+        self.B = False
+        self.I = True
+        # set PC to NMI vector
+        self.PC = (self.read_memory(NMI_VECTOR, MemMode.ABSOLUTE)) | \
+                  (self.read_memory(NMI_VECTOR + 1, MemMode.ABSOLUTE) << 8)
+
