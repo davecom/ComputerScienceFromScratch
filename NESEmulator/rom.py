@@ -15,12 +15,14 @@
 # limitations under the License.
 from struct import unpack
 from collections import namedtuple
+from array import array
 
 Header = namedtuple("Header", "signature prg_rom_size chr_rom_size flags6 flags7 flags8 flags9 flags10 unused")
 HEADER_SIZE = 16
 TRAINER_SIZE = 512
 PRG_ROM_BASE_UNIT_SIZE = 16384
 CHR_ROM_BASE_UNIT_SIZE = 8192
+PRG_RAM_SIZE = 8192
 
 
 class ROM:
@@ -38,6 +40,7 @@ class ROM:
             if self.mapper != 0:
                 print("Invalid Mapper: Only Mapper 0 is Implemented")
             self.read_cartridge = self.read_mapper0
+            self.write_cartridge = self.write_mapper0
             # Check if there's a trainer (4th bit flags6) and read it
             self.has_trainer = bool(self.header.flags6 & 4)
             if self.has_trainer:
@@ -45,10 +48,13 @@ class ROM:
             # Read PRG_ROM and CHR_ROM, these are in multiples of 16K and 8K respectively
             self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE * self.header.prg_rom_size)
             self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE * self.header.chr_rom_size)
+            self.prg_ram = array('B', [0] * PRG_RAM_SIZE) # sprite ram
 
     def read_mapper0(self, address: int) -> int:
         if address < 0x2000:
             return self.chr_rom[address]
+        elif 0x6000 <= address < 0x8000:
+            return self.prg_ram[address % PRG_RAM_SIZE]
         elif address >= 0x8000:
             if self.header.prg_rom_size > 1:
                 return self.prg_rom[address - 0x8000]
@@ -56,3 +62,7 @@ class ROM:
                 return self.prg_rom[(address - 0x8000) % PRG_ROM_BASE_UNIT_SIZE]
         else:
             print(f"Tried to read from cartridge at invalid address {address:X}")
+
+    def write_mapper0(self, address: int, value: int):
+        if address >= 0x6000:
+            self.prg_ram[address % PRG_RAM_SIZE] = value

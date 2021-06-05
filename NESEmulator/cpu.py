@@ -311,6 +311,9 @@ MEM_SIZE = 2048
 
 class CPU:
     def __init__(self, ppu: PPU, rom: ROM):
+        # Connections to Other Parts of the Console
+        self.ppu: PPU = ppu
+        self.rom: ROM = rom
         # Memory on the CPU
         self.ram = array('B', [0] * MEM_SIZE)
         # Registers
@@ -333,9 +336,6 @@ class CPU:
         self.cpu_ticks: int = 0
         self.stall: int = 0 # Number of cycles to stall
         self.instruction_count: int = 0
-        # Connections to Other Parts of the Console
-        self.ppu: PPU = ppu
-        self.rom: ROM = rom
 
     def cycle(self):
         if self.stall > 0:
@@ -359,12 +359,12 @@ class CPU:
             src = self.read_memory(data, instruction.mode)
             signed_result = src + self.A + self.C
             self.V = bool(~(self.A ^ src) & (self.A ^ signed_result) & 0x80)
-            self.A = (self.A + src + self.C) % 255
+            self.A = (self.A + src + self.C) % 256
             self.C = signed_result > 0xFF
             self.setZN(self.A)
         elif instruction.type == InstructionType.AND: # bitwise AND with accumulator
             src = self.read_memory(data, instruction.mode)
-            self.A = bool(self.A & src)
+            self.A = self.A & src
             self.setZN(self.A)
         elif instruction.type == InstructionType.ASL: # arithmetic shift left
             src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
@@ -404,12 +404,13 @@ class CPU:
             if not self.N:
                 self.PC = self.address_for_mode(data, instruction.mode)
                 jumped = True
-        elif instruction.Type == InstructionType.BRK: # force break
+        elif instruction.type == InstructionType.BRK: # force break
             self.PC += 2
             # push pc to stack
             self.stack_push((self.PC >> 8) & 0xFF)
             self.stack_push(self.PC & 0xFF)
             # push status to stack
+            self.B = True
             self.stack_push(self.status)
             self.B = False
             # set PC to reset vector
@@ -446,28 +447,28 @@ class CPU:
             self.setZN(self.Y - src)
         elif instruction.type == InstructionType.DEC:  # decrement memory
             src = self.read_memory(data, instruction.mode)
-            src -= 1
+            src = (src - 1) & 0xFF
             self.write_memory(data, instruction.mode, src)
             self.setZN(src)
         elif instruction.type == InstructionType.DEX:  # decrement X
-            self.X -= 1
+            self.X = (self.X - 1) & 0xFF
             self.setZN(self.X)
         elif instruction.type == InstructionType.DEY:  # decrement Y
-            self.Y -= 1
+            self.Y = (self.Y - 1) & 0xFF
             self.setZN(self.Y)
         elif instruction.type == InstructionType.EOR:  # exclusive or memory with accumulator
             self.A ^= self.read_memory(data, instruction.mode)
             self.setZN(self.A)
         elif instruction.type == InstructionType.INC:  # increment memory
             src = self.read_memory(data, instruction.mode)
-            src += 1
+            src = (src + 1) & 0xFF
             self.write_memory(data, instruction.mode, src)
             self.setZN(src)
         elif instruction.type == InstructionType.INX:  # increment X
-            self.X += 1
+            self.X = (self.X + 1) & 0xFF
             self.setZN(self.X)
         elif instruction.type == InstructionType.INY:  # increment Y
-            self.Y += 1
+            self.Y = (self.Y + 1) & 0xFF
             self.setZN(self.Y)
         elif instruction.type == InstructionType.JMP: # jump
             self.PC = self.address_for_mode(data, instruction.mode)
@@ -552,7 +553,7 @@ class CPU:
             src = self.read_memory(data, instruction.mode)
             signed_result = self.A - src - (1 - self.C)
             self.V = bool((self.A ^ src) & (self.A ^ signed_result) & 0x80) # set overflow
-            self.A = (self.A - src - (1 - self.C)) % 255
+            self.A = (self.A - src - (1 - self.C)) % 256
             self.C = not (signed_result < 0) # set carry
             self.setZN(self.A)
         elif instruction.type == InstructionType.SEC: # set carry
@@ -585,15 +586,14 @@ class CPU:
             self.A = self.Y
             self.setZN(self.A)
         else:
-            print(f"Unimplemented Opcode: {Instruction}")
+            print(f"Unimplemented Instruction: {instruction.type.name}")
 
         if not jumped:
             self.PC += instruction.length
-        else:
-            if instruction.type in [InstructionType.BCC, InstructionType.BCS, InstructionType.BEQ, InstructionType.BMI,
-                                    InstructionType.BNE, InstructionType.BPL, InstructionType.BVC, InstructionType.BVS]:
-                # branch instructions are +1 ticks if they succeeded
-                self.cpu_ticks += 1
+        elif instruction.type in [InstructionType.BCC, InstructionType.BCS, InstructionType.BEQ, InstructionType.BMI,
+                                  InstructionType.BNE, InstructionType.BPL, InstructionType.BVC, InstructionType.BVS]:
+            # branch instructions are +1 ticks if they succeeded
+            self.cpu_ticks += 1
         self.cpu_ticks += instruction.ticks
         if self.page_crossed:
             self.cpu_ticks += instruction.page_ticks
@@ -605,10 +605,10 @@ class CPU:
         if mode == MemMode.ABSOLUTE:
             address = data
         elif mode == MemMode.ABSOLUTE_X:
-            address = data + self.X
+            address = (data + self.X) & 0xFFFF
             self.page_crossed = different_pages(address, address - self.X)
         elif mode == MemMode.ABSOLUTE_Y:
-            address = data + self.Y
+            address = (data + self.Y) & 0xFFFF
             self.page_crossed = different_pages(address, address - self.Y)
         elif mode == MemMode.INDEXED_INDIRECT:
             ls = self.ram[(data + self.X) & 0xFF] # 0xFF for zero-page wrapping
@@ -624,16 +624,16 @@ class CPU:
             ls = self.ram[data & 0xFF]  # 0xFF for zero-page wrapping
             ms = self.ram[(data + 1) & 0xFF]  # 0xFF for zero-page wrapping
             address = (ms << 8) | ls
-            address += self.Y
+            address = (address + self.Y) & 0xFFFF
             self.page_crossed = different_pages(address, address - self.Y)
         elif mode == MemMode.RELATIVE:
-            address = (self.PC + 2 + data) if (data < 0x80) else (self.PC + 2 + (data - 256)) # signed
+            address = (self.PC + 2 + data) & 0xFFFF if (data < 0x80) else (self.PC + 2 + (data - 256)) & 0xFFFF # signed
         elif mode == MemMode.ZEROPAGE:
             address = data
         elif mode == MemMode.ZEROPAGE_X:
-            address = data + self.X
+            address = (data + self.X) & 0xFF
         elif mode == MemMode.ZEROPAGE_Y:
-            address = data + self.Y
+            address = (data + self.Y) & 0xFF
         return address
 
     def read_memory(self, location: int, mode: MemMode) -> int:
@@ -659,14 +659,13 @@ class CPU:
             self.ram[location] = value
             return
 
-        address = self.a
-        ddress_for_mode(location, mode)
+        address = self.address_for_mode(location, mode)
         # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
         if address < 0x2000:  # main ram 2 KB goes up to 0x800
             self.ram[address % 0x800] = value  # mirrors for next 6 KB
         elif address < 0x3FFF:  # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
             temp = ((address % 8) | 0x2000)  # write data to ppu register
-            self.ppu.write_register(temp)
+            self.ppu.write_register(temp, value)
         elif address == 0x4014:  # DMA Transfer of Sprite Data
             from_address = value * 0x100 # this is the address to start copying from
             for i in range(SPR_RAM_SIZE): # copy all 256 bytes over to sprite ram
@@ -680,7 +679,7 @@ class CPU:
             return # Unimplemented other kinds of IO
         else:  # Addresses from 0x6000 to 0xFFFF are from the cartridge
             # We haven't implemented support for cartridge RAM
-            return #self.rom.write_cartridge(address)
+            return self.rom.write_cartridge(address, value)
 
     def setZN(self, value: int):
         self.Z = (value == 0)
@@ -688,10 +687,10 @@ class CPU:
 
     def stack_push(self, value: int):
         self.ram[(0x100 | self.SP)] = value
-        self.SP -= 1
+        self.SP = (self.SP - 1) & 0xFF
 
     def stack_pop(self) -> int:
-        self.SP += 1
+        self.SP = (self.SP + 1) & 0xFF
         return self.ram[(0x100 | self.SP)]
 
     @property
@@ -719,3 +718,10 @@ class CPU:
         self.PC = (self.read_memory(NMI_VECTOR, MemMode.ABSOLUTE)) | \
                   (self.read_memory(NMI_VECTOR + 1, MemMode.ABSOLUTE) << 8)
 
+    def log(self) -> str:
+        opcode = self.read_memory(self.PC, MemMode.ABSOLUTE)
+        instruction = Instructions[opcode]
+        data1 = "  " if instruction.length < 2 else f"{self.read_memory(self.PC + 1, MemMode.ABSOLUTE):02X}"
+        data2 = "  " if instruction.length < 3 else f"{self.read_memory(self.PC + 2, MemMode.ABSOLUTE):02X}"
+        return f"{self.PC:04X}  {opcode:02X} {data1} {data2}  {instruction.type.name}{29 * ' '}" \
+               f"A:{self.A:02X} X:{self.X:02X} Y:{self.Y:02X} P:{self.status:02X} SP:{self.SP:02X}"
