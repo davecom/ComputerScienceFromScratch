@@ -17,22 +17,10 @@
 # DESCRIPTION
 # Tries running multiple different tests to verify the correctness of our emulator.
 import unittest
-import sys
 import os
-from io import StringIO
 from cpu import CPU
 from ppu import PPU
 from rom import ROM
-
-
-
-# Tokenizes, parses, and interprets a NanoBASIC
-# program; stores the output in a string and returns it
-# def run(file_name: str) -> str:
-#     output_holder = StringIO()
-#     sys.stdout = output_holder
-#     execute(file_name)
-#     return output_holder.getvalue()
 
 
 class CPUTestCase(unittest.TestCase):
@@ -176,7 +164,6 @@ class CPUTestCase(unittest.TestCase):
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")])  # Message ends with null terminator
         self.assertEqual(0, rom.prg_ram[0], f"Result code of special test is {rom.prg_ram[0]} not 0")
-
 
 
 if __name__ == "__main__":

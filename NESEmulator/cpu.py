@@ -413,6 +413,7 @@ class CPU:
             self.B = True
             self.stack_push(self.status)
             self.B = False
+            self.I = True
             # set PC to reset vector
             self.PC = (self.read_memory(IRQ_BRK_VECTOR, MemMode.ABSOLUTE)) | \
                       (self.read_memory(IRQ_BRK_VECTOR + 1, MemMode.ABSOLUTE) << 8)
