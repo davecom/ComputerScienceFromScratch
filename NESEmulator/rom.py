@@ -45,6 +45,8 @@ class ROM:
             self.has_trainer = bool(self.header.flags6 & 4)
             if self.has_trainer:
                 self.trainer_data = file.read(TRAINER_SIZE)
+            # Check mirroring from flags6 bit 0
+            self.vertical_mirroring = bool(self.header.flags6 & 1)
             # Read PRG_ROM and CHR_ROM, these are in multiples of 16K and 8K respectively
             self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE * self.header.prg_rom_size)
             self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE * self.header.chr_rom_size)

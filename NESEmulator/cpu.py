@@ -335,15 +335,13 @@ class CPU:
         self.page_crossed: bool = False
         self.cpu_ticks: int = 0
         self.stall: int = 0 # Number of cycles to stall
-        self.instruction_count: int = 0
 
-    def cycle(self):
+    def step(self):
         if self.stall > 0:
             self.stall -= 1
             self.cpu_ticks += 1
             return
 
-        self.instruction_count += 1
         opcode = self.read_memory(self.PC, MemMode.ABSOLUTE)
         self.page_crossed = False
         jumped = False

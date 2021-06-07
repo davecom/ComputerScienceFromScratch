@@ -15,6 +15,26 @@
 # limitations under the License.
 from argparse import ArgumentParser
 from rom import ROM
+from ppu import PPU
+from cpu import CPU
+from ui import UI
+
+def run(rom: ROM):
+    ui = UI()
+    ppu = PPU(rom)
+    cpu = CPU(ppu, rom)
+    ticks = 0
+    while True:
+        cpu.step()
+        new_ticks = cpu.cpu_ticks - ticks
+        # 3 PPU cycles for every CPU tick
+        for _ in range(new_ticks * 3):
+            ppu.step()
+            if (ppu.scanline == 241) and (ppu.cycle == 1) and ppu.generate_nmi:
+                cpu.trigger_NMI()
+        ticks += new_ticks
+
+
 
 if __name__ == "__main__":
     # Parse the file argument
