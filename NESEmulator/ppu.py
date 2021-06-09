@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from array import array
-from rom import ROM
+from .rom import ROM
+import numpy as np
 
 SPR_RAM_SIZE = 256
 NAMETABLE_SIZE = 2048
@@ -56,7 +57,7 @@ class PPU:
         self.buffer2007 = 0
         self.scanline = 0
         self.cycle = 0
-        self.display_buffer = array('L', [0] * (NES_WIDTH * NES_HEIGHT))  # pixels for screen
+        self.display_buffer = np.zeros((NES_WIDTH, NES_HEIGHT), dtype=np.uint32)  # pixels for screen
 
     # rendering reference https://wiki.nesdev.com/w/index.php/PPU_rendering
     # status reference http://wiki.nesdev.com/w/index.php/PPU_registers#PPUSTATUS
@@ -111,8 +112,8 @@ class PPU:
                         y_screen_loc = y * 8 + fine_y
                         transparent_background = ((pixel & 3) == 0)
                         # if the background is transparent, we use the first color in the palette
-                        color = self.pallete[0] if transparent_background else self.palette[pixel]
-                        self.display_buffer[y_screen_loc * NES_WIDTH + x_screen_loc] = NES_PALETTE[color]
+                        color = self.palette[0] if transparent_background else self.palette[pixel]
+                        self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
                         # plot pixel here draw_pixel(x_screen_loc, y_screen_loc, transparent_background ? palette[0] : palette[pixel]);
 
     def draw_sprites(self, background_transparent: bool):
@@ -162,7 +163,7 @@ class PPU:
 
                     color = bit3and2 | bit1and0
                     color = self.read_memory(0x3F10 + color) # pull from palette
-                    self.display_buffer[y * NES_WIDTH + x] = NES_PALETTE[color]
+                    self.display_buffer[x, y] = NES_PALETTE[color]
                     # draw_pixel(x, y, color)
 
 

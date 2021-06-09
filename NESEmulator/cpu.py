@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from enum import Enum
-from typing import NamedTuple
+from dataclasses import dataclass
 from array import array
-from ppu import PPU, SPR_RAM_SIZE
-from rom import ROM
+from .ppu import PPU, SPR_RAM_SIZE
+from .rom import ROM
 
 MemMode = Enum("MemMode", "DUMMY ABSOLUTE ABSOLUTE_X ABSOLUTE_Y ACCUMULATOR IMMEDIATE "
                           "IMPLIED INDEXED_INDIRECT INDIRECT INDIRECT_INDEXED RELATIVE "
@@ -33,12 +33,27 @@ InstructionType = Enum("InstructionType", "ADC AHX ALR ANC AND ARR ASL AXS BCC B
                                           "TXS TYA XAA")
 
 
-class Instruction(NamedTuple):
+@dataclass(frozen=True)
+class Instruction:
     type: InstructionType
     mode: MemMode
     length: int
     ticks: int
     page_ticks: int
+
+
+@dataclass
+class Joypad:
+    strobe: bool = False
+    read_count: int = 0
+    a: bool = False
+    b: bool = False
+    select: bool = False
+    start: bool = False
+    up: bool = False
+    down: bool = False
+    left: bool = False
+    right: bool = False
 
 
 Instructions: list[Instruction] = [
@@ -335,6 +350,7 @@ class CPU:
         self.page_crossed: bool = False
         self.cpu_ticks: int = 0
         self.stall: int = 0 # Number of cycles to stall
+        self.joypad1 = Joypad()
 
     def step(self):
         if self.stall > 0:
@@ -646,8 +662,28 @@ class CPU:
         elif address < 0x3FFF: # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
             temp = ((address % 8) | 0x2000) # get data from ppu register
             return self.ppu.read_register(temp)
-        elif address == 0x4016: # Joypad status
-            return 0 # Must enter here stuff from joypad
+        elif address == 0x4016: # Joypad 1 status
+            if self.joypad1.strobe:
+                return self.joypad1.a
+            self.joypad1.read_count += 1
+            if self.joypad1.read_count == 1:
+                return 0x40 | self.joypad1.a
+            elif self.joypad1.read_count == 2:
+                return 0x40 | self.joypad1.b
+            elif self.joypad1.read_count == 3:
+                return 0x40 | self.joypad1.select
+            elif self.joypad1.read_count == 4:
+                return 0x40 | self.joypad1.start
+            elif self.joypad1.read_count == 5:
+                return 0x40 | self.joypad1.up
+            elif self.joypad1.read_count == 6:
+                return 0x40 | self.joypad1.down
+            elif self.joypad1.read_count == 7:
+                return 0x40 | self.joypad1.left
+            elif self.joypad1.read_count == 8:
+                return 0x40 | self.joypad1.right
+            else:
+                return 0x41
         elif address < 0x6000:
             return 0 # Unimplemented other kinds of IO
         else: # Addresses from 0x6000 to 0xFFFF are from the cartridge
@@ -671,8 +707,10 @@ class CPU:
                 self.ppu.spr[i] = self.read_memory((from_address + i), MemMode.ABSOLUTE)
             # stall for 512 cycles while this completes
             self.stall = 512
-        elif address == 0x4016:
-            # Joypad strobe and readcoutn change... see original source
+        elif address == 0x4016: # Joypad 1
+            if self.joypad1.strobe and (not bool(value & 1)):
+                self.joypad1.read_count = 0
+            self.joypad1.strobe = bool(value & 1)
             return
         elif address < 0x6000:
             return # Unimplemented other kinds of IO

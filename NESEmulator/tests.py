@@ -18,9 +18,9 @@
 # Tries running multiple different tests to verify the correctness of our emulator.
 import unittest
 import os
-from cpu import CPU
-from ppu import PPU
-from rom import ROM
+from .cpu import CPU
+from .ppu import PPU
+from .rom import ROM
 
 
 class CPUTestCase(unittest.TestCase):
