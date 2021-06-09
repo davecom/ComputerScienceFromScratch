@@ -15,15 +15,19 @@
 # limitations under the License.
 import sys
 from argparse import ArgumentParser
-from .rom import ROM
-from .ppu import PPU, NES_WIDTH, NES_HEIGHT
-from .cpu import CPU
+from rom import ROM
+from ppu import PPU, NES_WIDTH, NES_HEIGHT, NES_PALETTE
+from cpu import CPU
 import pygame
 from timeit import default_timer as timer
 
 def run(rom: ROM):
     pygame.init()
-    screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0 , 32)
+    screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0 , 24)
+    #screen.convert_alpha(screen)
+    print(screen.get_flags())
+    print(screen.get_blendmode())
+    print(screen.get_bytesize())
     ppu = PPU(rom)
     cpu = CPU(ppu, rom)
     ticks = 0
