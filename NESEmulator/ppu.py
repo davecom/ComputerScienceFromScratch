@@ -15,7 +15,11 @@
 # limitations under the License.
 from array import array
 from rom import ROM
-import numpy as np
+try:
+    import numpy as np
+except ImportError as error:
+    print("Couldn't import numpy, trying _numpypy")
+    import _numpypy as np # for pypy
 
 SPR_RAM_SIZE = 256
 NAMETABLE_SIZE = 2048

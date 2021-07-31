@@ -56,7 +56,7 @@ class Joypad:
     right: bool = False
 
 
-Instructions: list[Instruction] = [
+Instructions = [
     Instruction(InstructionType.BRK, MemMode.IMPLIED, 1, 7, 0), 			# 00
     Instruction(InstructionType.ORA, MemMode.INDEXED_INDIRECT, 2, 6, 0), 	# 01
     Instruction(InstructionType.KIL, MemMode.IMPLIED, 0, 2, 0), 			# 02
