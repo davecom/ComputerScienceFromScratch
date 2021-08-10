@@ -14,11 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from stainedglass import StainedGlass
+from stainedglass import StainedGlass, ColorMethod, Shape
 
 if __name__ == "__main__":
     # Parse the file argument
-    file_parser = ArgumentParser("StainedGlass")
-    file_parser.add_argument("image_file", help="An image file to paint a stained glass equivalent of.")
-    arguments = file_parser.parse_args()
-    StainedGlass(arguments.image_file)
+    argument_parser = ArgumentParser("StainedGlass")
+    argument_parser.add_argument("image_file", help="An image file to paint a stained glass equivalent of.")
+    argument_parser.add_argument("output_file", help="The final resulting abstract art image.")
+    argument_parser.add_argument('-t', '--trials', type=int, default=10000,
+                        help='The number of trials to run.')
+    argument_parser.add_argument('-m', '--method', choices=['random', 'average', 'scissors'], default='average',
+                                 help='The method for determining shape colors.')
+    argument_parser.add_argument('-s', '--shape', choices=['ellipse', 'triangle', 'quadrilateral', 'line'], default='ellipse',
+                                 help='The shape to use.')
+    arguments = argument_parser.parse_args()
+    method = ColorMethod[arguments.method.upper()]
+    shape = Shape[arguments.shape.upper()]
+    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method, shape)
