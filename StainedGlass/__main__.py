@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from stainedglass import StainedGlass, ColorMethod, Shape
+from stainedglass import StainedGlass, ColorMethod, ShapeType
 
 if __name__ == "__main__":
     # Parse the file argument
@@ -23,11 +23,15 @@ if __name__ == "__main__":
     argument_parser.add_argument("output_file", help="The final resulting abstract art image.")
     argument_parser.add_argument('-t', '--trials', type=int, default=10000,
                         help='The number of trials to run.')
-    argument_parser.add_argument('-m', '--method', choices=['random', 'average', 'scissors'], default='average',
+    argument_parser.add_argument('-m', '--method', choices=['random', 'average', 'common'], default='average',
                                  help='The method for determining shape colors.')
     argument_parser.add_argument('-s', '--shape', choices=['ellipse', 'triangle', 'quadrilateral', 'line'], default='ellipse',
-                                 help='The shape to use.')
+                                 help='The shape type to use.')
+    argument_parser.add_argument('-l', '--length', type = int, default = 256,
+                                 help='The length (height) of the final image in pixels.')
+    argument_parser.add_argument('-v', '--vector', default=False, action='store_true',
+                                 help='Create vector output. A SVG file will also be output.')
     arguments = argument_parser.parse_args()
     method = ColorMethod[arguments.method.upper()]
-    shape = Shape[arguments.shape.upper()]
-    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method, shape)
+    shape_type = ShapeType[arguments.shape.upper()]
+    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method, shape_type, arguments.length, arguments.vector)

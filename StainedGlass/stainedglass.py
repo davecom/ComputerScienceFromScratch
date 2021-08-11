@@ -21,7 +21,7 @@ from math import trunc
 from timeit import default_timer as timer
 
 ColorMethod = Enum("ColorMethod", "RANDOM AVERAGE COMMON")
-Shape = Enum("Shape", "ELLIPSE TRIANGLE QUADRILATERAL LINE")
+ShapeType = Enum("ShapeType", "ELLIPSE TRIANGLE QUADRILATERAL LINE")
 Dimensions = list[int]
 MAX_HEIGHT = 256
 
@@ -33,9 +33,10 @@ def get_most_common_color(image: Image) -> tuple[int, int, int]:
 
 
 class StainedGlass:
-    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape: Shape):
+    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType, length: int, vector: bool):
         self.method = method
-        self.shape = shape
+        self.shape_type = shape_type
+        self.shapes = []
         # Open image file and store in instance variable, execute algorithm
         with open(file_name, "rb") as fp:
             self.original = Image.open(fp)
@@ -60,14 +61,29 @@ class StainedGlass:
                     last_percent = percent
                     print(f"{percent}% Done, Best Difference {self.best_difference}")
             end = timer()
-            print(f"{end-start} seconds elapsed")
-            self.glass.save(output_file)
+            print(f"{end-start} seconds elapsed. Outputting image...")
+            self.create_output(output_file, length, vector)
+
+    def create_output(self, output_file: str, height: int, vector: bool):
+        average_color = tuple((round(n) for n in ImageStat.Stat(self.original).mean))
+        original_width, original_height = self.original.size
+        ratio = height / original_height
+        output_size = (int(original_width * ratio), int(original_height * ratio))
+        output_image = Image.new("RGB", output_size, average_color)
+        output_draw = ImageDraw.Draw(output_image)
+        for coordinates, color in self.shapes:
+            dimensions = [int(x * ratio) for x in coordinates]
+            if self.shape_type == ShapeType.ELLIPSE:
+                output_draw.ellipse(dimensions, fill=color)
+            else: # must be triangle or quadrilateral or line
+                output_draw.polygon(dimensions, fill=color)
+        output_image.save(output_file)
 
     def random_dimensions(self) -> Dimensions:
         num_dimensions = 4 # ellipse or line
-        if self.shape == Shape.TRIANGLE:
+        if self.shape_type == ShapeType.TRIANGLE:
             num_dimensions = 6
-        elif self.shape == Shape.QUADRILATERAL:
+        elif self.shape_type == ShapeType.QUADRILATERAL:
             num_dimensions = 8
         dimensions = []
         for d in range(num_dimensions):
@@ -78,7 +94,7 @@ class StainedGlass:
         return dimensions
 
     def bounding_box(self, dimensions: Dimensions):
-        if self.shape == Shape.ELLIPSE or self.shape == Shape.LINE:
+        if self.shape_type == ShapeType.ELLIPSE or self.shape_type == ShapeType.LINE:
             return dimensions
         else: # Triangle or would work for any Polygon
             xcoords = dimensions[::2]
@@ -110,14 +126,15 @@ class StainedGlass:
         def experiment() -> bool:
             new_image = original.copy()
             glass_draw = ImageDraw.Draw(new_image)
-            if self.shape == Shape.ELLIPSE:
+            if self.shape_type == ShapeType.ELLIPSE:
                 glass_draw.ellipse(dimensions, fill=color)
-            else: # must be triangle or quadrilateral
+            else: # must be triangle or quadrilateral or line
                 glass_draw.polygon(dimensions, fill=color)
             new_difference = self.difference(new_image)
             if new_difference < self.best_difference:
                 self.best_difference = new_difference
                 self.glass = new_image
+                self.shapes.append((dimensions, color))
                 return True
             return False
 
