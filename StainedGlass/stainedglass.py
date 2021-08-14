@@ -19,6 +19,7 @@ from PIL import ImageChops, ImageStat
 import random
 from math import trunc
 from timeit import default_timer as timer
+from svg import SVG
 
 ColorMethod = Enum("ColorMethod", "RANDOM AVERAGE COMMON")
 ShapeType = Enum("ShapeType", "ELLIPSE TRIANGLE QUADRILATERAL LINE")
@@ -61,7 +62,7 @@ class StainedGlass:
                     last_percent = percent
                     print(f"{percent}% Done, Best Difference {self.best_difference}")
             end = timer()
-            print(f"{end-start} seconds elapsed. Outputting image...")
+            print(f"{end-start} seconds elapsed. {len(self.shapes)} shapes created. Outputting image...")
             self.create_output(output_file, length, vector)
 
     def create_output(self, output_file: str, height: int, vector: bool):
@@ -71,13 +72,24 @@ class StainedGlass:
         output_size = (int(original_width * ratio), int(original_height * ratio))
         output_image = Image.new("RGB", output_size, average_color)
         output_draw = ImageDraw.Draw(output_image)
+        if vector:
+            svg = SVG(*output_size, average_color)
         for coordinates, color in self.shapes:
             dimensions = [int(x * ratio) for x in coordinates]
             if self.shape_type == ShapeType.ELLIPSE:
                 output_draw.ellipse(dimensions, fill=color)
+                if vector:
+                    svg.draw_ellipse(*dimensions, color)
             else: # must be triangle or quadrilateral or line
+                if vector:
+                    if self.shape_type == ShapeType.LINE:
+                        svg.draw_line(*dimensions, color)
+                    else:
+                        svg.draw_polygon(dimensions, color)
                 output_draw.polygon(dimensions, fill=color)
         output_image.save(output_file)
+        if vector:
+            svg.write(output_file + ".svg")
 
     def random_dimensions(self) -> Dimensions:
         num_dimensions = 4 # ellipse or line
@@ -134,7 +146,6 @@ class StainedGlass:
             if new_difference < self.best_difference:
                 self.best_difference = new_difference
                 self.glass = new_image
-                self.shapes.append((dimensions, color))
                 return True
             return False
 
@@ -150,6 +161,7 @@ class StainedGlass:
                         if not experiment():
                             dimensions = old_dimensions
                             break
+            self.shapes.append((dimensions, color))
 
     def difference(self, other_image: Image) -> float:
         diff = ImageChops.difference(self.original, other_image)
