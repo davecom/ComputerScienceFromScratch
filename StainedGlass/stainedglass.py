@@ -34,7 +34,7 @@ def get_most_common_color(image: Image) -> tuple[int, int, int]:
 
 
 class StainedGlass:
-    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType, length: int, vector: bool):
+    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType, length: int, vector: bool, animation_length: int):
         self.method = method
         self.shape_type = shape_type
         self.shapes = []
@@ -63,9 +63,9 @@ class StainedGlass:
                     print(f"{percent}% Done, Best Difference {self.best_difference}")
             end = timer()
             print(f"{end-start} seconds elapsed. {len(self.shapes)} shapes created. Outputting image...")
-            self.create_output(output_file, length, vector)
+            self.create_output(output_file, length, vector, animation_length)
 
-    def create_output(self, output_file: str, height: int, vector: bool):
+    def create_output(self, output_file: str, height: int, vector: bool, animation_length: int):
         average_color = tuple((round(n) for n in ImageStat.Stat(self.original).mean))
         original_width, original_height = self.original.size
         ratio = height / original_height
@@ -74,6 +74,8 @@ class StainedGlass:
         output_draw = ImageDraw.Draw(output_image)
         if vector:
             svg = SVG(*output_size, average_color)
+        if animation_length > 0:
+            animation_frames = []
         for coordinates, color in self.shapes:
             dimensions = [int(x * ratio) for x in coordinates]
             if self.shape_type == ShapeType.ELLIPSE:
@@ -87,9 +89,14 @@ class StainedGlass:
                     else:
                         svg.draw_polygon(dimensions, color)
                 output_draw.polygon(dimensions, fill=color)
+            if animation_length > 0:
+                animation_frames.append(output_image.copy())
         output_image.save(output_file)
         if vector:
             svg.write(output_file + ".svg")
+        if animation_length > 0:
+            animation_frames[0].save(output_file + ".gif", save_all=True, append_images=animation_frames[1:],
+                                     optimize=False, duration=animation_length, loop=0)
 
     def random_dimensions(self) -> Dimensions:
         num_dimensions = 4 # ellipse or line

@@ -31,7 +31,9 @@ if __name__ == "__main__":
                                  help='The length (height) of the final image in pixels.')
     argument_parser.add_argument('-v', '--vector', default=False, action='store_true',
                                  help='Create vector output. A SVG file will also be output.')
+    argument_parser.add_argument('-a', '--animate', type = int, default = 0,
+                                 help='If a number greater than 0 is provided, will create an animated GIF with the number of milliseconds per frame provided.')
     arguments = argument_parser.parse_args()
     method = ColorMethod[arguments.method.upper()]
     shape_type = ShapeType[arguments.shape.upper()]
-    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method, shape_type, arguments.length, arguments.vector)
+    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method, shape_type, arguments.length, arguments.vector, arguments.animate)
