@@ -40,7 +40,7 @@ class StainedGlass:
         self.shapes = []
         # Open image file and store in instance variable, execute algorithm
         with open(file_name, "rb") as fp:
-            self.original = Image.open(fp)
+            self.original = Image.open(fp).convert('RGB')
             # Scale down image so processing is faster, 256 max height pixel dimension
             width, height = self.original.size
             aspect_ratio = width / height

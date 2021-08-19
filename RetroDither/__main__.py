@@ -16,10 +16,7 @@
 from PIL import Image
 from argparse import ArgumentParser
 from dither import atkinson_dither
-
-MAX_WIDTH = 576
-MAX_HEIGHT = 720
-
+from macpaint import MAX_WIDTH, MAX_HEIGHT, write_macpaint_file
 
 def prepare(file_name: str) -> Image:
     with open(file_name, "rb") as fp:
@@ -50,3 +47,4 @@ if __name__ == "__main__":
     if arguments.gif:
         out_image = Image.frombytes('L', original.size, dithered_data.tobytes())
         out_image.save(arguments.output_file + ".gif")
+    write_macpaint_file(dithered_data, arguments.output_file, original.width, original.height)
