@@ -14,21 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from array import array
+from pathlib import Path
+from datetime import datetime, timedelta
 
 MAX_WIDTH = 576
 MAX_HEIGHT = 720
+MACBINARY_LENGTH = 128
 HEADER_LENGTH = 512
 
 # Convert an array of bytes where each byte is 0 or 255
-# to an array of bits where each byte that is 0 becomes a 0
-# and each bit that is 255 becomes a 1
+# to an array of bits where each byte that is 0 becomes a 1
+# and each bit that is 255 becomes a 0
 def bytes_to_bits(original: array) -> array:
     bits_array = array('B')
 
     for byte_index in range(0, len(original), 8):
         next_byte = 0
         for bit_index in range(8):
-            next_bit = original[byte_index + bit_index] & 1
+            next_bit = 1 - (original[byte_index + bit_index] & 1)
             next_byte = next_byte | (next_bit << (7 - bit_index))
             if (byte_index + bit_index + 1) >= len(original):
                 break
@@ -54,44 +57,66 @@ def prepare(data: array, width: int, height: int) -> array:
 
 
 # https://en.wikipedia.org/wiki/PackBitsma
-def run_length_encode(data: array) -> array:
+# MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH)
+# In other words there are line boundaries
+def run_length_encode(original_data: array) -> array:
     rle_data = array('B')
-    start_pointer = 0
-    reading_pointer = 0
-    while start_pointer < len(data):
-        reading_pointer = start_pointer
-        same = 0
-        not_same = 0
-        while reading_pointer < len(data):
-            if (reading_pointer + 1) < len(data) and data[reading_pointer] == data[reading_pointer + 1]:
-                if not_same > 0:
+    # Divide data into MAX_WIDTH size boundaries
+    for line_start in range(0, len(original_data), MAX_WIDTH // 8):
+        data = original_data[line_start:(line_start + (MAX_WIDTH // 8))]
+        start_pointer = 0
+        reading_pointer = 0
+        while start_pointer < len(data):
+            reading_pointer = start_pointer
+            same = 0
+            not_same = 0
+            while reading_pointer < len(data):
+                if (reading_pointer + 1) < len(data) and data[reading_pointer] == data[reading_pointer + 1]:
+                    if not_same > 0:
+                        break
+                    same += 1
+                elif same > 0:
                     break
-                same += 1
-            elif same > 0:
-                break
-            else:
-                not_same += 1
-            if same >= 127 or not_same >= 127:
-                break
-            reading_pointer += 1
-        if same > 0:
-            rle_data.append(same)
-            rle_data.append(data[start_pointer])
-        elif not_same > 0:
-            rle_data.append(255 - not_same)
-            rle_data += data[start_pointer:(start_pointer + not_same)]
-        else: # last byte
-            print("same and not_same both 0")
-        start_pointer += max(same + 1, not_same)
+                else:
+                    not_same += 1
+                if same >= 127 or not_same >= 127:
+                    break
+                reading_pointer += 1
+            if same > 0:
+                rle_data.append(255 - same + 1)
+                rle_data.append(data[start_pointer])
+            elif not_same > 0:
+                rle_data.append(not_same - 1)
+                rle_data += data[start_pointer:(start_pointer + not_same)]
+            else: # last byte
+                print("same and not_same both 0")
+            start_pointer += max(same + 1, not_same)
     return rle_data
+
+
+def macbinary_header(outfile: str, data_size: int) -> array:
+    macbinary = array('B', [0] * MACBINARY_LENGTH)
+    filename = Path(outfile).stem
+    filename = filename[:63] if len(filename) > 63 else filename # limit to 63 characters maximum
+    macbinary[1] = len(filename) # file name length
+    macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman")) # file name
+    macbinary[65:69] = array("B", "PNTG".encode("mac_roman")) # file type
+    macbinary[69:73] = array("B", "MPNT".encode("mac_roman")) # file creator
+    macbinary[83:87] = array("B", data_size.to_bytes(4, byteorder='big'))# size of data fork
+    timestamp = int((datetime.now() - datetime(1904,1,1)).total_seconds()) # Mac timestamps are seconds since 1904
+    macbinary[91:95] = array("B", timestamp.to_bytes(4, byteorder='big'))  # creation stamp
+    macbinary[95:99] = array("B", timestamp.to_bytes(4, byteorder='big'))  # modification stamp
+    return macbinary
 
 
 # Writes array *data* to *out_file*
 def write_macpaint_file(data: array, out_file: str, width: int, height: int):
     bits_array = prepare(data, width, height)
     rle = run_length_encode(bits_array)
-    output_array = array('B', [0] * HEADER_LENGTH) + rle
-    output_array[3] = 2 # Header Signature
+    output_array = macbinary_header(out_file, len(rle) + HEADER_LENGTH) + array('B', [0] * HEADER_LENGTH) + rle
+    output_array[MACBINARY_LENGTH + 3] = 2 # Data Fork Header Signature
+    #output_array = array('B', [0] * HEADER_LENGTH) + rle
+    #output_array[3] = 2
     with open(out_file, "wb") as fp:
         output_array.tofile(fp)
 

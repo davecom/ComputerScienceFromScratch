@@ -16,9 +16,10 @@
 from PIL import Image
 from array import array
 
+THRESHOLD = 127
 
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)
-# Returns an array of dithered pixels (255 for black, 0 for white)
+# Returns an array of dithered pixels (255 for white, 0 for black)
 def atkinson_dither(image: Image) -> array:
     # Add *value* to the pixel at (*c*, *r*) in *image*
     def add_to_pixel(c: int, r: int, value: int):
@@ -32,7 +33,7 @@ def atkinson_dither(image: Image) -> array:
             old_pixel = image.getpixel((x, y))
             # Every new pixel is either solid black or solid white
             # since this is all that the original Macintosh supported
-            new_pixel = 255 if old_pixel > 127 else 0
+            new_pixel = 255 if old_pixel > THRESHOLD else 0
             result[y * image.width + x] = new_pixel
             # Error is an eighth of the difference between
             # the original pixel and how it ended up dithered
