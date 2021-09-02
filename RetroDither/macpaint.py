@@ -117,6 +117,6 @@ def write_macpaint_file(data: array, out_file: str, width: int, height: int):
     output_array[MACBINARY_LENGTH + 3] = 2 # Data Fork Header Signature
     #output_array = array('B', [0] * HEADER_LENGTH) + rle
     #output_array[3] = 2
-    with open(out_file, "wb") as fp:
+    with open(out_file + ".bin", "wb") as fp:
         output_array.tofile(fp)
 
