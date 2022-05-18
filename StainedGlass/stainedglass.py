@@ -19,7 +19,7 @@ from PIL import ImageChops, ImageStat
 import random
 from math import trunc
 from timeit import default_timer as timer
-from svg import SVG
+from StainedGlass.svg import SVG
 
 ColorMethod = Enum("ColorMethod", "RANDOM AVERAGE COMMON")
 ShapeType = Enum("ShapeType", "ELLIPSE TRIANGLE QUADRILATERAL LINE")

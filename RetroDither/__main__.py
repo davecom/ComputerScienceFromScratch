@@ -15,8 +15,8 @@
 # limitations under the License.
 from PIL import Image
 from argparse import ArgumentParser
-from dither import atkinson_dither
-from macpaint import MAX_WIDTH, MAX_HEIGHT, write_macpaint_file
+from RetroDither.dither import atkinson_dither
+from RetroDither.macpaint import MAX_WIDTH, MAX_HEIGHT, write_macpaint_file
 
 def prepare(file_name: str) -> Image:
     with open(file_name, "rb") as fp:

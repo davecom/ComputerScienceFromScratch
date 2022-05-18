@@ -21,7 +21,7 @@ import unittest
 import sys
 import os
 from io import StringIO
-from .executioner import execute
+from NanoBASIC.executioner import execute
 
 
 # Tokenizes, parses, and interprets a NanoBASIC
@@ -40,57 +40,57 @@ class NanoBASICTestCase(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     def test_print1(self):
-        program_output = run("Examples/print1.bas")
+        program_output = run("../NanoBASIC/Examples/print1.bas")
         expected = "Hello World\n"
         self.assertEqual(program_output, expected)
 
     def test_print2(self):
-        program_output = run("Examples/print2.bas")
+        program_output = run("../NanoBASIC/Examples/print2.bas")
         expected = "4\n12\n30\n7\n100\t9\n"
         self.assertEqual(program_output, expected)
 
     def test_print3(self):
-        program_output = run("Examples/print3.bas")
+        program_output = run("../NanoBASIC/Examples/print3.bas")
         expected = "E is\t-31\n"
         self.assertEqual(program_output, expected)
 
     def test_variables(self):
-        program_output = run("Examples/variables.bas")
+        program_output = run("../NanoBASIC/Examples/variables.bas")
         expected = "15\n"
         self.assertEqual(program_output, expected)
 
     def test_goto(self):
-        program_output = run("Examples/goto.bas")
+        program_output = run("../NanoBASIC/Examples/goto.bas")
         expected = "Josh\nDave\nNanoBASIC ROCKS\n"
         self.assertEqual(program_output, expected)
 
     def test_gosub(self):
-        program_output = run("Examples/gosub.bas")
+        program_output = run("../NanoBASIC/Examples/gosub.bas")
         expected = "10\n"
         self.assertEqual(program_output, expected)
 
     def test_if1(self):
-        program_output = run("Examples/if1.bas")
+        program_output = run("../NanoBASIC/Examples/if1.bas")
         expected = "10\n40\n50\n60\n70\n100\n"
         self.assertEqual(program_output, expected)
 
     def test_if2(self):
-        program_output = run("Examples/if2.bas")
+        program_output = run("../NanoBASIC/Examples/if2.bas")
         expected = "GOOD\n"
         self.assertEqual(program_output, expected)
 
     def test_fib(self):
-        program_output = run("Examples/fib.bas")
+        program_output = run("../NanoBASIC/Examples/fib.bas")
         expected = "0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n55\n89\n"
         self.assertEqual(program_output, expected)
 
     def test_factorial(self):
-        program_output = run("Examples/factorial.bas")
+        program_output = run("../NanoBASIC/Examples/factorial.bas")
         expected = "120\n"
         self.assertEqual(program_output, expected)
 
     def test_gcd(self):
-        program_output = run("Examples/gcd.bas")
+        program_output = run("../NanoBASIC/Examples/gcd.bas")
         expected = "7\n"
         self.assertEqual(program_output, expected)
 

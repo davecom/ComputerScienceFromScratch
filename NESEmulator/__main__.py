@@ -15,9 +15,9 @@
 # limitations under the License.
 import sys
 from argparse import ArgumentParser
-from rom import ROM
-from ppu import PPU, NES_WIDTH, NES_HEIGHT, NES_PALETTE
-from cpu import CPU
+from NESEmulator.rom import ROM
+from NESEmulator.ppu import PPU, NES_WIDTH, NES_HEIGHT, NES_PALETTE
+from NESEmulator.cpu import CPU
 import pygame
 from timeit import default_timer as timer
 

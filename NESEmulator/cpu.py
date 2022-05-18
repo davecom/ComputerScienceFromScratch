@@ -16,8 +16,8 @@
 from enum import Enum
 from dataclasses import dataclass
 from array import array
-from ppu import PPU, SPR_RAM_SIZE
-from rom import ROM
+from NESEmulator.ppu import PPU, SPR_RAM_SIZE
+from NESEmulator.rom import ROM
 
 MemMode = Enum("MemMode", "DUMMY ABSOLUTE ABSOLUTE_X ABSOLUTE_Y ACCUMULATOR IMMEDIATE "
                           "IMPLIED INDEXED_INDIRECT INDIRECT INDIRECT_INDEXED RELATIVE "

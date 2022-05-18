@@ -21,7 +21,7 @@
 # just an array of statement nodes; each node is something of a tree in itself. The interpreter
 # translates the meaning of each statement node into Python code that can be run "live."
 from __future__ import annotations  # can delete in 3.9
-from .nodes import *
+from NanoBASIC.nodes import *
 from collections import deque
 from typing import cast, Optional, Union
 

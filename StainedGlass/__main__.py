@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from stainedglass import StainedGlass, ColorMethod, ShapeType
+from StainedGlass.stainedglass import StainedGlass, ColorMethod, ShapeType
 
 if __name__ == "__main__":
     # Parse the file argument

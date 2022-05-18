@@ -18,9 +18,9 @@
 # Tries running multiple different tests to verify the correctness of our emulator.
 import unittest
 import os
-from cpu import CPU
-from ppu import PPU
-from rom import ROM
+from NESEmulator.cpu import CPU
+from NESEmulator.ppu import PPU
+from NESEmulator.rom import ROM
 
 
 class CPUTestCase(unittest.TestCase):
@@ -31,12 +31,12 @@ class CPUTestCase(unittest.TestCase):
 
     def test_nes_test(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/nestest/nestest.nes")
+        rom = ROM("../NESEmulator/Tests/nestest/nestest.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Setup tests
         cpu.PC = 0xC000 # special starting location for tests
-        with open("Tests/nestest/nestest.log") as f:
+        with open("../NESEmulator/Tests/nestest/nestest.log") as f:
             correct_lines = f.readlines()
         log_line = 1
         # Check every line of the log against our own produced logs
@@ -50,7 +50,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_basics(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/01-basics.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/01-basics.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -63,7 +63,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_implied(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/02-implied.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/02-implied.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -76,7 +76,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_branches(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/10-branches.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/10-branches.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -89,7 +89,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_stack(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/11-stack.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/11-stack.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -102,7 +102,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_jmp_jsr(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/12-jmp_jsr.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/12-jmp_jsr.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -115,7 +115,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_rts(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/13-rts.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/13-rts.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -128,7 +128,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_rti(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/14-rti.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/14-rti.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -141,7 +141,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_brk(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/15-brk.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/15-brk.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
@@ -154,7 +154,7 @@ class CPUTestCase(unittest.TestCase):
 
     def test_blargg_instr_test_v5_special(self):
         # Create machinery that we are testing
-        rom = ROM("Tests/instr_test-v5/rom_singles/16-special.nes")
+        rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/16-special.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
         # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success

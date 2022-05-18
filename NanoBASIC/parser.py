@@ -27,9 +27,9 @@
 # recursive descent parser just calls the function representing that other production rule.
 # The recursive descent functions return respective nodes when they are successful.
 from __future__ import annotations  # can delete in 3.9
-from .tokenizer import Token, TokenType
-from typing import Optional, Union
-from .nodes import *
+from NanoBASIC.tokenizer import Token, TokenType
+from typing import Union
+from NanoBASIC.nodes import *
 
 
 class Parser:

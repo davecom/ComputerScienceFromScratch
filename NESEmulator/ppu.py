@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from array import array
-from rom import ROM
+from NESEmulator.rom import ROM
 try:
     import numpy as np
 except ImportError as error:

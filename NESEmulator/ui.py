@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pygame
-from ppu import NES_WIDTH, NES_HEIGHT
+from NESEmulator.ppu import NES_WIDTH, NES_HEIGHT
 
 class UI:
     def __init__(self):

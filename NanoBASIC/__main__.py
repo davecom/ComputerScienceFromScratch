@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from .executioner import execute
+from NanoBASIC.executioner import execute
 
 if __name__ == "__main__":
     # Parse the file argument

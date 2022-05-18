@@ -21,7 +21,7 @@
 from __future__ import annotations  # can delete in 3.9
 from dataclasses import dataclass
 from typing import Union
-from .tokenizer import TokenType
+from NanoBASIC.tokenizer import TokenType
 
 
 # All statements in NanoBASIC have a line number identifier

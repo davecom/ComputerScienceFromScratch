@@ -21,7 +21,7 @@ import unittest
 import sys
 import os
 from io import StringIO
-from .brainfuck import Brainfuck
+from Brainfuck.brainfuck import Brainfuck
 
 
 # Tokenizes, parses, and interprets a Brainfuck
@@ -40,23 +40,23 @@ class BrainfuckTestCase(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     def test_hello_world(self):
-        program_output = run("Examples/hello_world_verbose.bf")
+        program_output = run("../Brainfuck/Examples/hello_world_verbose.bf")
         expected = "Hello World!\n"
         self.assertEqual(program_output, expected)
 
     def test_fibonacci(self):
-        program_output = run("Examples/fibonacci.bf")
+        program_output = run("../Brainfuck/Examples/fibonacci.bf")
         expected = "1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89"
         self.assertEqual(program_output, expected)
 
     def test_cell_size(self):
-        program_output = run("Examples/cell_size.bf")
+        program_output = run("../Brainfuck/Examples/cell_size.bf")
         expected = "8 bit cells\n"
         self.assertEqual(program_output, expected)
 
     def test_beer(self):
-        program_output = run("Examples/beer.bf")
-        with open("Examples/beer.out", "r") as text_file:
+        program_output = run("../Brainfuck/Examples/beer.bf")
+        with open("../Brainfuck/Examples/beer.out", "r") as text_file:
             expected = text_file.read()
             self.assertEqual(program_output, expected)
 
