@@ -1,6 +1,6 @@
 # NESEmulator/rom.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class ROM:
             else:
                 return self.prg_rom[(address - 0x8000) % PRG_ROM_BASE_UNIT_SIZE]
         else:
-            print(f"Tried to read from cartridge at invalid address {address:X}")
+            raise LookupError(f"Tried to read from cartridge at invalid address {address:X}")
 
     def write_mapper0(self, address: int, value: int):
         if address >= 0x6000:

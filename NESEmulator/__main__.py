@@ -1,6 +1,6 @@
 # NESEmulator/__main__.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,11 +23,8 @@ from timeit import default_timer as timer
 
 def run(rom: ROM):
     pygame.init()
-    screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0 , 24)
+    screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0, 24)
     #screen.convert_alpha(screen)
-    print(screen.get_flags())
-    print(screen.get_blendmode())
-    print(screen.get_bytesize())
     ppu = PPU(rom)
     cpu = CPU(ppu, rom)
     ticks = 0
@@ -52,39 +49,41 @@ def run(rom: ROM):
         # Handle keyboard events as joypad changes
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    cpu.joypad1.left = True
-                if event.key == pygame.K_RIGHT:
-                    cpu.joypad1.right = True
-                if event.key == pygame.K_UP:
-                    cpu.joypad1.up = True
-                if event.key == pygame.K_DOWN:
-                    cpu.joypad1.down = True
-                if event.key == pygame.K_x:
-                    cpu.joypad1.a = True
-                if event.key == pygame.K_z:
-                    cpu.joypad1.b = True
-                if event.key == pygame.K_s:
-                    cpu.joypad1.start = True
-                if event.key == pygame.K_a:
-                    cpu.joypad1.select = True
+                match event.key:
+                    case pygame.K_LEFT:
+                        cpu.joypad1.left = True
+                    case pygame.K_RIGHT:
+                        cpu.joypad1.right = True
+                    case pygame.K_UP:
+                        cpu.joypad1.up = True
+                    case pygame.K_DOWN:
+                        cpu.joypad1.down = True
+                    case pygame.K_x:
+                        cpu.joypad1.a = True
+                    case pygame.K_z:
+                        cpu.joypad1.b = True
+                    case pygame.K_s:
+                        cpu.joypad1.start = True
+                    case pygame.K_a:
+                        cpu.joypad1.select = True
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT:
-                    cpu.joypad1.left = False
-                if event.key == pygame.K_RIGHT:
-                    cpu.joypad1.right = False
-                if event.key == pygame.K_UP:
-                    cpu.joypad1.up = False
-                if event.key == pygame.K_DOWN:
-                    cpu.joypad1.down = False
-                if event.key == pygame.K_x:
-                    cpu.joypad1.a = False
-                if event.key == pygame.K_z:
-                    cpu.joypad1.b = False
-                if event.key == pygame.K_s:
-                    cpu.joypad1.start = False
-                if event.key == pygame.K_a:
-                    cpu.joypad1.select = False
+                match event.key:
+                    case pygame.K_LEFT:
+                        cpu.joypad1.left = False
+                    case pygame.K_RIGHT:
+                        cpu.joypad1.right = False
+                    case pygame.K_UP:
+                        cpu.joypad1.up = False
+                    case pygame.K_DOWN:
+                        cpu.joypad1.down = False
+                    case pygame.K_x:
+                        cpu.joypad1.a = False
+                    case pygame.K_z:
+                        cpu.joypad1.b = False
+                    case pygame.K_s:
+                        cpu.joypad1.start = False
+                    case pygame.K_a:
+                        cpu.joypad1.select = False
             elif event.type == pygame.QUIT:
                 sys.exit()
 

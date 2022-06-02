@@ -1,6 +1,6 @@
 # NESEmulator/ppu.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
 # limitations under the License.
 from array import array
 from NESEmulator.rom import ROM
-try:
-    import numpy as np
-except ImportError as error:
-    print("Couldn't import numpy, trying _numpypy")
-    import _numpypy as np # for pypy
+import numpy as np
 
 SPR_RAM_SIZE = 256
 NAMETABLE_SIZE = 2048
@@ -95,7 +91,7 @@ class PPU:
                 attry = y // 4
                 attribute_address = attribute_table_address + attry * 8 + attrx
                 attribute_entry = self.read_memory(attribute_address)
-                block = (y & 0x02) | ((x & 0x02) >> 1) # https://forums.nesdev.com/viewtopic.php?f=10&t=13315
+                block = (y & 0x02) | ((x & 0x02) >> 1)  # https://forums.nesdev.com/viewtopic.php?f=10&t=13315
                 attribute_bits = 0
                 if block == 0:
                     attribute_bits = (attribute_entry & 0b00000011) << 2
@@ -171,8 +167,6 @@ class PPU:
                     self.display_buffer[x, y] = NES_PALETTE[color]
                     # draw_pixel(x, y, color)
 
-
-
     def read_register(self, address: int) -> int:
         if address == 0x2002:
             self.addr_write_latch = False
@@ -191,7 +185,7 @@ class PPU:
             self.addr += self.address_increment # every read to $2007 there is an increment of 1 or 32
             return value
         else:
-            print(f"Error: Unrecognized PPU register read {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU register read {address:X}")
 
     def write_register(self, address: int, value: int):
         if address == 0x2000: # Control1
@@ -222,7 +216,7 @@ class PPU:
             self.write_memory(self.addr, value)
             self.addr += self.address_increment
         else:
-            print(f"Error: Unrecognized PPU register write {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU register write {address:X}")
 
     def read_memory(self, address: int) -> int:
         address = address % 0x4000 # mirror >0x4000
@@ -244,7 +238,7 @@ class PPU:
                 address = address - 0x10
             return self.palette[address]
         else:
-            print(f"Error: Unrecognized PPU address read at {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU address read at {address:X}")
 
     def write_memory(self, address: int, value: int):
         address = address % 0x4000  # mirror >0x4000
@@ -266,4 +260,4 @@ class PPU:
                 address = address - 0x10
             self.palette[address] = value
         else:
-            print(f"Error: Unrecognized PPU address read at {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU address read at {address:X}")

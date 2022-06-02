@@ -1,6 +1,6 @@
 # NanoBASIC/interpreter.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@
 from __future__ import annotations  # can delete in 3.9
 from NanoBASIC.nodes import *
 from collections import deque
-from typing import cast, Optional, Union
+from typing import Optional
 
 
 class Interpreter:
     class InterpreterError(Exception):
-        def __init__(self, message: str, statement_or_expression: Union[Statement, NumericExpression]):
+        def __init__(self, message: str, node: Node):
             self.message = message
-            self.line_num = statement_or_expression.line_num
-            self.column = statement_or_expression.col_start
+            self.line_num = node.line_num
+            self.column = node.col_start
 
         def __str__(self):
             return f"{self.message} Occurred at line {self.line_num} and column {self.column}"
@@ -66,112 +66,92 @@ class Interpreter:
             self.interpret(self.current)
 
     def interpret(self, statement: Statement):
-        if isinstance(statement, LetStatement):
-            let_statement = cast(LetStatement, statement)
-            value = self.evaluate_numeric(let_statement.value)
-            self.variable_table[let_statement.name] = value
-            self.statement_index += 1
-        elif isinstance(statement, GoToStatement):
-            goto_statement = cast(GoToStatement, statement)
-            go_to_line_id = self.evaluate_numeric(goto_statement.goto_line_id)
-            if (line_index := self.find_line_index(go_to_line_id)) is not None:
-                self.statement_index = line_index
-            else:
-                raise Interpreter.InterpreterError("Couldn't find goto line id.", self.current)
-        elif isinstance(statement, GoSubStatement):
-            gosub_statement = cast(GoSubStatement, statement)
-            go_to_line_id = self.evaluate_numeric(gosub_statement.goto_line_id)
-            if (line_index := self.find_line_index(go_to_line_id)) is not None:
-                self.subroutine_stack.append(self.statement_index + 1)  # Setup for RETURN
-                self.statement_index = line_index
-            else:
-                raise Interpreter.InterpreterError("Couldn't find gosub line id.", self.current)
-        elif isinstance(statement, ReturnStatement):
-            if not self.subroutine_stack:  # Check if the stack is empty
-                raise Interpreter.InterpreterError("Return with no prior corresponding gosub.", self.current)
-            self.statement_index = self.subroutine_stack.pop()
-        elif isinstance(statement, PrintStatement):
-            print_statement = cast(PrintStatement, statement)
-            accumulated_string: str = ""
-            for index, printable in enumerate(print_statement.printables):
-                if index > 0:  # Put tabs between items in the list
-                    accumulated_string += "\t"
-                if isinstance(printable, NumericExpression):
-                    accumulated_string += str(self.evaluate_numeric(printable))
-                else:  # Otherwise it's a string, because that's the only other thing we allow
-                    accumulated_string += str(printable)
-            print(accumulated_string)
-            self.statement_index += 1
-        elif isinstance(statement, IfStatement):
-            if_statement = cast(IfStatement, statement)
-            if self.evaluate_boolean(if_statement.boolean_expression):
-                self.interpret(if_statement.then_statement)
-            else:
+        match statement:
+            case LetStatement(name=name, expr=expr):
+                value = self.evaluate_numeric(expr)
+                self.variable_table[name] = value
                 self.statement_index += 1
-        else:
-            raise Interpreter.InterpreterError(f"Unexpected item {self.current} in statement list.", self.current)
+            case GoToStatement(line_expr=line_expr):
+                go_to_line_id = self.evaluate_numeric(line_expr)
+                if (line_index := self.find_line_index(go_to_line_id)) is not None:
+                    self.statement_index = line_index
+                else:
+                    raise Interpreter.InterpreterError("Couldn't find GOTO line id.", self.current)
+            case GoSubStatement(line_expr=line_expr):
+                go_sub_line_id = self.evaluate_numeric(line_expr)
+                if (line_index := self.find_line_index(go_sub_line_id)) is not None:
+                    self.subroutine_stack.append(self.statement_index + 1)  # Setup for RETURN
+                    self.statement_index = line_index
+                else:
+                    raise Interpreter.InterpreterError("Couldn't find GOSUB line id.", self.current)
+            case ReturnStatement():
+                if not self.subroutine_stack:  # Check if the stack is empty
+                    raise Interpreter.InterpreterError("Return with no prior corresponding GOSUB.", self.current)
+                self.statement_index = self.subroutine_stack.pop()
+            case PrintStatement(printables=printables):
+                accumulated_string: str = ""
+                for index, printable in enumerate(printables):
+                    if index > 0:  # Put tabs between items in the list
+                        accumulated_string += "\t"
+                    if isinstance(printable, NumericExpression):
+                        accumulated_string += str(self.evaluate_numeric(printable))
+                    else:  # Otherwise, it's a string, because that's the only other thing we allow
+                        accumulated_string += str(printable)
+                print(accumulated_string)
+                self.statement_index += 1
+            case IfStatement(boolean_expr=boolean_expr, then_statement=then_statement):
+                if self.evaluate_boolean(boolean_expr):
+                    self.interpret(then_statement)
+                else:
+                    self.statement_index += 1
+            case _:
+                raise Interpreter.InterpreterError(f"Unexpected item {self.current} in statement list.", self.current)
 
     def evaluate_numeric(self, numeric_expression: NumericExpression) -> int:
-        if isinstance(numeric_expression, NumberLiteral):
-            number_literal = cast(NumberLiteral, numeric_expression)
-            return number_literal.number
-        elif isinstance(numeric_expression, VarRetrieve):
-            var_retrieve = cast(VarRetrieve, numeric_expression)
-            if var_retrieve.name in self.variable_table:
-                return self.variable_table[var_retrieve.name]
-            else:
-                raise Interpreter.InterpreterError(f"Var {var_retrieve.name} used before initialized.", var_retrieve)
-        elif isinstance(numeric_expression, UnaryOperation):
-            unary_operation = cast(UnaryOperation, numeric_expression)
-            if unary_operation.operator is TokenType.MINUS:
-                return -self.evaluate_numeric(unary_operation.value)
-            else:
-                raise Interpreter.InterpreterError(f"Expected - but got {unary_operation.operator}.", unary_operation)
-        elif isinstance(numeric_expression, UnaryOperation):
-            unary_operation = cast(UnaryOperation, numeric_expression)
-            if unary_operation.operator is TokenType.MINUS:
-                return -self.evaluate_numeric(unary_operation.value)
-            else:
-                raise Interpreter.InterpreterError(f"Expected - but got {unary_operation.operator}.", unary_operation)
-        elif isinstance(numeric_expression, BinaryOperation):
-            binary_operation = cast(BinaryOperation, numeric_expression)
-            if binary_operation.operator is TokenType.PLUS:
-                return self.evaluate_numeric(binary_operation.left) \
-                       + self.evaluate_numeric(binary_operation.right)
-            elif binary_operation.operator is TokenType.MINUS:
-                return self.evaluate_numeric(binary_operation.left) \
-                       - self.evaluate_numeric(binary_operation.right)
-            elif binary_operation.operator is TokenType.MULTIPLY:
-                return self.evaluate_numeric(binary_operation.left) \
-                       * self.evaluate_numeric(binary_operation.right)
-            elif binary_operation.operator is TokenType.DIVIDE:
-                return self.evaluate_numeric(binary_operation.left) \
-                       // self.evaluate_numeric(binary_operation.right)
-            else:
-                raise Interpreter.InterpreterError(f"Unexpected binary operator {binary_operation.operator}.", binary_operation)
-        else:
-            raise Interpreter.InterpreterError("Expected numeric expression, got something else.", numeric_expression)
+        match numeric_expression:
+            case NumberLiteral(number=number):
+                return number
+            case VarRetrieve(name=name):
+                if name in self.variable_table:
+                    return self.variable_table[name]
+                else:
+                    raise Interpreter.InterpreterError(f"Var {name} used before initialized.", numeric_expression)
+            case UnaryOperation(operator=operator, expr=expr):
+                if operator is TokenType.MINUS:
+                    return -self.evaluate_numeric(expr)
+                else:
+                    raise Interpreter.InterpreterError(f"Expected - but got {operator}.", numeric_expression)
+            case BinaryOperation(operator=operator, left_expr=left, right_expr=right):
+                if operator is TokenType.PLUS:
+                    return self.evaluate_numeric(left) + self.evaluate_numeric(right)
+                elif operator is TokenType.MINUS:
+                    return self.evaluate_numeric(left) - self.evaluate_numeric(right)
+                elif operator is TokenType.MULTIPLY:
+                    return self.evaluate_numeric(left) * self.evaluate_numeric(right)
+                elif operator is TokenType.DIVIDE:
+                    return self.evaluate_numeric(left) // self.evaluate_numeric(right)
+                else:
+                    raise Interpreter.InterpreterError(f"Unexpected binary operator {operator}.", numeric_expression)
+            case _:
+                raise Interpreter.InterpreterError("Expected numeric expression.", numeric_expression)
 
     def evaluate_boolean(self, boolean_expression: BooleanExpression) -> bool:
-        if boolean_expression.operator is TokenType.LESS:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   < self.evaluate_numeric(boolean_expression.right)
-        elif boolean_expression.operator is TokenType.LESS_EQUAL:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   <= self.evaluate_numeric(boolean_expression.right)
-        elif boolean_expression.operator is TokenType.GREATER:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   > self.evaluate_numeric(boolean_expression.right)
-        elif boolean_expression.operator is TokenType.GREATER_EQUAL:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   >= self.evaluate_numeric(boolean_expression.right)
-        elif boolean_expression.operator is TokenType.EQUAL:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   == self.evaluate_numeric(boolean_expression.right)
-        elif boolean_expression.operator is TokenType.NOT_EQUAL:
-            return self.evaluate_numeric(boolean_expression.left) \
-                   != self.evaluate_numeric(boolean_expression.right)
-        else:
-            raise Interpreter.InterpreterError(f"Unexpected boolean operator {boolean_expression.operator}.",
-                                               boolean_expression)
+        left = self.evaluate_numeric(boolean_expression.left_expr)
+        right = self.evaluate_numeric(boolean_expression.right_expr)
+        match boolean_expression.operator:
+            case TokenType.LESS:
+                return left < right
+            case TokenType.LESS_EQUAL:
+                return left <= right
+            case TokenType.GREATER:
+                return left > right
+            case TokenType.GREATER_EQUAL:
+                return left >= right
+            case TokenType.EQUAL:
+                return left == right
+            case TokenType.NOT_EQUAL:
+                return left != right
+            case _:
+                raise Interpreter.InterpreterError(f"Unexpected boolean operator {boolean_expression.operator}.",
+                                                   boolean_expression)
 

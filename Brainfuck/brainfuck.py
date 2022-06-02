@@ -1,6 +1,6 @@
 # Brainfuck/brainfuck.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,24 +28,25 @@ class Brainfuck:
         # Change to match statement in Python 3.10
         while instruction_pointer < len(self.source_code):
             instruction = self.source_code[instruction_pointer]
-            if instruction == ">":
-                data_pointer += 1
-            elif instruction == "<":
-                data_pointer -= 1
-            elif instruction == "+":
-                cells[data_pointer] = clamp0_255_wraparound(cells[data_pointer] + 1)
-            elif instruction == "-":
-                cells[data_pointer] = clamp0_255_wraparound(cells[data_pointer] - 1)
-            elif instruction == ".":
-                print(chr(cells[data_pointer]), end='', flush=True)
-            elif instruction == ",":
-                cells[data_pointer] = clamp0_255_wraparound(int(input()))
-            elif instruction == "[":
-                if cells[data_pointer] == 0:
-                    instruction_pointer = self.find_bracket_match(instruction_pointer, True)
-            elif instruction == "]":
-                if cells[data_pointer] != 0:
-                    instruction_pointer = self.find_bracket_match(instruction_pointer, False)
+            match instruction:
+                case ">":
+                    data_pointer += 1
+                case "<":
+                    data_pointer -= 1
+                case "+":
+                    cells[data_pointer] = clamp0_255_wraparound(cells[data_pointer] + 1)
+                case "-":
+                    cells[data_pointer] = clamp0_255_wraparound(cells[data_pointer] - 1)
+                case ".":
+                    print(chr(cells[data_pointer]), end='', flush=True)
+                case ",":
+                    cells[data_pointer] = clamp0_255_wraparound(int(input()))
+                case "[":
+                    if cells[data_pointer] == 0:
+                        instruction_pointer = self.find_bracket_match(instruction_pointer, True)
+                case "]":
+                    if cells[data_pointer] != 0:
+                        instruction_pointer = self.find_bracket_match(instruction_pointer, False)
             instruction_pointer += 1
 
     # Find the location of the corresponding matching bracket to the one at start

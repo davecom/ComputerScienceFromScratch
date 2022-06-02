@@ -1,6 +1,6 @@
 # StainedGlass/stainedglass.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ Dimensions = list[int]
 MAX_HEIGHT = 256
 
 
-def get_most_common_color(image: Image) -> tuple[int, int, int]:
+def get_most_common_color(image: Image.Image) -> tuple[int, int, int]:
     colors = image.getcolors(image.width * image.height)
     sorted_colors = sorted(colors, key=lambda item: item[0])
     return sorted_colors[-1][1]
@@ -82,7 +82,7 @@ class StainedGlass:
                 output_draw.ellipse(dimensions, fill=color)
                 if vector:
                     svg.draw_ellipse(*dimensions, color)
-            else: # must be triangle or quadrilateral or line
+            else:  # must be triangle or quadrilateral or line
                 if vector:
                     if self.shape_type == ShapeType.LINE:
                         svg.draw_line(*dimensions, color)
@@ -106,23 +106,20 @@ class StainedGlass:
             num_dimensions = 8
         dimensions = []
         for d in range(num_dimensions):
-            if d % 2 == 0: # x coordinates
+            if d % 2 == 0:  # x coordinates
                 dimensions.append(random.randint(0, self.original.width))
-            else: # y coordinates
+            else:  # y coordinates
                 dimensions.append(random.randint(0, self.original.height))
         return dimensions
 
-    def bounding_box(self, dimensions: Dimensions):
-        if self.shape_type == ShapeType.ELLIPSE or self.shape_type == ShapeType.LINE:
-            return dimensions
-        else: # Triangle or would work for any Polygon
-            xcoords = dimensions[::2]
-            ycoords = dimensions[1::2]
-            x1 = min(xcoords)
-            y1 = min(ycoords)
-            x2 = max(xcoords)
-            y2 = max(ycoords)
-            return [x1, y1, x2, y2]
+    def bounding_box(self, dimensions: Dimensions) -> tuple[int, int, int, int]:
+        xcoords = dimensions[::2]
+        ycoords = dimensions[1::2]
+        x1 = min(xcoords)
+        y1 = min(ycoords)
+        x2 = max(xcoords)
+        y2 = max(ycoords)
+        return x1, y1, x2, y2
 
     def trial(self):
         while True:
@@ -170,7 +167,7 @@ class StainedGlass:
                             break
             self.shapes.append((dimensions, color))
 
-    def difference(self, other_image: Image) -> float:
+    def difference(self, other_image: Image.Image) -> float:
         diff = ImageChops.difference(self.original, other_image)
         stat = ImageStat.Stat(diff)
         diff_ratio = sum(stat.mean) / (len(stat.mean) * 255)

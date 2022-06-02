@@ -1,6 +1,6 @@
 # NanoBASIC/tokenizer.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 # read tokenizer.py and parser.py.
 from __future__ import annotations  # can delete in 3.9
 from enum import Enum
-from typing import Optional, Union, TextIO
+from typing import Optional, TextIO
 import re
 from dataclasses import dataclass
 
@@ -69,7 +69,7 @@ class Token:
     line_num: int
     col_start: int
     col_end: int
-    associated_value: Optional[Union[str, int]]
+    associated_value: str | int | None
 
 
 def tokenize(text_file: TextIO) -> list[Token]:
@@ -86,7 +86,7 @@ def tokenize(text_file: TextIO) -> list[Token]:
                     col_end: int = col_start + found.end() - 1
                     # Store tokens other than comments and whitespace
                     if possibility is not TokenType.WHITESPACE and possibility is not TokenType.COMMENT:
-                        associated_value: Optional[Union[str, int]] = None
+                        associated_value: str | int | None = None
                         if possibility.has_associated_value:
                             if possibility is TokenType.NUMBER:
                                 associated_value = int(found.group(0))

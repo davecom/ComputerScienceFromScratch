@@ -1,6 +1,6 @@
 # RetroDither/__main__.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ from argparse import ArgumentParser
 from RetroDither.dither import atkinson_dither
 from RetroDither.macpaint import MAX_WIDTH, MAX_HEIGHT, write_macpaint_file
 
-def prepare(file_name: str) -> Image:
+
+def prepare(file_name: str) -> Image.Image:
     with open(file_name, "rb") as fp:
         image = Image.open(fp)
         # Size to within the bounds of the maximum for MacPaint

@@ -1,6 +1,6 @@
 # RetroDither/dither.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021 David Kopec
+# Copyright 2021-2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ from array import array
 
 THRESHOLD = 127
 
+
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)
 # Returns an array of dithered pixels (255 for white, 0 for black)
-def atkinson_dither(image: Image) -> array:
+def atkinson_dither(image: Image.Image) -> array:
     # Add *value* to the pixel at (*c*, *r*) in *image*
     def add_to_pixel(c: int, r: int, value: int):
         if c < 0 or c >= image.width or r >= image.height:
