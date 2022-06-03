@@ -16,6 +16,7 @@
 import pygame
 from NESEmulator.ppu import NES_WIDTH, NES_HEIGHT
 
+
 class UI:
     def __init__(self):
         pygame.init()

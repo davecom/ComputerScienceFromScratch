@@ -31,15 +31,16 @@ NES_PALETTE = [0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020, 0xA81
                0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8, 0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8,
                0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8, 0x00FCFC, 0xF8D8F8, 0x000000, 0x000000]
 
+
 class PPU:
     def __init__(self, rom: ROM):
         self.rom = rom
         # PPU Memory
-        self.spr = array('B', [0] * SPR_RAM_SIZE) # sprite ram
-        self.nametables = array('B', [0] * NAMETABLE_SIZE) # nametable ram
+        self.spr = array('B', [0] * SPR_RAM_SIZE)  # sprite ram
+        self.nametables = array('B', [0] * NAMETABLE_SIZE)  # nametable ram
         self.palette = array('B', [0] * PALETTE_SIZE)  # pallete ram
         # Registers
-        self.addr = 0 # main PPU address register
+        self.addr = 0  # main PPU address register
         self.addr_write_latch = False
         self.status = 0
         self.spr_address = 0
@@ -69,9 +70,9 @@ class PPU:
             if self.show_sprites:
                 self.draw_sprites(False)
         if (self.scanline == 241) and (self.cycle == 1):
-            self.status |= 0b10000000 # set vblank
+            self.status |= 0b10000000  # set vblank
         if (self.scanline == 261) and (self.cycle == 1):
-            self.status |= 0b00011111 # vblank off, clear sprite zero, clear sprite overflow
+            self.status |= 0b00011111  # vblank off, clear sprite zero, clear sprite overflow
 
         self.cycle += 1
         if self.cycle > 340:
@@ -105,9 +106,11 @@ class PPU:
                     print("Invalid block")
                 for fine_y in range(8):
                     low_order = self.read_memory(self.background_pattern_table_address + nametable_entry * 16 + fine_y)
-                    high_order = self.read_memory(self.background_pattern_table_address + nametable_entry * 16 + 8 + fine_y)
+                    high_order = self.read_memory(
+                        self.background_pattern_table_address + nametable_entry * 16 + 8 + fine_y)
                     for fine_x in range(8):
-                        pixel = ((low_order >> (7 - fine_x)) & 1) | (((high_order >> (7 - fine_x)) & 1) << 1) | attribute_bits
+                        pixel = ((low_order >> (7 - fine_x)) & 1) | (
+                                    ((high_order >> (7 - fine_x)) & 1) << 1) | attribute_bits
                         x_screen_loc = x * 8 + fine_x
                         y_screen_loc = y * 8 + fine_y
                         transparent_background = ((pixel & 3) == 0)
@@ -115,12 +118,13 @@ class PPU:
                         color = self.palette[0] if transparent_background else self.palette[pixel]
                         # self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
                         self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
-                        # plot pixel here draw_pixel(x_screen_loc, y_screen_loc, transparent_background ? palette[0] : palette[pixel]);
+                        # plot pixel here draw_pixel(x_screen_loc, y_screen_loc,
+                        # transparent_background ? palette[0] : palette[pixel]);
 
     def draw_sprites(self, background_transparent: bool):
         for i in range(SPR_RAM_SIZE - 4, -4, -4):
             y_position = self.spr[i]
-            if y_position == 0xFF: # 0xFF is a marker for no sprite data
+            if y_position == 0xFF:  # 0xFF is a marker for no sprite data
                 continue
             # we actually draw sprites shifted one pixel down
             background_sprite = bool((self.spr[i + 2] >> 5) & 1)
@@ -145,25 +149,27 @@ class PPU:
                     # draw the 8 pixels on this scanline
                     flip_x = bool((self.spr[i + 2] >> 6) & 1)
 
-                    x_loc = x - x_position # position within sprite
+                    x_loc = x - x_position  # position within sprite
                     if not flip_x:
                         x_loc = 7 - x_loc
 
                     bit1and0 = (((bit1s >> x_loc) & 1) << 1) | (((bit0s >> x_loc) & 1) << 0)
-                    if bit1and0 == 0: # transparent pixel... skip
+                    if bit1and0 == 0:  # transparent pixel... skip
                         continue
 
                     # this is not transparent, is it a sprite zero hit therefore?
                     # check left 8 pixel clipping is not off
-                    if (i == 0) and (not background_transparent) and (not (x < 8 and (not self.left_8_sprite_show or not self.left_8_background_show)) and self.show_background and self.show_sprites):
+                    if (i == 0) and (not background_transparent) and (not (x < 8 and (
+                            not self.left_8_sprite_show or not self.left_8_background_show))
+                                                                      and self.show_background and self.show_sprites):
                         self.status |= 0b01000000
                     # need to do this after sprite zero checking so we still count background
                     # sprites for sprite zero checks
                     if background_sprite and not background_transparent:
-                        continue # don't draw over opaque background pixels if this is backround sprite
+                        continue  # don't draw over opaque background pixels if this is backround sprite
 
                     color = bit3and2 | bit1and0
-                    color = self.read_memory(0x3F10 + color) # pull from palette
+                    color = self.read_memory(0x3F10 + color)  # pull from palette
                     self.display_buffer[x, y] = NES_PALETTE[color]
                     # draw_pixel(x, y, color)
 
@@ -171,7 +177,7 @@ class PPU:
         if address == 0x2002:
             self.addr_write_latch = False
             current = self.status
-            self.status &= 0b01111111 # clear vblank on read to $2002
+            self.status &= 0b01111111  # clear vblank on read to $2002
             return current
         elif address == 0x2004:
             return self.spr[self.spr_address]
@@ -182,19 +188,19 @@ class PPU:
             else:
                 value = self.read_memory(self.addr)
                 self.buffer2007 = self.read_memory(self.addr - 0x1000)
-            self.addr += self.address_increment # every read to $2007 there is an increment of 1 or 32
+            self.addr += self.address_increment  # every read to $2007 there is an increment of 1 or 32
             return value
         else:
             raise LookupError(f"Error: Unrecognized PPU register read {address:X}")
 
     def write_register(self, address: int, value: int):
-        if address == 0x2000: # Control1
+        if address == 0x2000:  # Control1
             self.nametable_address = (0x2000 + (value & 0b00000011) * 0x400)
             self.address_increment = 32 if (value & 0b00000100) else 1
             self.spr_pattern_table_address = (((value & 0b00001000) >> 3) * 0x1000)
             self.background_pattern_table_address = (((value & 0b00010000) >> 4) * 0x1000)
             self.generate_nmi = bool(value & 0b10000000)
-        elif address == 0x2001: # Control2
+        elif address == 0x2001:  # Control2
             self.show_background = bool(value & 0b00001000)
             self.show_sprites = bool(value & 0b00010000)
             self.left_8_background_show = bool(value & 0b00000010)
@@ -204,12 +210,12 @@ class PPU:
         elif address == 0x2004:
             self.spr[self.spr_address] = value
             self.spr_address += 1
-        elif address == 0x2005: # scroll
+        elif address == 0x2005:  # scroll
             pass
-        elif address == 0x2006: # based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
-            if not self.addr_write_latch: # first write
+        elif address == 0x2006:  # based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
+            if not self.addr_write_latch:  # first write
                 self.addr = (self.addr & 0x00FF) | ((value & 0xFF) << 8)
-            else: # second write
+            else:  # second write
                 self.addr = (self.addr & 0xFF00) | (value & 0xFF)
             self.addr_write_latch = not self.addr_write_latch
         elif address == 0x2007:
@@ -219,20 +225,20 @@ class PPU:
             raise LookupError(f"Error: Unrecognized PPU register write {address:X}")
 
     def read_memory(self, address: int) -> int:
-        address = address % 0x4000 # mirror >0x4000
-        if address < 0x2000: # pattern tables
+        address = address % 0x4000  # mirror >0x4000
+        if address < 0x2000:  # pattern tables
             return self.rom.read_cartridge(address)
-        elif address < 0x3F00: # nametables
-            address = (address - 0x2000) % 0x1000 # 3000-3EFF is a mirror
+        elif address < 0x3F00:  # nametables
+            address = (address - 0x2000) % 0x1000  # 3000-3EFF is a mirror
             if self.rom.vertical_mirroring:
                 address = address % 0x0800
-            else: # horizontal mirroring
+            else:  # horizontal mirroring
                 if (address >= 0x400) and (address < 0xC00):
                     address = address - 0x400
                 elif address >= 0xC00:
                     address = address - 0x800
             return self.nametables[address]
-        elif address < 0x4000: # palette memory
+        elif address < 0x4000:  # palette memory
             address = (address - 0x3F00) % 0x20
             if (address > 0x0F) and ((address % 0x04) == 0):
                 address = address - 0x10

@@ -34,7 +34,8 @@ def get_most_common_color(image: Image.Image) -> tuple[int, int, int]:
 
 
 class StainedGlass:
-    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType, length: int, vector: bool, animation_length: int):
+    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType,
+                 length: int, vector: bool, animation_length: int):
         self.method = method
         self.shape_type = shape_type
         self.shapes = []
@@ -47,7 +48,7 @@ class StainedGlass:
             new_size = (int(MAX_HEIGHT * aspect_ratio), MAX_HEIGHT)
             self.original.thumbnail(new_size, Image.ANTIALIAS)
             # Start the generated image with a background that is the
-            # average of all of the original's pixels in color
+            # average of all the original's pixels in color
             average_color = tuple((round(n) for n in ImageStat.Stat(self.original).mean))
             self.glass = Image.new("RGB", new_size, average_color)
             # Keep track of how far along we are, our best result so far, and
@@ -99,7 +100,7 @@ class StainedGlass:
                                      optimize=False, duration=animation_length, loop=0)
 
     def random_dimensions(self) -> Dimensions:
-        num_dimensions = 4 # ellipse or line
+        num_dimensions = 4  # ellipse or line
         if self.shape_type == ShapeType.TRIANGLE:
             num_dimensions = 6
         elif self.shape_type == ShapeType.QUADRILATERAL:
@@ -112,7 +113,8 @@ class StainedGlass:
                 dimensions.append(random.randint(0, self.original.height))
         return dimensions
 
-    def bounding_box(self, dimensions: Dimensions) -> tuple[int, int, int, int]:
+    @staticmethod
+    def bounding_box(dimensions: Dimensions) -> tuple[int, int, int, int]:
         xcoords = dimensions[::2]
         ycoords = dimensions[1::2]
         x1 = min(xcoords)
@@ -132,11 +134,8 @@ class StainedGlass:
             color = tuple((round(n) for n in ImageStat.Stat(region).mean))
         elif self.method == ColorMethod.COMMON:
             color = get_most_common_color(region)
-        else: # must be random
+        else:  # must be random
             color = tuple(random.choices(range(256), k=3))
-        #try:
-        #except ZeroDivisionError:
-        #    color = (0, 0, 0)
         original = self.glass
 
         def experiment() -> bool:
@@ -144,7 +143,7 @@ class StainedGlass:
             glass_draw = ImageDraw.Draw(new_image)
             if self.shape_type == ShapeType.ELLIPSE:
                 glass_draw.ellipse(dimensions, fill=color)
-            else: # must be triangle or quadrilateral or line
+            else:  # must be triangle or quadrilateral or line
                 glass_draw.polygon(dimensions, fill=color)
             new_difference = self.difference(new_image)
             if new_difference < self.best_difference:

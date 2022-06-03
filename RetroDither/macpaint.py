@@ -15,12 +15,13 @@
 # limitations under the License.
 from array import array
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 
 MAX_WIDTH = 576
 MAX_HEIGHT = 720
 MACBINARY_LENGTH = 128
 HEADER_LENGTH = 512
+
 
 # Convert an array of bytes where each byte is 0 or 255
 # to an array of bits where each byte that is 0 becomes a 1
@@ -45,7 +46,7 @@ def prepare(data: array, width: int, height: int) -> array:
     bits_array = array('B')
     for row in range(height):
         image_location = row * width
-        image_bits = bytes_to_bits(data[image_location:(image_location+width)])
+        image_bits = bytes_to_bits(data[image_location:(image_location + width)])
         bits_array += image_bits
         remaining_width = MAX_WIDTH - width
         white_width_bits = array('B', [0] * (remaining_width // 8))
@@ -88,7 +89,7 @@ def run_length_encode(original_data: array) -> array:
             elif not_same > 0:
                 rle_data.append(not_same - 1)
                 rle_data += data[start_pointer:(start_pointer + not_same)]
-            else: # last byte
+            else:  # last byte
                 print("same and not_same both 0")
             start_pointer += max(same + 1, not_same)
     return rle_data
@@ -97,13 +98,13 @@ def run_length_encode(original_data: array) -> array:
 def macbinary_header(outfile: str, data_size: int) -> array:
     macbinary = array('B', [0] * MACBINARY_LENGTH)
     filename = Path(outfile).stem
-    filename = filename[:63] if len(filename) > 63 else filename # limit to 63 characters maximum
-    macbinary[1] = len(filename) # file name length
-    macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman")) # file name
-    macbinary[65:69] = array("B", "PNTG".encode("mac_roman")) # file type
-    macbinary[69:73] = array("B", "MPNT".encode("mac_roman")) # file creator
-    macbinary[83:87] = array("B", data_size.to_bytes(4, byteorder='big'))# size of data fork
-    timestamp = int((datetime.now() - datetime(1904,1,1)).total_seconds()) # Mac timestamps are seconds since 1904
+    filename = filename[:63] if len(filename) > 63 else filename  # limit to 63 characters maximum
+    macbinary[1] = len(filename)  # file name length
+    macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman"))  # file name
+    macbinary[65:69] = array("B", "PNTG".encode("mac_roman"))  # file type
+    macbinary[69:73] = array("B", "MPNT".encode("mac_roman"))  # file creator
+    macbinary[83:87] = array("B", data_size.to_bytes(4, byteorder='big'))  # size of data fork
+    timestamp = int((datetime.now() - datetime(1904, 1, 1)).total_seconds())  # Mac timestamps are seconds since 1904
     macbinary[91:95] = array("B", timestamp.to_bytes(4, byteorder='big'))  # creation stamp
     macbinary[95:99] = array("B", timestamp.to_bytes(4, byteorder='big'))  # modification stamp
     return macbinary
@@ -114,9 +115,8 @@ def write_macpaint_file(data: array, out_file: str, width: int, height: int):
     bits_array = prepare(data, width, height)
     rle = run_length_encode(bits_array)
     output_array = macbinary_header(out_file, len(rle) + HEADER_LENGTH) + array('B', [0] * HEADER_LENGTH) + rle
-    output_array[MACBINARY_LENGTH + 3] = 2 # Data Fork Header Signature
-    #output_array = array('B', [0] * HEADER_LENGTH) + rle
-    #output_array[3] = 2
+    output_array[MACBINARY_LENGTH + 3] = 2  # Data Fork Header Signature
+    # output_array = array('B', [0] * HEADER_LENGTH) + rle
+    # output_array[3] = 2
     with open(out_file + ".bin", "wb") as fp:
         output_array.tofile(fp)
-

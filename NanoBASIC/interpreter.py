@@ -154,4 +154,3 @@ class Interpreter:
             case _:
                 raise Interpreter.InterpreterError(f"Unexpected boolean operator {boolean_expression.operator}.",
                                                    boolean_expression)
-
