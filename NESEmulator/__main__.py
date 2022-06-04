@@ -16,15 +16,16 @@
 import sys
 from argparse import ArgumentParser
 from NESEmulator.rom import ROM
-from NESEmulator.ppu import PPU, NES_WIDTH, NES_HEIGHT, NES_PALETTE
+from NESEmulator.ppu import PPU, NES_WIDTH, NES_HEIGHT
 from NESEmulator.cpu import CPU
 import pygame
 from timeit import default_timer as timer
 
+
 def run(rom: ROM):
     pygame.init()
     screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0, 24)
-    #screen.convert_alpha(screen)
+    # screen.convert_alpha(screen)
     ppu = PPU(rom)
     cpu = CPU(ppu, rom)
     ticks = 0
@@ -39,10 +40,10 @@ def run(rom: ROM):
             if (ppu.scanline == 240) and (ppu.cycle == 257):
                 pygame.surfarray.blit_array(screen, ppu.display_buffer)
                 pygame.display.flip()
-                end=timer()
+                end = timer()
                 if start is not None:
-                    print(end-start)
-                start=timer()
+                    print(end - start)
+                start = timer()
             if (ppu.scanline == 241) and (ppu.cycle == 2) and ppu.generate_nmi:
                 cpu.trigger_NMI()
         ticks += new_ticks
@@ -88,7 +89,6 @@ def run(rom: ROM):
                 sys.exit()
 
 
-
 if __name__ == "__main__":
     # Parse the file argument
     file_parser = ArgumentParser("NESEmulator")
@@ -96,4 +96,3 @@ if __name__ == "__main__":
     arguments = file_parser.parse_args()
     game = ROM(arguments.rom_file)
     run(game)
-
