@@ -1,0 +1,118 @@
+﻿#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+: start
+	jump main
+
+: attribution
+	0x20 # ' '
+	0x54 # 'T'
+	0x72 # 'r'
+	0x6F # 'o'
+	0x6E # 'n'
+	0x69 # 'i'
+	0x78 # 'x'
+	0x20 # ' '
+	
+:macro zero-reg-check R {
+	if R != 0 then jump init-error
+}
+
+: main
+	clear
+	
+: all-checks
+
+	
+: init-check
+#	v0 := 1 # uncomment to fail
+	zero-reg-check vf
+	zero-reg-check ve
+	zero-reg-check vd
+	zero-reg-check vc
+	zero-reg-check vb
+	zero-reg-check va
+	zero-reg-check v9
+	zero-reg-check v8
+	zero-reg-check v7
+	zero-reg-check v6
+	zero-reg-check v5
+	zero-reg-check v4
+	zero-reg-check v3
+	zero-reg-check v2
+	zero-reg-check v1
+	zero-reg-check v0
+	
+	jump all-checks-passed
+
+
+: all-checks-passed
+	v0 := 0
+	v1 := 0
+	
+	i := hex v0 # 'O'
+	sprite v0 v1 5
+	
+	v0 += 5
+	
+	i := letter-k # 'K'
+	sprite v0 v1 5
+	
+	jump finish
+	
+: all-errors
+	
+: init-error
+	v0 := 0
+	v1 := 0
+	
+	v0 := 0xE
+	i := hex v0 # 'E'
+	
+	v0 := 0
+	sprite v0 v1 5
+	
+	v0 += 5
+	
+	i := letter-r # 'R'
+	sprite v0 v1 5
+	
+	v0 += 5
+	sprite v0 v1 5
+
+
+: finish
+  v0 := key
+	jump finish
+	
+: all-data
+
+: letter-k
+ 	0x90
+ 	0xA0
+ 	0xC0
+ 	0xA0
+	0x90
+	
+: letter-r
+	0xE0
+	0x90
+	0xE0
+	0x90
+	0x90

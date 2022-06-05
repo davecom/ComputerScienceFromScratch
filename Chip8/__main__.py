@@ -21,9 +21,10 @@ from timeit import default_timer as timer
 import os
 
 
-def run(rom: bytes):
+def run(rom: bytes, name: str):
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
+    pygame.display.set_caption(f"Chip8 - {os.path.basename(name)}")
     bee_sound = pygame.mixer.Sound(os.path.dirname(os.path.realpath(__file__)) + "/bee.wav")
     currently_playing_sound = False
     vm = VM(rom)
@@ -39,12 +40,10 @@ def run(rom: bytes):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 key_name = pygame.key.name(event.key)
-                print(key_name)
                 if key_name in ALLOWED_KEYS:
                     vm.keys[ALLOWED_KEYS.index(key_name)] = True
             elif event.type == pygame.KEYUP:
                 key_name = pygame.key.name(event.key)
-                print(key_name)
                 if key_name in ALLOWED_KEYS:
                     vm.keys[ALLOWED_KEYS.index(key_name)] = False
             elif event.type == pygame.QUIT:
@@ -54,10 +53,10 @@ def run(rom: bytes):
         if vm.play_sound:
             if not currently_playing_sound:
                 bee_sound.play(-1)
+                currently_playing_sound = True
         else:
-            if currently_playing_sound:
-                currently_playing_sound = False
-                bee_sound.stop()
+            currently_playing_sound = False
+            bee_sound.stop()
 
         # Handle timing
         end = timer()
@@ -66,7 +65,6 @@ def run(rom: bytes):
         if timer_accumulator > TIMER_DELAY:
             vm.decrement_timers()
             timer_accumulator = 0
-        print(frame_time)
 
 
 if __name__ == "__main__":
@@ -76,4 +74,4 @@ if __name__ == "__main__":
     arguments = file_parser.parse_args()
     with open(arguments.rom_file, "rb") as fp:
         file_data = fp.read()
-        run(file_data)
+        run(file_data, arguments.rom_file)

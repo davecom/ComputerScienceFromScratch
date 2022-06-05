@@ -20,12 +20,13 @@ from NESEmulator.ppu import PPU, NES_WIDTH, NES_HEIGHT
 from NESEmulator.cpu import CPU
 import pygame
 from timeit import default_timer as timer
+import os
 
 
-def run(rom: ROM):
+def run(rom: ROM, name: str):
     pygame.init()
     screen = pygame.display.set_mode((NES_WIDTH, NES_HEIGHT), 0, 24)
-    # screen.convert_alpha(screen)
+    pygame.display.set_caption(f"NES Emulator - {os.path.basename(name)}")
     ppu = PPU(rom)
     cpu = CPU(ppu, rom)
     ticks = 0
@@ -95,4 +96,4 @@ if __name__ == "__main__":
     file_parser.add_argument("rom_file", help="A file containing an NES game in iNES format.")
     arguments = file_parser.parse_args()
     game = ROM(arguments.rom_file)
-    run(game)
+    run(game, arguments.rom_file)

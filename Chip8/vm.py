@@ -23,7 +23,7 @@ SCREEN_WIDTH = 64
 SCREEN_HEIGHT = 32
 SPRITE_WIDTH = 8
 RAM_SIZE = 4096
-TIMER_DELAY = 0.166667  # in seconds... about 60 hz
+TIMER_DELAY = 0.0166667  # in seconds... about 60 hz
 ALLOWED_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "a", "b", "c", "d", "e", "f"]
 WHITE = 0xFFFFFFFF
@@ -48,6 +48,7 @@ FONT_SET = [
     0xF0, 0x80, 0xF0, 0x80, 0xF0,  # E
     0xF0, 0x80, 0xF0, 0x80, 0x80   # F
 ]
+
 
 def concat_nibbles(*args: int) -> int:
     result = 0
@@ -214,9 +215,9 @@ class VM:
                         if key_name in ALLOWED_KEYS:
                             self.v[x] = ALLOWED_KEYS.index(key_name)
                             break
-            case (0xF, x, 0x1, 0x5):  # set delayTimer to v[x]
+            case (0xF, x, 0x1, 0x5):  # set delay_timer to v[x]
                 self.delay_timer = self.v[x]
-            case (0xF, x, 0x1, 0x8):  # set soundTimer to v[x]
+            case (0xF, x, 0x1, 0x8):  # set sound_timer to v[x]
                 self.sound_timer = self.v[x]
             case (0xF, x, 0x1, 0xE):  # add vx to i
                 self.i += self.v[x]
@@ -246,7 +247,7 @@ class VM:
 
     # Draw a sprite at *x*, *y* using data at *i* and with a height of *height*
     def draw_sprite(self, x: int, y: int, height: int):
-        flipped = False  # were any pixels where this was drawn?
+        flipped_black = False  # were any pixels where this was drawn flipped from white to black?
         for row in range(0, height):
             row_bits = self.ram[self.i + row]
             for col in range(0, SPRITE_WIDTH):
@@ -254,11 +255,10 @@ class VM:
                 py = y + row
                 if px >= SCREEN_WIDTH or py >= SCREEN_HEIGHT:
                     continue  # Ignore off-screen pixels
-                new_pixel = (row_bits >> (7 - col)) & 1
-                if new_pixel == 0 and (self.display_buffer[px, py] & 1) == 1:
-                    flipped = True
+                new_bit = (row_bits >> (7 - col)) & 1
+                old_bit = self.display_buffer[px, py] & 1
+                if new_bit & old_bit:  # If both are set, they will get flipped white -> black
+                    flipped_black = True
+                new_pixel = new_bit ^ old_bit  # Chip 8 draws by XORing, which flips everything
                 self.display_buffer[px, py] = WHITE if new_pixel else BLACK
-        self.v[0xF] = 1 if flipped else 0  # flipped flag
-
-
-
+        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag in register for collision detection
