@@ -178,7 +178,7 @@ class VM:
                     self.v[x] = (self.v[y] - self.v[x]) % 256
                     self.v[0xF] = 0  # indicates there was a borrow
             case (0x8, x, _, 0xE):  # v[x] << 1 v[f] = most significant bit
-                self.v[0xF] = self.v[x] & 0b10000000
+                self.v[0xF] = (self.v[x] & 0b10000000) >> 7
                 self.v[x] = (self.v[x] << 1) & 0xFF
             case (0x9, x, y, 0x0):  # conditional skip if v[x] != v[y]
                 if self.v[x] != self.v[y]:
