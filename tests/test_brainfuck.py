@@ -1,4 +1,4 @@
-# Brainfuck/tests.py
+# tests/test_brainfuck.py
 # From Fun Computer Science Projects in Python
 # Copyright 2021-2022 David Kopec
 #
@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # DESCRIPTION
-# Tries running all of the example NanoBASIC programs and checks their
+# Tries running all of the example Brainfuck programs and checks their
 # output against the expected output.
 import unittest
 import sys

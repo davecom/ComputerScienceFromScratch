@@ -1,4 +1,4 @@
-# NESEmulator/tests.py
+# tests/test_nesemulator.py
 # From Fun Computer Science Projects in Python
 # Copyright 2021-2022 David Kopec
 #
