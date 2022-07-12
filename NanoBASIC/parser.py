@@ -60,11 +60,6 @@ class Parser:
     def previous(self) -> Token:
         return self.tokens[self.token_index - 1]
 
-    def match(self, kind: TokenType) -> bool:
-        if not self.out_of_tokens and self.current.kind is kind:
-            return True
-        return False
-
     def consume(self, kind: TokenType) -> Token:
         if self.current.kind is kind:
             self.token_index += 1
@@ -235,7 +230,7 @@ class Parser:
         elif self.current.kind is TokenType.OPEN_PAREN:
             self.consume(TokenType.OPEN_PAREN)
             expression = self.parse_numeric_expression()
-            if not self.match(TokenType.CLOSE_PAREN):
+            if self.current.kind is not TokenType.CLOSE_PAREN:
                 raise Parser.ParserError("Expected matching closing parenthesis.", self.current)
             self.consume(TokenType.CLOSE_PAREN)
             return expression
