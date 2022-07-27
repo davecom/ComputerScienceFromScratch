@@ -26,8 +26,7 @@
 # is being analyzed is expected to be a part of another production rule, the
 # recursive descent parser just calls the function representing that other production rule.
 # The recursive descent functions return respective nodes when they are successful.
-from __future__ import annotations  # can delete in 3.9
-from NanoBASIC.tokenizer import Token, TokenType
+from NanoBASIC.tokenizer import Token
 from typing import cast
 from NanoBASIC.nodes import *
 
@@ -97,7 +96,7 @@ class Parser:
     # PRINT "COMMA",SEPARATED,7154
     def parse_print(self, line_id: int) -> PrintStatement:
         print_token = self.consume(TokenType.PRINT)
-        printables: list[Union[str, NumericExpression]] = []
+        printables: list[str | NumericExpression] = []
         last_col: int = print_token.col_end
         while True:  # Keep finding things to print
             if self.current.kind is TokenType.STRING:

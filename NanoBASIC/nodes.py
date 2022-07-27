@@ -19,7 +19,6 @@
 # chunks of a program for the interpreter to interpret. For example, generally
 # each statement will become a node.
 from dataclasses import dataclass
-from typing import Union
 from NanoBASIC.tokenizer import TokenType
 
 
@@ -36,7 +35,6 @@ class Node:
 # This is a little confusing because there's also the "physical"
 # line number (*line_num*), that actual count of how many lines down
 # in the file where the statement occurs
-# The column range is for debugging purposes
 @dataclass(frozen=True)
 class Statement(Node):
     line_id: int
@@ -47,61 +45,6 @@ class Statement(Node):
 @dataclass(frozen=True)
 class NumericExpression(Node):
     pass
-
-
-# Represents a LET statement, setting *name* to *expr*
-@dataclass(frozen=True)
-class LetStatement(Statement):
-    name: str
-    expr: NumericExpression
-
-
-# Represents a GOTO statement, transferring control to *line_expr*
-@dataclass(frozen=True)
-class GoToStatement(Statement):
-    line_expr: NumericExpression
-
-
-# Represents a GOSUB statement, transferring control to *line_expr*
-# Return line_id is not saved here, it will be maintained by a stack
-@dataclass(frozen=True)
-class GoSubStatement(Statement):
-    line_expr: NumericExpression
-
-
-# Represents a RETURN statement, transferring control to the line after
-# the last GOSUB statement
-@dataclass(frozen=True)
-class ReturnStatement(Statement):
-    pass
-
-
-# A PRINT statement with all the things that it is meant to print (comma separated)
-@dataclass(frozen=True)
-class PrintStatement(Statement):
-    printables: list[Union[str, NumericExpression]]
-
-
-# A boolean expression can be computed to a true or false value
-# It takes two numeric expressions, *left_expr* and *right_expr*, and compares
-# them using a boolean *operator*
-@dataclass(frozen=True)
-class BooleanExpression(Node):
-    operator: TokenType
-    left_expr: NumericExpression
-    right_expr: NumericExpression
-
-    def __repr__(self) -> str:
-        return f"{self.left_expr} {self.operator} {self.right_expr}"
-
-
-# An IF statement
-# *then_statement* is what statement will be executed if the
-# *boolean_expression* is true
-@dataclass(frozen=True)
-class IfStatement(Statement):
-    boolean_expr: BooleanExpression
-    then_statement: Statement
 
 
 # A numeric expression with two operands like +, -, *, and /
@@ -135,3 +78,58 @@ class NumberLiteral(NumericExpression):
 @dataclass(frozen=True)
 class VarRetrieve(NumericExpression):
     name: str
+
+
+# A boolean expression can be computed to a true or false value
+# It takes two numeric expressions, *left_expr* and *right_expr*, and compares
+# them using a boolean *operator*
+@dataclass(frozen=True)
+class BooleanExpression(Node):
+    operator: TokenType
+    left_expr: NumericExpression
+    right_expr: NumericExpression
+
+    def __repr__(self) -> str:
+        return f"{self.left_expr} {self.operator} {self.right_expr}"
+
+
+# Represents a LET statement, setting *name* to *expr*
+@dataclass(frozen=True)
+class LetStatement(Statement):
+    name: str
+    expr: NumericExpression
+
+
+# Represents a GOTO statement, transferring control to *line_expr*
+@dataclass(frozen=True)
+class GoToStatement(Statement):
+    line_expr: NumericExpression
+
+
+# Represents a GOSUB statement, transferring control to *line_expr*
+# Return line_id is not saved here, it will be maintained by a stack
+@dataclass(frozen=True)
+class GoSubStatement(Statement):
+    line_expr: NumericExpression
+
+
+# Represents a RETURN statement, transferring control to the line after
+# the last GOSUB statement
+@dataclass(frozen=True)
+class ReturnStatement(Statement):
+    pass
+
+
+# A PRINT statement with all the things that it is meant to print (comma separated)
+@dataclass(frozen=True)
+class PrintStatement(Statement):
+    printables: list[str | NumericExpression]
+
+
+# An IF statement
+# *then_statement* is what statement will be executed if the
+# *boolean_expression* is true
+@dataclass(frozen=True)
+class IfStatement(Statement):
+    boolean_expr: BooleanExpression
+    then_statement: Statement

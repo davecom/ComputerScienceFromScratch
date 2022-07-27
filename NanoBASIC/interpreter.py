@@ -17,13 +17,11 @@
 # DESCRIPTION
 # The interpreter is responsible for processing the nodes that come
 # from the parser. In many interpreters, this structure will be represented as
-# an abstract syntax tree. In NanoBASIC, the data structure that the interpreter receives is
+# an abstract syntax tree. In NanoBASIC, the root of the AST is
 # just an array of statement nodes; each node is something of a tree in itself. The interpreter
 # translates the meaning of each statement node into Python code that can be run "live."
-from __future__ import annotations  # can delete in 3.9
 from NanoBASIC.nodes import *
 from collections import deque
-from typing import Optional
 
 
 class Interpreter:
@@ -48,7 +46,7 @@ class Interpreter:
 
     # Returns the index of a *line_id* using a binary search, or None if not found
     # Assumes the statements list is sorted
-    def find_line_index(self, line_id: int) -> Optional[int]:
+    def find_line_index(self, line_id: int) -> int | None:
         low: int = 0
         high: int = len(self.statements) - 1
         while low <= high:

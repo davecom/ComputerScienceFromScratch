@@ -21,9 +21,8 @@
 # tokens in a programming language are specified by a grammar. We have a grammar
 # file in the repository as well. It is grammar.txt. Please keep it open as you
 # read tokenizer.py and parser.py.
-from __future__ import annotations  # can delete in 3.9
 from enum import Enum
-from typing import Optional, TextIO
+from typing import TextIO
 import re
 from dataclasses import dataclass
 
@@ -53,7 +52,7 @@ class TokenType(Enum):
     CLOSE_PAREN = (r'\)', False)
     VARIABLE = (r'[A-Za-z_]+', True)
     NUMBER = (r'-?[0-9]+', True)
-    STRING = (r'"[a-zA-Z0-9 ]*"', True)
+    STRING = (r'".*"', True)
 
     def __init__(self, pattern: str, has_associated_value: bool):
         self.pattern = pattern
@@ -77,7 +76,7 @@ def tokenize(text_file: TextIO) -> list[Token]:
     for line_num, line in enumerate(text_file.readlines(), start=1):
         col_start: int = 1
         while len(line) > 0:
-            found: Optional[re.Match] = None
+            found: re.Match | None = None
             for possibility in TokenType:
                 # Try each pattern on the beginning of the text case-insensitive
                 # if it's found, store the match in *found*
