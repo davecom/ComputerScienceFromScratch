@@ -30,7 +30,7 @@ def prepare(file_name: str) -> Image.Image:
                 new_size = (MAX_WIDTH, int(image.height * (MAX_WIDTH / image.width)))
             else:
                 new_size = (int(image.width * (MAX_HEIGHT / image.height)), MAX_HEIGHT)
-            image.thumbnail(new_size, Image.ANTIALIAS)
+            image.thumbnail(new_size, Image.Resampling.LANCZOS)
         # Convert to grayscale
         return image.convert("L")
 
