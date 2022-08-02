@@ -36,7 +36,6 @@ def prepare(file_name: str) -> Image.Image:
 
 
 if __name__ == "__main__":
-    # Parse the file argument
     argument_parser = ArgumentParser("RetroDither")
     argument_parser.add_argument("image_file", help="The input image file.")
     argument_parser.add_argument("output_file", help="The resulting MacPaint file.")

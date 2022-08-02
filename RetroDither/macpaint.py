@@ -40,6 +40,7 @@ def bytes_to_bits(original: array) -> array:
     return bits_array
 
 
+# Convert the array of bytes into bits using the helper function
 # Pad any missing spots with white bits due to the original
 # image having a smaller size than 576x720
 def prepare(data: array, width: int, height: int) -> array:
@@ -56,42 +57,34 @@ def prepare(data: array, width: int, height: int) -> array:
     bits_array += white_height_bits
     return bits_array
 
-
-# https://en.wikipedia.org/wiki/PackBitsma
+# https://en.wikipedia.org/wiki/PackBits
 # MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH)
 # In other words there are line boundaries
 def run_length_encode(original_data: array) -> array:
+    # Find how many of the same bytes are in a row from *start*
+    def take_same(source: array, start: int) -> int:
+        count = 0
+        while start + count + 1 < len(source) and source[start + count] == source[start + count + 1]:
+            count += 1
+        return count + 1 if count > 0 else 0
+
     rle_data = array('B')
-    # Divide data into MAX_WIDTH size boundaries
+    # Divide data into MAX_WIDTH size boundaries by line
     for line_start in range(0, len(original_data), MAX_WIDTH // 8):
         data = original_data[line_start:(line_start + (MAX_WIDTH // 8))]
-        start_pointer = 0
-        reading_pointer = 0
-        while start_pointer < len(data):
-            reading_pointer = start_pointer
-            same = 0
+        index = 0
+        while index < len(data):
             not_same = 0
-            while reading_pointer < len(data):
-                if (reading_pointer + 1) < len(data) and data[reading_pointer] == data[reading_pointer + 1]:
-                    if not_same > 0:
-                        break
-                    same += 1
-                elif same > 0:
-                    break
-                else:
-                    not_same += 1
-                if same >= 127 or not_same >= 127:
-                    break
-                reading_pointer += 1
-            if same > 0:
-                rle_data.append(255 - same + 1)
-                rle_data.append(data[start_pointer])
-            elif not_same > 0:
+            while ((same := take_same(data, index + not_same)) == 0) and (index + not_same < len(data)):
+                not_same += 1
+            if not_same > 0:
                 rle_data.append(not_same - 1)
-                rle_data += data[start_pointer:(start_pointer + not_same)]
-            else:  # last byte
-                print("same and not_same both 0")
-            start_pointer += max(same + 1, not_same)
+                rle_data += data[index:index + not_same]
+                index += not_same
+            if same > 0:
+                rle_data.append(255 - same + 2)
+                rle_data.append(data[index])
+                index += same
     return rle_data
 
 
@@ -124,3 +117,37 @@ def write_macpaint_file(data: array, out_file: str, width: int, height: int):
         output_array += array('B', [0] * padding)
     with open(out_file + ".bin", "wb") as fp:
         output_array.tofile(fp)
+
+# Alternative version of run_length_encode that doesn't use the helper function
+# # https://en.wikipedia.org/wiki/PackBits
+# # MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH)
+# # In other words there are line boundaries
+# def run_length_encode(original_data: array) -> array:
+#     rle_data = array('B')
+#     # Divide data into MAX_WIDTH size boundaries
+#     for line_start in range(0, len(original_data), MAX_WIDTH // 8):
+#         data = original_data[line_start:(line_start + (MAX_WIDTH // 8))]
+#         start_pointer = 0
+#         reading_pointer = 0
+#         while start_pointer < len(data):
+#             reading_pointer = start_pointer
+#             same = 0
+#             not_same = 0
+#             while reading_pointer < len(data):
+#                 if (reading_pointer + 1) < len(data) and data[reading_pointer] == data[reading_pointer + 1]:
+#                     if not_same > 0:
+#                         break
+#                     same += 1
+#                 elif same > 0:
+#                     break
+#                 else:
+#                     not_same += 1
+#                 reading_pointer += 1
+#             if same > 0:
+#                 rle_data.append(255 - same + 1)
+#                 rle_data.append(data[start_pointer])
+#             elif not_same > 0:
+#                 rle_data.append(not_same - 1)
+#                 rle_data += data[start_pointer:(start_pointer + not_same)]
+#             start_pointer += max(same + 1, not_same)
+#     return rle_data
