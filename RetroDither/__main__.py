@@ -15,7 +15,7 @@
 # limitations under the License.
 from PIL import Image
 from argparse import ArgumentParser
-from RetroDither.dither import atkinson_dither
+from RetroDither.dither import dither
 from RetroDither.macpaint import MAX_WIDTH, MAX_HEIGHT, write_macpaint_file
 
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                                  help='Create an output gif as well.')
     arguments = argument_parser.parse_args()
     original = prepare(arguments.image_file)
-    dithered_data = atkinson_dither(original)
+    dithered_data = dither(original)
     if arguments.gif:
         out_image = Image.frombytes('L', original.size, dithered_data.tobytes())
         out_image.save(arguments.output_file + ".gif")

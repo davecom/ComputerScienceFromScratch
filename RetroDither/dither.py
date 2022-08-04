@@ -15,36 +15,46 @@
 # limitations under the License.
 from PIL import Image
 from array import array
+from typing import NamedTuple
 
 THRESHOLD = 127
 
 
+class PatternPart(NamedTuple):
+    dx: int
+    dy: int
+    numerator: int
+    denominator: int
+
+
+ATKINSON = [PatternPart(1, 0, 1, 8), PatternPart(2, 0, 1, 8), PatternPart(-1, 1, 1, 8),
+            PatternPart(0, 1, 1, 8), PatternPart(1, 1, 1, 8), PatternPart(0, 2, 1, 8)]
+
+
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)
 # Returns an array of dithered pixels (255 for white, 0 for black)
-def atkinson_dither(image: Image.Image) -> array:
-    # Add *value* to the pixel at (*c*, *r*) in *image*
-    def add_to_pixel(c: int, r: int, value: int):
-        if c < 0 or c >= image.width or r >= image.height:
-            return
-        image.putpixel((c, r), image.getpixel((c, r)) + value)
+def dither(image: Image.Image) -> array:
+
+    def diffuse(x: int, y: int, error: int, pattern: list[PatternPart]):
+        for part in pattern:
+            col = x + part.dx
+            row = y + part.dy
+            if col < 0 or col >= image.width or row >= image.height:
+                continue
+            # Add *error_part* to the pixel at (*c*, *r*) in *image*
+            error_part = (error * part.numerator) // part.denominator
+            image.putpixel((col, row), image.getpixel((col, row)) + error_part)
 
     result = array('B', [0] * (image.width * image.height))
     for y in range(image.height):
         for x in range(image.width):
             old_pixel = image.getpixel((x, y))
-            # Every new pixel is either solid black or solid white
+            # Every new pixel is either solid white or solid black
             # since this is all that the original Macintosh supported
             new_pixel = 255 if old_pixel > THRESHOLD else 0
             result[y * image.width + x] = new_pixel
-            # Error is an eighth of the difference between
-            # the original pixel and how it ended up dithered
-            error = (old_pixel - new_pixel) // 8
+            difference = (old_pixel - new_pixel)
             # Disperse error amongst nearby upcoming pixels
-            add_to_pixel(x + 1, y, error)
-            add_to_pixel(x + 2, y, error)
-            add_to_pixel(x - 1, y + 1, error)
-            add_to_pixel(x, y + 1, error)
-            add_to_pixel(x + 1, y + 1, error)
-            add_to_pixel(x, y + 2, error)
+            diffuse(x, y, difference, ATKINSON)
 
     return result
