@@ -57,6 +57,7 @@ def prepare(data: array, width: int, height: int) -> array:
     bits_array += white_height_bits
     return bits_array
 
+
 # https://en.wikipedia.org/wiki/PackBits
 # MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH)
 # In other words there are line boundaries
@@ -82,7 +83,7 @@ def run_length_encode(original_data: array) -> array:
                 rle_data += data[index:index + not_same]
                 index += not_same
             if same > 0:
-                rle_data.append(255 - same + 2)
+                rle_data.append(257 - same)
                 rle_data.append(data[index])
                 index += same
     return rle_data

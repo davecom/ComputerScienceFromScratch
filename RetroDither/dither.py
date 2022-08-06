@@ -21,8 +21,8 @@ THRESHOLD = 127
 
 
 class PatternPart(NamedTuple):
-    dx: int
-    dy: int
+    dc: int  # change in column
+    dr: int  # change in row
     numerator: int
     denominator: int
 
@@ -34,14 +34,14 @@ ATKINSON = [PatternPart(1, 0, 1, 8), PatternPart(2, 0, 1, 8), PatternPart(-1, 1,
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)
 # Returns an array of dithered pixels (255 for white, 0 for black)
 def dither(image: Image.Image) -> array:
-
-    def diffuse(x: int, y: int, error: int, pattern: list[PatternPart]):
+    # Distribute error amongst nearby pixels
+    def diffuse(c: int, r: int, error: int, pattern: list[PatternPart]):
         for part in pattern:
-            col = x + part.dx
-            row = y + part.dy
+            col = c + part.dc
+            row = r + part.dr
             if col < 0 or col >= image.width or row >= image.height:
                 continue
-            # Add *error_part* to the pixel at (*c*, *r*) in *image*
+            # Add *error_part* to the pixel at (*col*, *row*) in *image*
             error_part = (error * part.numerator) // part.denominator
             image.putpixel((col, row), image.getpixel((col, row)) + error_part)
 
