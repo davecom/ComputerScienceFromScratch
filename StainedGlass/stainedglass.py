@@ -124,8 +124,6 @@ class StainedGlass:
                 return True
             return False
 
-        # print(coordinates, rand_color, new_difference)
-
         if experiment():
             # Try expanding every direction, keep expanding in any directions that are better
             for index in range(len(coordinates)):

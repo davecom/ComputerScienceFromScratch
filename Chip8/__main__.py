@@ -21,14 +21,16 @@ from timeit import default_timer as timer
 import os
 
 
-def run(rom: bytes, name: str):
+def run(program_data: bytes, name: str):
+    # Startup Pygame, create the window, and load the sound
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
     pygame.display.set_caption(f"Chip8 - {os.path.basename(name)}")
     bee_sound = pygame.mixer.Sound(os.path.dirname(os.path.realpath(__file__)) + "/bee.wav")
     currently_playing_sound = False
-    vm = VM(rom)
-    timer_accumulator = 0.0
+    vm = VM(program_data) # Load the virtual machine with the program data
+    timer_accumulator = 0.0 # Used to limit the timer to 60 Hz
+    # Main virtual machine loop
     while True:
         start = timer()
         vm.step()

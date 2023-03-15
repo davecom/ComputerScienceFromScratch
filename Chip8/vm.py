@@ -19,15 +19,16 @@ import numpy as np
 import pygame
 import sys
 
+
+RAM_SIZE = 4096  # in bytes, aka 4 kilobytes
 SCREEN_WIDTH = 64
 SCREEN_HEIGHT = 32
 SPRITE_WIDTH = 8
-RAM_SIZE = 4096
+WHITE = 0xFFFFFFFF
+BLACK = 0
 TIMER_DELAY = 0.0166667  # in seconds... about 60 hz
 ALLOWED_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "a", "b", "c", "d", "e", "f"]
-WHITE = 0xFFFFFFFF
-BLACK = 0
 
 # The font set, hardcoded
 FONT_SET = [
@@ -58,38 +59,63 @@ def concat_nibbles(*args: int) -> int:
 
 
 class VM:
-    def __init__(self, rom_data: bytes):
+    def __init__(self, program_data: bytes):
         # Initialized registers & memory constructs
-        # General Purpose Regisers - CHIP-8 has 16 of these registers
+        # General Purpose Registers - CHIP-8 has 16 of these registers
         self.v = array('B', [0] * 16)
         # Index Register
         self.i = 0
         # Program Counter
-        # starts at 0x200 because addresses below that are used for
-        # special memory for the emulator itself - usually a font
+        # starts at 0x200 because addresses below that were
+        # used for the VM itself in the original CHIP-8 machines
         self.pc = 0x200
         # Memory - the standard 4k on the original CHIP-8 machines
         self.ram = array('B', [0] * RAM_SIZE)
-        # load the fontset into the first 80 bytes
+        # load the font set into the first 80 bytes
         self.ram[0:len(FONT_SET)] = array('B', FONT_SET)
-        # copy program (rom) into ram starting at byte 512 by convention
-        self.ram[512:(512 + len(rom_data))] = array('B', rom_data)
+        # copy program into ram starting at byte 512 by convention
+        self.ram[512:(512 + len(program_data))] = array('B', program_data)
         # Stack - in real hardware this is typically limited to
         # 12 or 16 PC addresses for jumps, but since we're on modern hardware,
         # ours can just be unlimited and expand/contract as needed
         self.stack = []
-        # Graphics buffer for the screen - typically 64 x 32
+        # Graphics buffer for the screen - 64 x 32 pixels
         self.display_buffer = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT), dtype=np.uint32)
         self.needs_redraw = False
-        # Timers - really simple registers that count down to 0 when timing needed
+        # Timers - really simple registers that count down to 0 at 60 hertz
         self.delay_timer = 0
         self.sound_timer = 0
-        # These hold the status of whether the keys are down - CHIP-8 has 16 keys
+        # These hold the status of whether the keys are down
+        # CHIP-8 has 16 keys
         self.keys = [False] * 16
+
+    def decrement_timers(self):
+        if self.delay_timer > 0:
+            self.delay_timer -= 1
+        if self.sound_timer > 0:
+            self.sound_timer -= 1
 
     @property
     def play_sound(self) -> bool:
         return self.sound_timer > 0
+
+    # Draw a sprite at *x*, *y* using data at *i* and with a height of *height*
+    def draw_sprite(self, x: int, y: int, height: int):
+        flipped_black = False  # were any pixels where this was drawn flipped from white to black?
+        for row in range(0, height):
+            row_bits = self.ram[self.i + row]
+            for col in range(0, SPRITE_WIDTH):
+                px = x + col
+                py = y + row
+                if px >= SCREEN_WIDTH or py >= SCREEN_HEIGHT:
+                    continue  # Ignore off-screen pixels
+                new_bit = (row_bits >> (7 - col)) & 1
+                old_bit = self.display_buffer[px, py] & 1
+                if new_bit & old_bit:  # If both are set, they will get flipped white -> black
+                    flipped_black = True
+                new_pixel = new_bit ^ old_bit  # Chip 8 draws by XORing, which flips everything
+                self.display_buffer[px, py] = WHITE if new_pixel else BLACK
+        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag in register for collision detection
 
     def step(self):
         # we look at the opcode in terms of its nibbles (4 bit pieces)
@@ -202,7 +228,7 @@ class VM:
                 if not self.keys[self.v[x]]:
                     self.pc += 4
                     jumped = True
-            case (0xF, x, 0x0, 0x7):  # set v[x] to delayTimer
+            case (0xF, x, 0x0, 0x7):  # set v[x] to delay_timer
                 self.v[x] = self.delay_timer
             case (0xF, x, 0x0, 0xA):  # wait until next key then store in v[x]
                 # wait here for the next key then continue
@@ -238,27 +264,3 @@ class VM:
 
         if not jumped:
             self.pc += 2  # increment program counter
-
-    def decrement_timers(self):
-        if self.delay_timer > 0:
-            self.delay_timer -= 1
-        if self.sound_timer > 0:
-            self.sound_timer -= 1
-
-    # Draw a sprite at *x*, *y* using data at *i* and with a height of *height*
-    def draw_sprite(self, x: int, y: int, height: int):
-        flipped_black = False  # were any pixels where this was drawn flipped from white to black?
-        for row in range(0, height):
-            row_bits = self.ram[self.i + row]
-            for col in range(0, SPRITE_WIDTH):
-                px = x + col
-                py = y + row
-                if px >= SCREEN_WIDTH or py >= SCREEN_HEIGHT:
-                    continue  # Ignore off-screen pixels
-                new_bit = (row_bits >> (7 - col)) & 1
-                old_bit = self.display_buffer[px, py] & 1
-                if new_bit & old_bit:  # If both are set, they will get flipped white -> black
-                    flipped_black = True
-                new_pixel = new_bit ^ old_bit  # Chip 8 draws by XORing, which flips everything
-                self.display_buffer[px, py] = WHITE if new_pixel else BLACK
-        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag in register for collision detection
