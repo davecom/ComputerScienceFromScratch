@@ -26,7 +26,8 @@ SCREEN_HEIGHT = 32
 SPRITE_WIDTH = 8
 WHITE = 0xFFFFFFFF
 BLACK = 0
-TIMER_DELAY = 0.0166667  # in seconds... about 60 hz
+TIMER_DELAY = 1/60  # in seconds... about 60 hz
+FRAME_TIME_EXPECTED = 1/500 # for limiting VM speed
 ALLOWED_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "a", "b", "c", "d", "e", "f"]
 

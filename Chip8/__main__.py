@@ -15,7 +15,7 @@
 # limitations under the License.
 import sys
 from argparse import ArgumentParser
-from Chip8.vm import VM, SCREEN_WIDTH, SCREEN_HEIGHT, TIMER_DELAY, ALLOWED_KEYS
+from Chip8.vm import VM, SCREEN_WIDTH, SCREEN_HEIGHT, TIMER_DELAY, FRAME_TIME_EXPECTED, ALLOWED_KEYS
 import pygame
 from timeit import default_timer as timer
 import os
@@ -32,7 +32,7 @@ def run(program_data: bytes, name: str):
     timer_accumulator = 0.0 # Used to limit the timer to 60 Hz
     # Main virtual machine loop
     while True:
-        start = timer()
+        frame_start = timer()
         vm.step()
         if vm.needs_redraw:
             pygame.surfarray.blit_array(screen, vm.display_buffer)
@@ -61,12 +61,18 @@ def run(program_data: bytes, name: str):
             bee_sound.stop()
 
         # Handle timing
-        end = timer()
-        frame_time = end - start
+        frame_end = timer()
+        frame_time = frame_end - frame_start # time it took for this iteration in seconds
         timer_accumulator += frame_time
+        # Every 1/60 of a second decrement the timers
         if timer_accumulator > TIMER_DELAY:
             vm.decrement_timers()
             timer_accumulator = 0
+        # Limit the speed of the entire machine to 500 "frames" per second
+        if frame_time < FRAME_TIME_EXPECTED:
+            difference = FRAME_TIME_EXPECTED - frame_time
+            pygame.time.delay(int(difference * 1000))
+            timer_accumulator += difference
 
 
 if __name__ == "__main__":
