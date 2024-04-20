@@ -83,7 +83,7 @@ class PPU:
 
     def draw_background(self):
         attribute_table_address = self.nametable_address + 0x3C0
-        # 30 tiles in width and 32 tiles in height
+        # 32 tiles in width and 30 tiles in height
         for y in range(30):
             for x in range(32):
                 tile_address = self.nametable_address + y * 0x20 + x
@@ -116,17 +116,13 @@ class PPU:
                         transparent_background = ((pixel & 3) == 0)
                         # if the background is transparent, we use the first color in the palette
                         color = self.palette[0] if transparent_background else self.palette[pixel]
-                        # self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
                         self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
-                        # plot pixel here draw_pixel(x_screen_loc, y_screen_loc,
-                        # transparent_background ? palette[0] : palette[pixel]);
 
     def draw_sprites(self, background_transparent: bool):
         for i in range(SPR_RAM_SIZE - 4, -4, -4):
             y_position = self.spr[i]
             if y_position == 0xFF:  # 0xFF is a marker for no sprite data
                 continue
-            # we actually draw sprites shifted one pixel down
             background_sprite = bool((self.spr[i + 2] >> 5) & 1)
             x_position = self.spr[i + 3]
 
@@ -140,15 +136,15 @@ class PPU:
                     sprite_line = y - y_position
                     if flip_y:
                         sprite_line = 7 - sprite_line
+
                     index = self.spr[i + 1]
                     bit0s_address = self.spr_pattern_table_address + (index * 16) + sprite_line
                     bit1s_address = self.spr_pattern_table_address + (index * 16) + sprite_line + 8
                     bit0s = self.read_memory(bit0s_address)
                     bit1s = self.read_memory(bit1s_address)
                     bit3and2 = ((self.spr[i + 2]) & 3) << 2
-                    # draw the 8 pixels on this scanline
-                    flip_x = bool((self.spr[i + 2] >> 6) & 1)
 
+                    flip_x = bool((self.spr[i + 2] >> 6) & 1)
                     x_loc = x - x_position  # position within sprite
                     if not flip_x:
                         x_loc = 7 - x_loc
@@ -166,12 +162,11 @@ class PPU:
                     # need to do this after sprite zero checking so we still count background
                     # sprites for sprite zero checks
                     if background_sprite and not background_transparent:
-                        continue  # don't draw over opaque background pixels if this is backround sprite
+                        continue  # don't draw over opaque background pixels if this is background sprite
 
                     color = bit3and2 | bit1and0
                     color = self.read_memory(0x3F10 + color)  # pull from palette
                     self.display_buffer[x, y] = NES_PALETTE[color]
-                    # draw_pixel(x, y, color)
 
     def read_register(self, address: int) -> int:
         if address == 0x2002:

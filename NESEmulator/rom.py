@@ -51,7 +51,7 @@ class ROM:
             # Read PRG_ROM and CHR_ROM, these are in multiples of 16K and 8K respectively
             self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE * self.header.prg_rom_size)
             self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE * self.header.chr_rom_size)
-            self.prg_ram = array('B', [0] * PRG_RAM_SIZE)  # sprite ram
+            self.prg_ram = array('B', [0] * PRG_RAM_SIZE)  # ram
 
     def read_mapper0(self, address: int) -> int:
         if address < 0x2000:

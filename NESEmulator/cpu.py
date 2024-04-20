@@ -777,7 +777,7 @@ class CPU:
         # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
         if address < 0x2000:  # main ram 2 KB goes up to 0x800
             return self.ram[address % 0x800]  # mirrors for next 6 KB
-        elif address < 0x3FFF:  # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
+        elif address < 0x4000:  # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
             temp = ((address % 8) | 0x2000)  # get data from ppu register
             return self.ppu.read_register(temp)
         elif address == 0x4016:  # Joypad 1 status
