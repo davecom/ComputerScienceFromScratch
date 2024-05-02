@@ -14,18 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from math import dist
 from typing import Self
+import numpy as np
 
 
 @dataclass
 class Digit:
     kind: str
-    pixels: list[int]
+    pixels: np.ndarray
 
     @classmethod
     def from_string_data(cls, data: list[str]) -> Self:
-        return cls(kind=data[64], pixels=[int(x) for x in data[:64]])
+        return cls(kind=data[64],
+                   pixels=np.array(data[:64], dtype=np.uint32))
 
     def distance(self, other: Self) -> float:
-        return dist(self.pixels, other.pixels)
+        tmp = self.pixels - other.pixels
+        return np.sqrt(np.dot(tmp.T, tmp))

@@ -16,6 +16,7 @@
 import csv
 from typing import Protocol, Self
 from pathlib import Path
+from collections.abc import Iterable
 
 
 class DataPoint(Protocol):
@@ -56,10 +57,10 @@ class KNN[DP: DataPoint]:
                 kinds[neighbor.kind] += 1
             else:
                 kinds[neighbor.kind] = 1
-        return max(kinds, key=kinds.get)
+        return max(kinds, key=kinds.get)  # type: ignore
 
     # Predict a property of a data point based on the k nearest neighbors
     # Find the average of that property from the neighbors and return it
-    def predict(self, k: int, data_point: DP, property_name: str) -> float:
+    def predict(self, k: int, data_point: DP, property_name: str) -> float | Iterable:
         neighbors = self.nearest(k, data_point)
         return sum([getattr(neighbor, property_name) for neighbor in neighbors]) / len(neighbors)
