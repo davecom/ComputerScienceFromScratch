@@ -5,13 +5,13 @@ Source for the book Fun Computer Science Projects in Python by [David Kopec](htt
 
 ## Authorship and License
 
-The code in this repository is Copyright 2022 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. 
+The code in this repository is Copyright 2024 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. Please read the license for details. 
 
 ## Running and Testing Each Project
 
-The following directions assume you are in the root directory of the repository in a terminal and that your Python command is `python` (on some systems it is `python3`). You need Python 3.9+ installed.
+The following directions assume you are in the root directory of the repository in a terminal and that your Python command is `python` (on some systems it is `python3`). The code is written against Python 3.12, although most of it will run with Python 3.9+.
 
-### Brainfuck
+### Brainfuck (Chapter 1)
 
 A simple [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) interpreter.
 
@@ -31,27 +31,7 @@ For example:
 
 `python -m tests.test_brainfuck`
 
-### Chip8
-
-A Chip8 virtual machine.
-
-#### Requirements
-
-- PyGame
-
-#### Running
-
-`python -m Chip8 <your_file_name>`
-
-For example:
-
-`python -m Chip8 Chip8/Games/tetris.chip`
-
-#### Testing
-
-`python -m tests.test_chip8`
-
-### NanoBASIC
+### NanoBASIC (Chapter 2)
 
 An interpreter for a very simple dialect of BASIC based on [Tiny BASIC](https://en.wikipedia.org/wiki/Tiny_BASIC).
 
@@ -71,28 +51,7 @@ For example:
 
 `python -m tests.test_nanobasic`
 
-### NESEmulator
-
-A simple [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) emulator that can play some basic public domain games.
-
-#### Requirements
-
-- PyGame
-- NumPy
-
-#### Running
-
-`python -m NESEmulator <your_file_name>`
-
-For example:
-
-`python -m NESEmulator NESEmulator/Games/LanMaster.nes`
-
-#### Testing
-
-`python -m tests.test_nesemulator`
-
-### RetroDither
+### RetroDither (Chapter 3)
 
 Dithers images into 1 bit black & white and exports them to MacPaint format.
 
@@ -112,7 +71,7 @@ Additional options:
 
 `-g` output a .gif format version as well
 
-### StainedGlass
+### StainedGlass (Chapter 4)
 
 Computationally draws abstract approximations of images using vector shapes.
 
@@ -148,3 +107,69 @@ Additional options:
 
 `-a ANIMATE, --animate ANIMATE` If a number greater than 0 is provided, will create an animated GIF with the number of milliseconds per frame
                         provided.
+
+### Chip8 (Chapter 5)
+
+A Chip8 virtual machine.
+
+#### Requirements
+
+- PyGame
+- NumPy
+
+#### Running
+
+`python -m Chip8 <your_file_name>`
+
+For example:
+
+`python -m Chip8 Chip8/Games/tetris.chip`
+
+#### Testing
+
+`python -m tests.test_chip8`
+
+### NESEmulator (Chapter 6)
+
+A simple [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) emulator that can play some basic public domain games.
+
+#### Requirements
+
+- PyGame
+- NumPy
+
+#### Running
+
+`python -m NESEmulator <your_file_name>`
+
+For example:
+
+`python -m NESEmulator NESEmulator/Games/LanMaster.nes`
+
+"a" is Select, "s" is Start, "arrow keys" are the D-pad, "z" is B, and "x" is A.
+
+#### Testing
+
+`python -m tests.test_nesemulator`
+
+### KNN (Chapter 7)
+
+A handwritten digit recognizer using the K-nearest neighbors algorithm.
+
+#### Requirements
+
+- PyGame
+- NumPy
+
+#### Running
+
+`python -m KNN`
+
+Then use the key commands "c" to classify, "p" to predict, and "e" to erase.
+
+#### Testing
+
+`python -m tests.test_knn`
+
+## Type Hints
+The code in this repository uses the latest type hinting features in Python 3.12. If you are using an older version of Python, you may need to remove some of the type hints to run the code. All the type hints in the source code were checked using [Pyright](https://github.com/microsoft/pyright).

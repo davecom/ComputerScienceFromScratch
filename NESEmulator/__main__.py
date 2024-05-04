@@ -1,6 +1,6 @@
 # NESEmulator/__main__.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021-2022 David Kopec
+# Copyright 2024 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

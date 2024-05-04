@@ -1,6 +1,6 @@
 # StainedGlass/stainedglass.py
 # From Fun Computer Science Projects in Python
-# Copyright 2021-2022 David Kopec
+# Copyright 2024 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ MAX_HEIGHT = 256
 
 def get_most_common_color(image: Image.Image) -> tuple[int, int, int]:
     colors = image.getcolors(image.width * image.height)
-    return max(colors, key=lambda item: item[0])[1]
+    return max(colors, key=lambda item: item[0])[1]  # type: ignore
 
 
 class StainedGlass:
@@ -45,7 +45,7 @@ class StainedGlass:
             width, height = self.original.size
             aspect_ratio = width / height
             new_size = (int(MAX_HEIGHT * aspect_ratio), MAX_HEIGHT)
-            self.original.thumbnail(new_size, Image.ANTIALIAS)
+            self.original.thumbnail(new_size, Image.Resampling.LANCZOS)
             # Start the generated image with a background that is the
             # average of all the original's pixels in color
             average_color = tuple((round(n) for n in ImageStat.Stat(self.original).mean))
@@ -114,7 +114,7 @@ class StainedGlass:
             new_image = original.copy()
             glass_draw = ImageDraw.Draw(new_image)
             if self.shape_type == ShapeType.ELLIPSE:
-                glass_draw.ellipse(coordinates, fill=color)
+                glass_draw.ellipse(self.bounding_box(coordinates), fill=color)
             else:  # must be triangle or quadrilateral or line
                 glass_draw.polygon(coordinates, fill=color)
             new_difference = self.difference(new_image)
@@ -143,28 +143,26 @@ class StainedGlass:
         output_size = (int(original_width * ratio), int(original_height * ratio))
         output_image = Image.new("RGB", output_size, average_color)
         output_draw = ImageDraw.Draw(output_image)
-        if vector:
-            svg = SVG(*output_size, average_color)
-        if animation_length > 0:
-            animation_frames = []
+        svg = SVG(*output_size, average_color) if vector else None
+        animation_frames = [] if animation_length > 0 else None
         for coordinate_list, color in self.shapes:
             coordinates = [int(x * ratio) for x in coordinate_list]
             if self.shape_type == ShapeType.ELLIPSE:
-                output_draw.ellipse(coordinates, fill=color)
-                if vector:
-                    svg.draw_ellipse(*coordinates, color)
+                output_draw.ellipse(self.bounding_box(coordinates), fill=color)
+                if svg:
+                    svg.draw_ellipse(*coordinates, color)  # type: ignore
             else:  # must be triangle or quadrilateral or line
-                if vector:
+                output_draw.polygon(coordinates, fill=color)
+                if svg:
                     if self.shape_type == ShapeType.LINE:
-                        svg.draw_line(*coordinates, color)
+                        svg.draw_line(*coordinates, color)  # type: ignore
                     else:
                         svg.draw_polygon(coordinates, color)
-                output_draw.polygon(coordinates, fill=color)
-            if animation_length > 0:
+            if animation_frames is not None:
                 animation_frames.append(output_image.copy())
         output_image.save(output_file)
-        if vector:
+        if svg:
             svg.write(output_file + ".svg")
-        if animation_length > 0:
+        if animation_frames is not None:
             animation_frames[0].save(output_file + ".gif", save_all=True, append_images=animation_frames[1:],
-                                     optimize=False, duration=animation_length, loop=0)
+                                     optimize=False, duration=animation_length, loop=0, transparency=0, disposal=2)
