@@ -15,6 +15,7 @@
 # limitations under the License.
 import csv
 from typing import Protocol, Self
+from collections import Counter
 import numpy as np
 
 
@@ -44,19 +45,13 @@ class KNN[DP: DataPoint]:
 
     # Find the k nearest neighbors of a given data point based on the distance method
     def nearest(self, k: int, data_point: DP) -> list[DP]:
-        return sorted(self.data_points, key=lambda other: data_point.distance(other))[:k]
+        return sorted(self.data_points, key=data_point.distance)[:k]
 
     # Classify a data point based on the k nearest neighbors
     # Choose the kind with the most neighbors and return it
     def classify(self, k: int, data_point: DP) -> str:
         neighbors = self.nearest(k, data_point)
-        kinds = {}
-        for neighbor in neighbors:
-            if neighbor.kind in kinds:
-                kinds[neighbor.kind] += 1
-            else:
-                kinds[neighbor.kind] = 1
-        return max(kinds, key=kinds.get)  # type: ignore
+        return Counter(neighbor.kind for neighbor in neighbors).most_common(1)[0][0]
 
     # Predict a property of a data point based on the k nearest neighbors
     # Find the average of that property from the neighbors and return it
