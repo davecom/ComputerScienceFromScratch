@@ -14,12 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+from KNN.knn import DataPoint
 from typing import Self
 import numpy as np
 
 
 @dataclass
-class Digit:
+class Digit(DataPoint):
     kind: str
     pixels: np.ndarray
 

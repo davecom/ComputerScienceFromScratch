@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # DESCRIPTION
-# Tries running multiple different tests to verify the correctness of our emulator.
+# Tries running multiple different tests to verify the correctness of our KNN implementation.
 import unittest
 import os
 import csv

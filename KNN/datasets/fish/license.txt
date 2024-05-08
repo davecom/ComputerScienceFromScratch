@@ -1,0 +1,13 @@
+This data is from a data set collected in 1917. It should be in the public domain. The original reference is:
+Brofeldt, Pekka: Bidrag till kaennedom on fiskbestondet i vaara sjoear. Laengelmaevesi. T.H.Jaervi: Finlands Fiskeriet  Band 4, Meddelanden utgivna av fiskerifoereningen i Finland. Helsingfors 1917
+
+The data was later included in a compilation you can find out more about at:
+https://jse.amstat.org/jse_data_archive.htm
+
+It was submitted to the collection by:
+Juha Puranen
+Departement of statistics
+PL33 (Aleksanterinkatu 7)
+000014 University of Helsinki
+Finland
+e-mail: jpuranen@noppa.helsinki.fi

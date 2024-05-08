@@ -14,11 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+from KNN.knn import DataPoint
 from typing import Self
 
 
 @dataclass
-class Fish:
+class Fish(DataPoint):
     kind: str
     weight: float
     length1: float
