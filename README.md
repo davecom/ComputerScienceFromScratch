@@ -1,11 +1,12 @@
-# FunComputerScienceProjectsInPython
-Source for the book Fun Computer Science Projects in Python by [David Kopec](https://davekopec.com).
+# Fun Computer Science Projects in Python
+
+Source for the book *Fun Computer Science Projects in Python* by [David Kopec](https://davekopec.com).
 
 ## Get the Book
 
 ## Authorship and License
 
-The code in this repository is Copyright 2024 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. Please read the license for details. 
+The code in this repository is Copyright 2024 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. Please read the license for details and other requirements. 
 
 ## Running and Testing Each Project
 
@@ -114,7 +115,7 @@ A Chip8 virtual machine.
 
 #### Requirements
 
-- PyGame
+- Pygame
 - NumPy
 
 #### Running
@@ -135,7 +136,7 @@ A simple [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) emul
 
 #### Requirements
 
-- PyGame
+- Pygame
 - NumPy
 
 #### Running
@@ -152,13 +153,13 @@ For example:
 
 `python -m tests.test_nesemulator`
 
-### KNN (Chapter 7)
+### KNN (Chapters 7 & 8)
 
 A handwritten digit recognizer using the K-nearest neighbors algorithm.
 
 #### Requirements
 
-- PyGame
+- Pygame
 - NumPy
 
 #### Running
