@@ -38,7 +38,7 @@ An interpreter for a very simple dialect of BASIC based on [Tiny BASIC](https://
 
 #### Requirements
 
-No external dependencies
+No External Dependencies
 
 #### Running
 
