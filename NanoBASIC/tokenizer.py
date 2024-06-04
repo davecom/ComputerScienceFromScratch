@@ -84,7 +84,8 @@ def tokenize(text_file: TextIO) -> list[Token]:
                 if found:
                     col_end: int = col_start + found.end() - 1
                     # Store tokens other than comments and whitespace
-                    if possibility is not TokenType.WHITESPACE and possibility is not TokenType.COMMENT:
+                    if (possibility is not TokenType.WHITESPACE
+                            and possibility is not TokenType.COMMENT):
                         associated_value: str | int | None = None
                         if possibility.has_associated_value:
                             if possibility is TokenType.NUMBER:
@@ -93,7 +94,8 @@ def tokenize(text_file: TextIO) -> list[Token]:
                                 associated_value = found.group()
                             elif possibility is TokenType.STRING:  # Remove quote characters
                                 associated_value = found.group(0)[1:-1]
-                        tokens.append(Token(possibility, line_num, col_start, col_end, associated_value))
+                        tokens.append(Token(possibility, line_num, col_start, col_end,
+                                            associated_value))
                     # Continue search from place in line after token
                     line = line[found.end():]
                     col_start = col_end + 1

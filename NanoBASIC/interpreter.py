@@ -74,17 +74,17 @@ class Interpreter:
                 if (line_index := self.find_line_index(go_to_line_id)) is not None:
                     self.statement_index = line_index
                 else:
-                    raise Interpreter.InterpreterError("Couldn't find GOTO line id.", self.current)
+                    raise Interpreter.InterpreterError("No GOTO line id.", self.current)
             case GoSubStatement(line_expr=line_expr):
                 go_sub_line_id = self.evaluate_numeric(line_expr)
                 if (line_index := self.find_line_index(go_sub_line_id)) is not None:
                     self.subroutine_stack.append(self.statement_index + 1)  # Setup for RETURN
                     self.statement_index = line_index
                 else:
-                    raise Interpreter.InterpreterError("Couldn't find GOSUB line id.", self.current)
+                    raise Interpreter.InterpreterError("No GOSUB line id.", self.current)
             case ReturnStatement():
                 if not self.subroutine_stack:  # Check if the stack is empty
-                    raise Interpreter.InterpreterError("Return with no prior corresponding GOSUB.", self.current)
+                    raise Interpreter.InterpreterError("RETURN without GOSUB.", self.current)
                 self.statement_index = self.subroutine_stack.pop()
             case PrintStatement(printables=printables):
                 accumulated_string: str = ""
@@ -93,7 +93,7 @@ class Interpreter:
                         accumulated_string += "\t"
                     if isinstance(printable, NumericExpression):
                         accumulated_string += str(self.evaluate_numeric(printable))
-                    else:  # Otherwise, it's a string, because that's the only other thing we allow
+                    else:  # Otherwise, it's a string
                         accumulated_string += str(printable)
                 print(accumulated_string)
                 self.statement_index += 1
@@ -103,7 +103,8 @@ class Interpreter:
                 else:
                     self.statement_index += 1
             case _:
-                raise Interpreter.InterpreterError(f"Unexpected item {self.current} in statement list.", self.current)
+                raise Interpreter.InterpreterError(f"Unexpected item {self.current} "
+                                                   f"in statement list.", self.current)
 
     def evaluate_numeric(self, numeric_expression: NumericExpression) -> int:
         match numeric_expression:
@@ -113,12 +114,14 @@ class Interpreter:
                 if name in self.variable_table:
                     return self.variable_table[name]
                 else:
-                    raise Interpreter.InterpreterError(f"Var {name} used before initialized.", numeric_expression)
+                    raise Interpreter.InterpreterError(f"Var {name} used "
+                                                       f"before initialized.", numeric_expression)
             case UnaryOperation(operator=operator, expr=expr):
                 if operator is TokenType.MINUS:
                     return -self.evaluate_numeric(expr)
                 else:
-                    raise Interpreter.InterpreterError(f"Expected - but got {operator}.", numeric_expression)
+                    raise Interpreter.InterpreterError(f"Expected - "
+                                                       f"but got {operator}.", numeric_expression)
             case BinaryOperation(operator=operator, left_expr=left, right_expr=right):
                 if operator is TokenType.PLUS:
                     return self.evaluate_numeric(left) + self.evaluate_numeric(right)
@@ -129,9 +132,11 @@ class Interpreter:
                 elif operator is TokenType.DIVIDE:
                     return self.evaluate_numeric(left) // self.evaluate_numeric(right)
                 else:
-                    raise Interpreter.InterpreterError(f"Unexpected binary operator {operator}.", numeric_expression)
+                    raise Interpreter.InterpreterError(f"Unexpected binary operator "
+                                                       f"{operator}.", numeric_expression)
             case _:
-                raise Interpreter.InterpreterError("Expected numeric expression.", numeric_expression)
+                raise Interpreter.InterpreterError("Expected numeric expression.",
+                                                   numeric_expression)
 
     def evaluate_boolean(self, boolean_expression: BooleanExpression) -> bool:
         left = self.evaluate_numeric(boolean_expression.left_expr)
@@ -150,5 +155,5 @@ class Interpreter:
             case TokenType.NOT_EQUAL:
                 return left != right
             case _:
-                raise Interpreter.InterpreterError(f"Unexpected boolean operator {boolean_expression.operator}.",
-                                                   boolean_expression)
+                raise Interpreter.InterpreterError(f"Unexpected boolean operator "
+                                                   f"{boolean_expression.operator}.", boolean_expression)

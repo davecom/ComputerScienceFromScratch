@@ -33,8 +33,8 @@ def get_most_common_color(image: Image.Image) -> tuple[int, int, int]:
 
 
 class StainedGlass:
-    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod, shape_type: ShapeType,
-                 length: int, vector: bool, animation_length: int):
+    def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod,
+                 shape_type: ShapeType, length: int, vector: bool, animation_length: int):
         self.method = method
         self.shape_type = shape_type
         self.shapes = []
@@ -62,7 +62,7 @@ class StainedGlass:
                     last_percent = percent
                     print(f"{percent}% Done, Best Difference {self.best_difference}")
             end = timer()
-            print(f"{end-start} seconds elapsed. {len(self.shapes)} shapes created. Outputting image...")
+            print(f"{end-start} seconds elapsed. {len(self.shapes)} shapes created.")
             self.create_output(output_file, length, vector, animation_length)
 
     def difference(self, other_image: Image.Image) -> float:
@@ -136,7 +136,7 @@ class StainedGlass:
                             break
             self.shapes.append((coordinates, color))
 
-    def create_output(self, output_file: str, height: int, vector: bool, animation_length: int):
+    def create_output(self, out_file: str, height: int, vector: bool, animation_length: int):
         average_color = tuple((round(n) for n in ImageStat.Stat(self.original).mean))
         original_width, original_height = self.original.size
         ratio = height / original_height
@@ -160,9 +160,10 @@ class StainedGlass:
                         svg.draw_polygon(coordinates, color)
             if animation_frames is not None:
                 animation_frames.append(output_image.copy())
-        output_image.save(output_file)
+        output_image.save(out_file)
         if svg:
-            svg.write(output_file + ".svg")
+            svg.write(out_file + ".svg")
         if animation_frames is not None:
-            animation_frames[0].save(output_file + ".gif", save_all=True, append_images=animation_frames[1:],
-                                     optimize=False, duration=animation_length, loop=0, transparency=0, disposal=2)
+            animation_frames[0].save(out_file + ".gif", save_all=True,
+                                     append_images=animation_frames[1:], optimize=False,
+                                     duration=animation_length, loop=0, transparency=0, disposal=2)

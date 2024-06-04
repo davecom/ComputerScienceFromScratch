@@ -52,7 +52,7 @@ class Parser:
     @property
     def current(self) -> Token:
         if self.out_of_tokens:
-            raise (Parser.ParserError(f"Ran out of tokens after {self.previous.kind}.", self.previous))
+            raise (Parser.ParserError(f"No tokens after {self.previous.kind}.", self.previous))
         return self.tokens[self.token_index]
 
     @property
@@ -107,8 +107,10 @@ class Parser:
                 printables.append(expression)
                 last_col = expression.col_end
             else:
-                raise Parser.ParserError("Only strings and numeric expressions allowed in print list.", self.current)
-            if not self.out_of_tokens and self.current.kind is TokenType.COMMA:  # Comma means there's more
+                raise Parser.ParserError("Only strings and numeric expressions "
+                                         "allowed in print list.", self.current)
+            # Comma means there's more to print
+            if not self.out_of_tokens and self.current.kind is TokenType.COMMA:
                 self.consume(TokenType.COMMA)
                 continue
             break
@@ -168,8 +170,8 @@ class Parser:
             return BooleanExpression(line_num=left.line_num,
                                      col_start=left.col_start, col_end=right.col_end,
                                      operator=operator.kind, left_expr=left, right_expr=right)
-        raise Parser.ParserError(f"Expected boolean operator inside boolean expression but found {self.current.kind}.",
-                                 self.current)
+        raise Parser.ParserError(f"Expected boolean operator but found "
+                                 f"{self.current.kind}.", self.current)
 
     def parse_numeric_expression(self) -> NumericExpression:
         left = self.parse_term()
@@ -180,15 +182,15 @@ class Parser:
             if self.current.kind is TokenType.PLUS:
                 self.consume(TokenType.PLUS)
                 right = self.parse_term()
-                left = BinaryOperation(line_num=left.line_num,
-                                       col_start=left.col_start, col_end=right.col_end,
-                                       operator=TokenType.PLUS, left_expr=left, right_expr=right)
+                left = BinaryOperation(line_num=left.line_num, col_start=left.col_start,
+                                       col_end=right.col_end, operator=TokenType.PLUS,
+                                       left_expr=left, right_expr=right)
             elif self.current.kind is TokenType.MINUS:
                 self.consume(TokenType.MINUS)
                 right = self.parse_term()
-                left = BinaryOperation(line_num=left.line_num,
-                                       col_start=left.col_start, col_end=right.col_end,
-                                       operator=TokenType.MINUS, left_expr=left, right_expr=right)
+                left = BinaryOperation(line_num=left.line_num, col_start=left.col_start,
+                                       col_end=right.col_end, operator=TokenType.MINUS,
+                                       left_expr=left, right_expr=right)
             else:
                 break  # No more, must be end of expression
         return left
@@ -202,15 +204,15 @@ class Parser:
             if self.current.kind is TokenType.MULTIPLY:
                 self.consume(TokenType.MULTIPLY)
                 right = self.parse_factor()
-                left = BinaryOperation(line_num=left.line_num,
-                                       col_start=left.col_start, col_end=right.col_end,
-                                       operator=TokenType.MULTIPLY, left_expr=left, right_expr=right)
+                left = BinaryOperation(line_num=left.line_num, col_start=left.col_start,
+                                       col_end=right.col_end, operator=TokenType.MULTIPLY,
+                                       left_expr=left, right_expr=right)
             elif self.current.kind is TokenType.DIVIDE:
                 self.consume(TokenType.DIVIDE)
                 right = self.parse_factor()
-                left = BinaryOperation(line_num=left.line_num,
-                                       col_start=left.col_start, col_end=right.col_end,
-                                       operator=TokenType.DIVIDE, left_expr=left, right_expr=right)
+                left = BinaryOperation(line_num=left.line_num, col_start=left.col_start,
+                                       col_end=right.col_end, operator=TokenType.DIVIDE,
+                                       left_expr=left, right_expr=right)
             else:
                 break  # No more, must be end of expression
         return left
@@ -230,7 +232,7 @@ class Parser:
             self.consume(TokenType.OPEN_PAREN)
             expression = self.parse_numeric_expression()
             if self.current.kind is not TokenType.CLOSE_PAREN:
-                raise Parser.ParserError("Expected matching closing parenthesis.", self.current)
+                raise Parser.ParserError("Expected matching close parenthesis.", self.current)
             self.consume(TokenType.CLOSE_PAREN)
             return expression
         elif self.current.kind is TokenType.MINUS:
@@ -239,4 +241,4 @@ class Parser:
             return UnaryOperation(line_num=minus.line_num,
                                   col_start=minus.col_start, col_end=expression.col_end,
                                   operator=TokenType.MINUS, expr=expression)
-        raise Parser.ParserError("Couldn't parse numeric expression, unexpected token.", self.current)
+        raise Parser.ParserError("Unexpected token in numeric expression.", self.current)

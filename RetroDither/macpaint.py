@@ -25,7 +25,7 @@ HEADER_LENGTH = 512
 
 # Convert an array of bytes where each byte is 0 or 255
 # to an array of bits where each byte that is 0 becomes a 1
-# and each bit that is 255 becomes a 0
+# and each byte that is 255 becomes a 0
 def bytes_to_bits(original: array) -> array:
     bits_array = array('B')
 
@@ -65,7 +65,8 @@ def run_length_encode(original_data: array) -> array:
     # Find how many of the same bytes are in a row from *start*
     def take_same(source: array, start: int) -> int:
         count = 0
-        while start + count + 1 < len(source) and source[start + count] == source[start + count + 1]:
+        while (start + count + 1 < len(source)
+               and source[start + count] == source[start + count + 1]):
             count += 1
         return count + 1 if count > 0 else 0
 
@@ -76,7 +77,8 @@ def run_length_encode(original_data: array) -> array:
         index = 0
         while index < len(data):
             not_same = 0
-            while ((same := take_same(data, index + not_same)) == 0) and (index + not_same < len(data)):
+            while (((same := take_same(data, index + not_same)) == 0)
+                   and (index + not_same < len(data))):
                 not_same += 1
             if not_same > 0:
                 rle_data.append(not_same - 1)
@@ -92,13 +94,13 @@ def run_length_encode(original_data: array) -> array:
 def macbinary_header(outfile: str, data_size: int) -> array:
     macbinary = array('B', [0] * MACBINARY_LENGTH)
     filename = Path(outfile).stem
-    filename = filename[:63] if len(filename) > 63 else filename  # limit to 63 characters maximum
+    filename = filename[:63] if len(filename) > 63 else filename  # limit to 63 characters max
     macbinary[1] = len(filename)  # file name length
     macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman"))  # file name
     macbinary[65:69] = array("B", "PNTG".encode("mac_roman"))  # file type
     macbinary[69:73] = array("B", "MPNT".encode("mac_roman"))  # file creator
     macbinary[83:87] = array("B", data_size.to_bytes(4, byteorder='big'))  # size of data fork
-    timestamp = int((datetime.now() - datetime(1904, 1, 1)).total_seconds())  # Mac timestamps are seconds since 1904
+    timestamp = int((datetime.now() - datetime(1904, 1, 1)).total_seconds())  # Mac timestamp
     macbinary[91:95] = array("B", timestamp.to_bytes(4, byteorder='big'))  # creation stamp
     macbinary[95:99] = array("B", timestamp.to_bytes(4, byteorder='big'))  # modification stamp
     return macbinary
@@ -109,15 +111,15 @@ def write_macpaint_file(data: array, out_file: str, width: int, height: int):
     bits_array = prepare(data, width, height)
     rle = run_length_encode(bits_array)
     data_size = len(rle) + HEADER_LENGTH  # header requires this
-    output_array = macbinary_header(out_file, data_size) + array('B', [0] * HEADER_LENGTH) + rle
-    output_array[MACBINARY_LENGTH + 3] = 2  # Data Fork Header Signature
+    output = macbinary_header(out_file, data_size) + array('B', [0] * HEADER_LENGTH) + rle
+    output[MACBINARY_LENGTH + 3] = 2  # Data Fork Header Signature
     # macbinary format requires that there be padding of 0s up to a
     # multiple of 128 bytes for the data fork
     padding = 128 - (data_size % 128)
     if padding > 0:
-        output_array += array('B', [0] * padding)
+        output += array('B', [0] * padding)
     with open(out_file + ".bin", "wb") as fp:
-        output_array.tofile(fp)
+        output.tofile(fp)
 
 # Alternative version of run_length_encode that doesn't use the helper function
 # # https://en.wikipedia.org/wiki/PackBits
