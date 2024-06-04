@@ -17,7 +17,7 @@
 class SVG:
     def __init__(self, width: int, height: int, background_color: tuple[int, int, int]):
         self.content = '<?xml version="1.0" encoding="utf-8"?>\n' \
-                       f'<svg version="1.1" baseProfile="full" width="{width}" ' \ 
+                       f'<svg version="1.1" baseProfile="full" width="{width}" ' \
                        f'height="{height}" xmlns="http://www.w3.org/2000/svg">\n' \
                        f'<rect width="100%" height="100%" fill="rgb{background_color}" />'
 
