@@ -27,7 +27,7 @@ SPRITE_WIDTH = 8
 WHITE = 0xFFFFFFFF
 BLACK = 0
 TIMER_DELAY = 1/60  # in seconds... about 60 hz
-FRAME_TIME_EXPECTED = 1/500 # for limiting VM speed
+FRAME_TIME_EXPECTED = 1/500  # for limiting VM speed
 ALLOWED_KEYS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "a", "b", "c", "d", "e", "f"]
 
@@ -102,7 +102,7 @@ class VM:
 
     # Draw a sprite at *x*, *y* using data at *i* and with a height of *height*
     def draw_sprite(self, x: int, y: int, height: int):
-        flipped_black = False  # were any pixels where this was drawn flipped from white to black?
+        flipped_black = False  # did drawing this flip any pixels from white to black?
         for row in range(0, height):
             row_bits = self.ram[self.i + row]
             for col in range(0, SPRITE_WIDTH):
@@ -116,7 +116,7 @@ class VM:
                     flipped_black = True
                 new_pixel = new_bit ^ old_bit  # Chip 8 draws by XORing, which flips everything
                 self.display_buffer[px, py] = WHITE if new_pixel else BLACK
-        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag in register for collision detection
+        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag for collision detection
 
     def step(self):
         # we look at the opcode in terms of its nibbles (4 bit pieces)

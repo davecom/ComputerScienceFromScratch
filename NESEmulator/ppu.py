@@ -82,11 +82,11 @@ class PPU:
                 self.scanline = 0
 
     def draw_background(self):
-        attribute_table_address = self.nametable_address + 0x3C0
+        attribute_table_address = self.nametable_address + 960
         # 32 tiles in width and 30 tiles in height
         for y in range(30):
             for x in range(32):
-                tile_address = self.nametable_address + y * 0x20 + x
+                tile_address = self.nametable_address + y * 32 + x
                 nametable_entry = self.read_memory(tile_address)
                 attrx = x // 4
                 attry = y // 4
@@ -105,17 +105,18 @@ class PPU:
                 else:
                     print("Invalid block")
                 for fine_y in range(8):
-                    low_order = self.read_memory(self.background_pattern_table_address + nametable_entry * 16 + fine_y)
-                    high_order = self.read_memory(
-                        self.background_pattern_table_address + nametable_entry * 16 + 8 + fine_y)
+                    low_order = self.read_memory(self.background_pattern_table_address +
+                                                 nametable_entry * 16 + fine_y)
+                    high_order = self.read_memory(self.background_pattern_table_address +
+                                                  nametable_entry * 16 + 8 + fine_y)
                     for fine_x in range(8):
                         pixel = ((low_order >> (7 - fine_x)) & 1) | (
                                     ((high_order >> (7 - fine_x)) & 1) << 1) | attribute_bits
                         x_screen_loc = x * 8 + fine_x
                         y_screen_loc = y * 8 + fine_y
-                        transparent_background = ((pixel & 3) == 0)
-                        # if the background is transparent, we use the first color in the palette
-                        color = self.palette[0] if transparent_background else self.palette[pixel]
+                        transparent = ((pixel & 3) == 0)
+                        # if the background is transparent use the first color in the palette
+                        color = self.palette[0] if transparent else self.palette[pixel]
                         self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
 
     def draw_sprites(self, background_transparent: bool):
@@ -157,12 +158,12 @@ class PPU:
                     # check left 8 pixel clipping is not off
                     if (i == 0) and (not background_transparent) and (not (x < 8 and (
                             not self.left_8_sprite_show or not self.left_8_background_show))
-                                                                      and self.show_background and self.show_sprites):
+                                and self.show_background and self.show_sprites):
                         self.status |= 0b01000000
                     # need to do this after sprite zero checking so we still count background
                     # sprites for sprite zero checks
                     if background_sprite and not background_transparent:
-                        continue  # don't draw over opaque background pixels if this is background sprite
+                        continue  # background sprite shouldn't draw over opaque pixels
 
                     color = bit3and2 | bit1and0
                     color = self.read_memory(0x3F10 + color)  # pull from palette
@@ -183,7 +184,7 @@ class PPU:
             else:
                 value = self.read_memory(self.addr)
                 self.buffer2007 = self.read_memory(self.addr - 0x1000)
-            self.addr += self.address_increment  # every read to $2007 there is an increment of 1 or 32
+            self.addr += self.address_increment  # every read to $2007 there is an increment
             return value
         else:
             raise LookupError(f"Error: Unrecognized PPU register read {address:X}")

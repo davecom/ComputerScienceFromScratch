@@ -15,7 +15,8 @@
 # limitations under the License.
 import sys
 from argparse import ArgumentParser
-from Chip8.vm import VM, SCREEN_WIDTH, SCREEN_HEIGHT, TIMER_DELAY, FRAME_TIME_EXPECTED, ALLOWED_KEYS
+from Chip8.vm import VM, SCREEN_WIDTH, SCREEN_HEIGHT
+from Chip8.vm import TIMER_DELAY, FRAME_TIME_EXPECTED, ALLOWED_KEYS
 import pygame
 from timeit import default_timer as timer
 import os

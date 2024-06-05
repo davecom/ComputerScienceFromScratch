@@ -43,7 +43,7 @@ class CPUTestCase(unittest.TestCase):
         while log_line < 5260: # go until first unofficial opcode test
             our_line = cpu.log()
             correct_line = correct_lines[log_line - 1]
-            self.assertEqual(correct_line[0:14], our_line[0:14], f"PC/Opcode don't match at line {log_line}")
+            self.assertEqual(correct_line[0:14], our_line[0:14], f"PC/Opcode doesn't match at line {log_line}")
             self.assertEqual(correct_line[48:73], our_line[48:73], f"Registers don't match at line {log_line}")
             cpu.step()
             log_line += 1

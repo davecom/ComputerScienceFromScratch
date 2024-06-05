@@ -30,8 +30,9 @@ class Fish(DataPoint):
 
     @classmethod
     def from_string_data(cls, data: list[str]) -> Self:
-        return cls(kind=data[0], weight=float(data[1]), length1=float(data[2]), length2=float(data[3]),
-                   length3=float(data[4]), height=float(data[5]), width=float(data[6]))
+        return cls(kind=data[0], weight=float(data[1]), length1=float(data[2]),
+                   length2=float(data[3]), length3=float(data[4]),
+                   height=float(data[5]), width=float(data[6]))
 
     def distance(self, other: Self) -> float:
         return ((self.length1 - other.length1) ** 2 + (self.length2 - other.length2) ** 2 +
