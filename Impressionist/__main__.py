@@ -18,7 +18,7 @@ from Impressionist.impressionist import Impressionist, ColorMethod, ShapeType
 
 if __name__ == "__main__":
     # Parse the file argument
-    argument_parser = ArgumentParser("StainedGlass")
+    argument_parser = ArgumentParser("Impressionist")
     argument_parser.add_argument("image_file", help="The input image to be painted.")
     argument_parser.add_argument("output_file", help="The final resulting abstract art image.")
     argument_parser.add_argument('-t', '--trials', type=int, default=10000,
