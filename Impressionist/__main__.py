@@ -1,4 +1,4 @@
-# StainedGlass/__main__.py
+# Impressionist/__main__.py
 # From Fun Computer Science Projects in Python
 # Copyright 2024 David Kopec
 #
@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from argparse import ArgumentParser
-from StainedGlass.stainedglass import StainedGlass, ColorMethod, ShapeType
+from Impressionist.impressionist import Impressionist, ColorMethod, ShapeType
 
 if __name__ == "__main__":
     # Parse the file argument
@@ -39,5 +39,5 @@ if __name__ == "__main__":
     arguments = argument_parser.parse_args()
     method = ColorMethod[arguments.method.upper()]
     shape_type = ShapeType[arguments.shape.upper()]
-    StainedGlass(arguments.image_file, arguments.output_file, arguments.trials, method,
+    Impressionist(arguments.image_file, arguments.output_file, arguments.trials, method,
                  shape_type, arguments.length, arguments.vector, arguments.animate)

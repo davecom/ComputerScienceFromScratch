@@ -1,4 +1,4 @@
-# StainedGlass/svg.py
+# Impressionist/svg.py
 # From Fun Computer Science Projects in Python
 # Copyright 2024 David Kopec
 #

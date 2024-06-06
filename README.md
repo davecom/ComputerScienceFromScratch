@@ -72,7 +72,7 @@ Additional options:
 
 `-g` output a .gif format version as well
 
-### StainedGlass (Chapter 4)
+### Impressionist (Chapter 4)
 
 Computationally draws abstract approximations of images using vector shapes.
 
@@ -82,11 +82,11 @@ Computationally draws abstract approximations of images using vector shapes.
 
 #### Running
 
-`python -m StainedGlass <input_file_name> <output_file_name>`
+`python -m Impressionist <input_file_name> <output_file_name>`
 
 For example:
 
-`python -m StainedGlass swing.jpeg swing.png`
+`python -m Impressionist swing.jpeg swing.png`
 
 Additional options:
 

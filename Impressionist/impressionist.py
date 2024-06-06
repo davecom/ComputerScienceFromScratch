@@ -1,4 +1,4 @@
-# StainedGlass/stainedglass.py
+# Impressionist/impressionist.py
 # From Fun Computer Science Projects in Python
 # Copyright 2024 David Kopec
 #
@@ -19,7 +19,7 @@ from PIL import ImageChops, ImageStat
 import random
 from math import trunc
 from timeit import default_timer as timer
-from StainedGlass.svg import SVG
+from Impressionist.svg import SVG
 
 ColorMethod = Enum("ColorMethod", "RANDOM AVERAGE COMMON")
 ShapeType = Enum("ShapeType", "ELLIPSE TRIANGLE QUADRILATERAL LINE")
@@ -32,7 +32,7 @@ def get_most_common_color(image: Image.Image) -> tuple[int, int, int]:
     return max(colors, key=lambda item: item[0])[1]  # type: ignore
 
 
-class StainedGlass:
+class Impressionist:
     def __init__(self, file_name: str, output_file: str, trials: int, method: ColorMethod,
                  shape_type: ShapeType, length: int, vector: bool, animation_length: int):
         self.method = method
