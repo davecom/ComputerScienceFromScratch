@@ -25,9 +25,11 @@ import os
 def run(program_data: bytes, name: str):
     # Startup Pygame, create the window, and load the sound
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SCALED)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                     pygame.SCALED)
     pygame.display.set_caption(f"Chip8 - {os.path.basename(name)}")
-    bee_sound = pygame.mixer.Sound(os.path.dirname(os.path.realpath(__file__)) + "/bee.wav")
+    bee_sound = pygame.mixer.Sound(os.path.dirname(os.path.realpath(__file__))
+                                   + "/bee.wav")
     currently_playing_sound = False
     vm = VM(program_data) # Load the virtual machine with the program data
     timer_accumulator = 0.0 # Used to limit the timer to 60 Hz
@@ -63,7 +65,7 @@ def run(program_data: bytes, name: str):
 
         # Handle timing
         frame_end = timer()
-        frame_time = frame_end - frame_start # time it took for this iteration in seconds
+        frame_time = frame_end - frame_start # time it took in seconds
         timer_accumulator += frame_time
         # Every 1/60 of a second decrement the timers
         if timer_accumulator > TIMER_DELAY:
@@ -79,7 +81,8 @@ def run(program_data: bytes, name: str):
 if __name__ == "__main__":
     # Parse the file argument
     file_parser = ArgumentParser("Chip8")
-    file_parser.add_argument("rom_file", help="A file containing a Chip-8 game.")
+    file_parser.add_argument("rom_file",
+                             help="A file containing a Chip-8 game.")
     arguments = file_parser.parse_args()
     with open(arguments.rom_file, "rb") as fp:
         file_data = fp.read()

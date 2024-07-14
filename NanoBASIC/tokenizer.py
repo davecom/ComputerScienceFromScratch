@@ -78,8 +78,8 @@ def tokenize(text_file: TextIO) -> list[Token]:
         while len(line) > 0:
             found: re.Match | None = None
             for possibility in TokenType:
-                # Try each pattern on the beginning of the text case-insensitive
-                # if it's found, store the match in *found*
+                # Try each pattern from the beginning, case-insensitive
+                # If it's found, store the match in *found*
                 found = re.match(possibility.pattern, line, re.IGNORECASE)
                 if found:
                     col_end: int = col_start + found.end() - 1
@@ -92,18 +92,19 @@ def tokenize(text_file: TextIO) -> list[Token]:
                                 associated_value = int(found.group(0))
                             elif possibility is TokenType.VARIABLE:
                                 associated_value = found.group()
-                            elif possibility is TokenType.STRING:  # Remove quote characters
+                            elif possibility is TokenType.STRING:
+                                # Remove quote characters
                                 associated_value = found.group(0)[1:-1]
-                        tokens.append(Token(possibility, line_num, col_start, col_end,
-                                            associated_value))
+                        tokens.append(Token(possibility, line_num, col_start,
+                                            col_end, associated_value))
                     # Continue search from place in line after token
                     line = line[found.end():]
                     col_start = col_end + 1
                     break  # Go around again for next token
-            # If we went through all of the tokens and none of them were a match
+            # If we went through all the tokens and none of them were a match
             # then this must be an invalid token
             if not found:
-                print(f"Syntax error on line {line_num} and column {col_start}")
+                print(f"Syntax error on line {line_num} column {col_start}")
                 break
 
     return tokens

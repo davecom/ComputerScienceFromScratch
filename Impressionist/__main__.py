@@ -19,16 +19,16 @@ from Impressionist.impressionist import Impressionist, ColorMethod, ShapeType
 if __name__ == "__main__":
     # Parse the file argument
     argument_parser = ArgumentParser("Impressionist")
-    argument_parser.add_argument("image_file", help="The input image to be painted.")
-    argument_parser.add_argument("output_file", help="The final resulting abstract art image.")
+    argument_parser.add_argument("image_file", help="The input image")
+    argument_parser.add_argument("output_file", help="The resulting abstract art")
     argument_parser.add_argument('-t', '--trials', type=int, default=10000,
                                  help='The number of trials to run (default 10000).')
-    argument_parser.add_argument('-m', '--method', choices=['random', 'average', 'common'],
-                                 default='average',
+    argument_parser.add_argument('-m', '--method',
+                                 choices=['random', 'average', 'common'], default='average',
                                  help='Shape color determination method (default average).')
     argument_parser.add_argument('-s', '--shape', choices=['ellipse', 'triangle',
-                                                           'quadrilateral', 'line'], default='ellipse',
-                                 help='The shape type to use (default ellipse).')
+                                                           'quadrilateral', 'line'],
+                                 default='ellipse', help='The shape type (default ellipse).')
     argument_parser.add_argument('-l', '--length', type=int, default=256,
                                  help='The length of the final image in pixels (default 256).')
     argument_parser.add_argument('-v', '--vector', default=False, action='store_true',

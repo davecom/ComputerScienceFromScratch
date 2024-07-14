@@ -62,7 +62,8 @@ class DigitsTestCase(unittest.TestCase):
 
     def test_digits_test_set(self):
         k: int = 1
-        digits_knn = KNN(Digit, '../KNN/datasets/digits/digits.csv', has_header=False)
+        digits_knn = KNN(Digit, '../KNN/datasets/digits/digits.csv',
+                         has_header=False)
         test_data_points: list[Digit] = []
         with open('../KNN/datasets/digits/digits_test.csv', 'r') as f:
             reader = csv.reader(f)
@@ -73,8 +74,10 @@ class DigitsTestCase(unittest.TestCase):
             predicted_digit: str = digits_knn.classify(k, test_data_point)
             if predicted_digit == test_data_point.kind:
                 correct_classifications += 1
-        correct_percentage = correct_classifications / len(test_data_points) * 100
-        print(f"Correct Classifications: {correct_classifications} out of {len(test_data_points)} "
+        correct_percentage = (correct_classifications
+                              / len(test_data_points) * 100)
+        print(f"Correct Classifications: "
+              f"{correct_classifications} of {len(test_data_points)} "
               f"or {correct_percentage}%")
         self.assertGreater(correct_percentage, 97.0)
 

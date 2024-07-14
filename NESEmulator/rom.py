@@ -17,7 +17,8 @@ from struct import unpack
 from collections import namedtuple
 from array import array
 
-Header = namedtuple("Header", "signature prg_rom_size chr_rom_size flags6 flags7 flags8 flags9 flags10 unused")
+Header = namedtuple("Header", "signature prg_rom_size chr_rom_size "
+                              "flags6 flags7 flags8 flags9 flags10 unused")
 HEADER_SIZE = 16
 TRAINER_SIZE = 512
 PRG_ROM_BASE_UNIT_SIZE = 16384
@@ -29,13 +30,15 @@ class ROM:
     def __init__(self, filename: str):
         with open(filename, "rb") as file:
             # Read Header and Check Signature "NES"
-            self.header = Header._make(unpack("!LBBBBBBB5s", file.read(HEADER_SIZE)))
+            self.header = Header._make(unpack("!LBBBBBBB5s",
+                                              file.read(HEADER_SIZE)))
             if self.header.signature != 0x4E45531A:
                 print("Invalid ROM Header Signature")
             else:
                 print("Valid ROM Header Signature")
             # Untangle Mapper - one nybble in flags6 and one nybble in flags7
-            self.mapper = (self.header.flags7 & 0xF0) | ((self.header.flags6 & 0xF0) >> 4)
+            self.mapper = (self.header.flags7 & 0xF0) | (
+                    (self.header.flags6 & 0xF0) >> 4)
             print(f"Mapper {self.mapper}")
             if self.mapper != 0:
                 print("Invalid Mapper: Only Mapper 0 is Implemented")
@@ -48,9 +51,11 @@ class ROM:
             # Check mirroring from flags6 bit 0
             self.vertical_mirroring = bool(self.header.flags6 & 1)
             print(f"Has vertical mirroring {self.vertical_mirroring}")
-            # Read PRG_ROM and CHR_ROM, these are in multiples of 16K and 8K respectively
-            self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE * self.header.prg_rom_size)
-            self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE * self.header.chr_rom_size)
+            # Read PRG_ROM & CHR_ROM, in multiples of 16K and 8K respectively
+            self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE *
+                                     self.header.prg_rom_size)
+            self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE *
+                                     self.header.chr_rom_size)
             self.prg_ram = array('B', [0] * PRG_RAM_SIZE)  # ram
 
     def read_mapper0(self, address: int) -> int:
@@ -64,7 +69,7 @@ class ROM:
             else:
                 return self.prg_rom[(address - 0x8000) % PRG_ROM_BASE_UNIT_SIZE]
         else:
-            raise LookupError(f"Tried to read from cartridge at invalid address {address:X}")
+            raise LookupError(f"Tried to read at invalid address {address:X}")
 
     def write_mapper0(self, address: int, value: int):
         if address >= 0x6000:

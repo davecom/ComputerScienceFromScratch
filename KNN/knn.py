@@ -29,7 +29,8 @@ class DataPoint(Protocol):
 
 
 class KNN[DP: DataPoint]:
-    def __init__(self, data_point_type: type[DP], file_path: str, has_header: bool = True) -> None:
+    def __init__(self, data_point_type: type[DP], file_path: str,
+                 has_header: bool = True) -> None:
         self.data_point_type = data_point_type
         self.data_points = []
         self._read_csv(file_path, has_header)
@@ -41,9 +42,10 @@ class KNN[DP: DataPoint]:
             if has_header:
                 _ = next(reader)
             for row in reader:
-                self.data_points.append(self.data_point_type.from_string_data(row))
+                self.data_points.append(
+                    self.data_point_type.from_string_data(row))
 
-    # Find the k nearest neighbors of a given data point based on the distance method
+    # Find the k nearest neighbors of a given data point
     def nearest(self, k: int, data_point: DP) -> list[DP]:
         return sorted(self.data_points, key=data_point.distance)[:k]
 
@@ -57,10 +59,12 @@ class KNN[DP: DataPoint]:
     # Find the average of that property from the neighbors and return it
     def predict(self, k: int, data_point: DP, property_name: str) -> float:
         neighbors = self.nearest(k, data_point)
-        return sum([getattr(neighbor, property_name) for neighbor in neighbors]) / len(neighbors)
+        return (sum([getattr(neighbor, property_name) for neighbor in neighbors])
+                / len(neighbors))
 
     # Predict a NumPy array property of a data point based on the k nearest neighbors
     # Find the average of that property from the neighbors and return it
     def predict_array(self, k: int, data_point: DP, property_name: str) -> np.ndarray:
         neighbors = self.nearest(k, data_point)
-        return np.sum([getattr(neighbor, property_name) for neighbor in neighbors], axis=0) / len(neighbors)
+        return (np.sum([getattr(neighbor, property_name) for neighbor in neighbors], axis=0)
+                / len(neighbors))

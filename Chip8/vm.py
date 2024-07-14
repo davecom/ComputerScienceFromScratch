@@ -81,7 +81,8 @@ class VM:
         # ours can just be unlimited and expand/contract as needed
         self.stack = []
         # Graphics buffer for the screen - 64 x 32 pixels
-        self.display_buffer = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT), dtype=np.uint32)
+        self.display_buffer = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                       dtype=np.uint32)
         self.needs_redraw = False
         # Timers - really simple registers that count down to 0 at 60 hertz
         self.delay_timer = 0
@@ -100,9 +101,9 @@ class VM:
     def play_sound(self) -> bool:
         return self.sound_timer > 0
 
-    # Draw a sprite at *x*, *y* using data at *i* and with a height of *height*
+    # Draw a sprite at *x*, *y* using data at *i* with a height of *height*
     def draw_sprite(self, x: int, y: int, height: int):
-        flipped_black = False  # did drawing this flip any pixels from white to black?
+        flipped_black = False  # did drawing this flip any pixels?
         for row in range(0, height):
             row_bits = self.ram[self.i + row]
             for col in range(0, SPRITE_WIDTH):
@@ -112,11 +113,13 @@ class VM:
                     continue  # Ignore off-screen pixels
                 new_bit = (row_bits >> (7 - col)) & 1
                 old_bit = self.display_buffer[px, py] & 1
-                if new_bit & old_bit:  # If both are set, they will get flipped white -> black
+                if new_bit & old_bit:  # If both set, flip white -> black
                     flipped_black = True
-                new_pixel = new_bit ^ old_bit  # Chip 8 draws by XORing, which flips everything
+                # Chip 8 draws by XORing, which flips everything
+                new_pixel = new_bit ^ old_bit
                 self.display_buffer[px, py] = WHITE if new_pixel else BLACK
-        self.v[0xF] = 1 if flipped_black else 0  # set flipped flag for collision detection
+        # set flipped flag for collision detection
+        self.v[0xF] = 1 if flipped_black else 0
 
     def step(self):
         # we look at the opcode in terms of its nibbles (4 bit pieces)
@@ -139,7 +142,7 @@ class VM:
                 self.pc = self.stack.pop()
                 jumped = True
             case (0x0, n1, n2, n3):  # call program
-                self.pc = concat_nibbles(n1, n2, n3)  # go to program start
+                self.pc = concat_nibbles(n1, n2, n3)  # go to start
                 # clear registers
                 self.delay_timer = 0
                 self.sound_timer = 0
@@ -153,7 +156,7 @@ class VM:
                 self.pc = concat_nibbles(n1, n2, n3)
                 jumped = True
             case (0x2, n1, n2, n3):  # call subroutine
-                self.stack.append(self.pc + 2)  # return location onto the stack
+                self.stack.append(self.pc + 2)  # put return place on stack
                 self.pc = concat_nibbles(n1, n2, n3)  # goto subroutine
                 jumped = True
             case (0x3, x, _, _):  # conditional skip v[x] equal last2
@@ -261,7 +264,8 @@ class VM:
                 for r in range(0, x + 1):
                     self.v[r] = self.ram[self.i + r]
             case _:
-                print(f"Unknown opcode {(hex(first), hex(second), hex(third), hex(fourth))}!")
+                print(f"Unknown opcode {(hex(first), hex(second), 
+                                         hex(third), hex(fourth))}!")
 
         if not jumped:
             self.pc += 2  # increment program counter

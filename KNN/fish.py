@@ -35,6 +35,8 @@ class Fish(DataPoint):
                    height=float(data[5]), width=float(data[6]))
 
     def distance(self, other: Self) -> float:
-        return ((self.length1 - other.length1) ** 2 + (self.length2 - other.length2) ** 2 +
-                (self.length3 - other.length3) ** 2 + (self.height - other.height) ** 2 +
+        return ((self.length1 - other.length1) ** 2 +
+                (self.length2 - other.length2) ** 2 +
+                (self.length3 - other.length3) ** 2 +
+                (self.height - other.height) ** 2 +
                 (self.width - other.width) ** 2) ** 0.5

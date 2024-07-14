@@ -23,7 +23,8 @@ class SVG:
 
     def draw_ellipse(self, x1: int, y1: int, x2: int, y2: int, color: tuple[int, int, int]):
         self.content += f'<ellipse cx="{(x1 + x2) // 2}" cy="{(y1 + y2) // 2}" ' \
-                        f'rx="{abs(x1 - x2) // 2}" ry="{abs(y1 - y2) // 2}" fill="rgb{color}" />\n'
+                        (f'rx="{abs(x1 - x2) // 2}" ry="{abs(y1 - y2) // 2}'
+                         f'" fill="rgb{color}" />\n')
 
     def draw_line(self, x1: int, y1: int, x2: int, y2: int, color: tuple[int, int, int]):
         self.content += f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="rgb{color}" ' \

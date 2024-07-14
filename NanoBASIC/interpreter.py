@@ -32,7 +32,8 @@ class Interpreter:
             self.column = node.col_start
 
         def __str__(self):
-            return f"{self.message} Occurred at line {self.line_num} and column {self.column}"
+            return (f"{self.message} Occurred at line {self.line_num} "
+                    f"and column {self.column}")
 
     def __init__(self, statements: list[Statement]):
         self.statements = statements
@@ -44,8 +45,8 @@ class Interpreter:
     def current(self) -> Statement:
         return self.statements[self.statement_index]
 
-    # Returns the index of a *line_id* using a binary search, or None if not found
-    # Assumes the statements list is sorted
+    # Returns the index of a *line_id* using a binary search,
+    # or None if not found; Assumes the statements list is sorted
     def find_line_index(self, line_id: int) -> int | None:
         low: int = 0
         high: int = len(self.statements) - 1

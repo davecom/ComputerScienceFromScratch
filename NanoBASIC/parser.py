@@ -39,7 +39,8 @@ class Parser:
             self.column = token.col_start
 
         def __str__(self):
-            return f"{self.message} Occurred at line {self.line_num} and column {self.column}"
+            return (f"{self.message} Occurred at line {self.line_num} "
+                    f"and column {self.column}")
 
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
@@ -52,7 +53,8 @@ class Parser:
     @property
     def current(self) -> Token:
         if self.out_of_tokens:
-            raise (Parser.ParserError(f"No tokens after {self.previous.kind}.", self.previous))
+            raise (Parser.ParserError(f"No tokens after "
+                                      f"{self.previous.kind}", self.previous))
         return self.tokens[self.token_index]
 
     @property
@@ -91,7 +93,8 @@ class Parser:
                 return self.parse_gosub(line_id)
             case TokenType.RETURN_T:
                 return self.parse_return(line_id)
-        raise Parser.ParserError("Expected to find start of statement.", self.current)
+        raise Parser.ParserError("Expected to find start of statement.",
+                                 self.current)
 
     # PRINT "COMMA",SEPARATED,7154
     def parse_print(self, line_id: int) -> PrintStatement:

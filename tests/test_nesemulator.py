@@ -43,8 +43,10 @@ class CPUTestCase(unittest.TestCase):
         while log_line < 5260: # go until first unofficial opcode test
             our_line = cpu.log()
             correct_line = correct_lines[log_line - 1]
-            self.assertEqual(correct_line[0:14], our_line[0:14], f"PC/Opcode doesn't match at line {log_line}")
-            self.assertEqual(correct_line[48:73], our_line[48:73], f"Registers don't match at line {log_line}")
+            self.assertEqual(correct_line[0:14], our_line[0:14],
+                             f"PC/Opcode doesn't match at line {log_line}")
+            self.assertEqual(correct_line[48:73], our_line[48:73],
+                             f"Registers don't match at line {log_line}")
             cpu.step()
             log_line += 1
 
@@ -53,11 +55,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/01-basics.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of basics test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of basics test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -66,11 +69,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/02-implied.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of implied test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of implied test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -79,11 +83,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/10-branches.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of braches test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of braches test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -92,11 +97,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/11-stack.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of stack test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of stack test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -105,11 +111,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/12-jmp_jsr.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of jmp_jsr test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of jmp_jsr test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -118,11 +125,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/13-rts.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of rts test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of rts test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -131,11 +139,12 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/14-rti.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of rti test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of rti test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")]) # Message ends with null terminator
 
@@ -144,26 +153,28 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/15-brk.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")])  # Message ends with null terminator
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of brk test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of brk test is {rom.prg_ram[0]} not 0")
 
     def test_blargg_instr_test_v5_special(self):
         # Create machinery that we are testing
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/16-special.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Test keeps running as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
         print(message[0:message.index("\0")])  # Message ends with null terminator
-        self.assertEqual(0, rom.prg_ram[0], f"Result code of special test is {rom.prg_ram[0]} not 0")
+        self.assertEqual(0, rom.prg_ram[0],
+                         f"Result code of special test is {rom.prg_ram[0]} not 0")
 
 
 if __name__ == "__main__":

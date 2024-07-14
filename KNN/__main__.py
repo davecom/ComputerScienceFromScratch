@@ -30,13 +30,16 @@ WHITE = (255, 255, 255)
 
 def run():
     # Create a 2D array of pixels to represent the digit
-    digit_pixels = np.zeros((PIXEL_HEIGHT, PIXEL_WIDTH, 3), dtype=np.uint32)
+    digit_pixels = np.zeros((PIXEL_HEIGHT, PIXEL_WIDTH, 3),
+                            dtype=np.uint32)
     # Load the training data
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    digits_knn = KNN(Digit, './datasets/digits/digits.csv', has_header=False)
+    digits_knn = KNN(Digit, './datasets/digits/digits.csv',
+                     has_header=False)
     # Startup Pygame, create the window
     pygame.init()
-    screen = pygame.display.set_mode(size=(PIXEL_WIDTH, PIXEL_HEIGHT), flags=pygame.SCALED | pygame.RESIZABLE)
+    screen = pygame.display.set_mode(size=(PIXEL_WIDTH, PIXEL_HEIGHT),
+                                     flags=pygame.SCALED | pygame.RESIZABLE)
     pygame.display.set_caption("Digit Recognizer")
     while True:
         pygame.surfarray.blit_array(screen, digit_pixels)

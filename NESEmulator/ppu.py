@@ -22,14 +22,17 @@ NAMETABLE_SIZE = 2048
 PALETTE_SIZE = 32
 NES_WIDTH = 256
 NES_HEIGHT = 240
-NES_PALETTE = [0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020, 0xA81000, 0x881400,
-               0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000,
-               0xBCBCBC, 0x0078F8, 0x0058F8, 0x6844FC, 0xD800CC, 0xE40058, 0xF83800, 0xE45C10,
-               0xAC7C00, 0x00B800, 0x00A800, 0x00A844, 0x008888, 0x000000, 0x000000, 0x000000,
-               0xF8F8F8, 0x3CBCFC, 0x6888FC, 0x9878F8, 0xF878F8, 0xF85898, 0xF87858, 0xFCA044,
-               0xF8B800, 0xB8F818, 0x58D854, 0x58F898, 0x00E8D8, 0x787878, 0x000000, 0x000000,
-               0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8, 0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8,
-               0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8, 0x00FCFC, 0xF8D8F8, 0x000000, 0x000000]
+NES_PALETTE = [0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020,
+               0xA81000, 0x881400, 0x503000, 0x007800, 0x006800, 0x005800,
+               0x004058, 0x000000, 0x000000, 0x000000, 0xBCBCBC, 0x0078F8,
+               0x0058F8, 0x6844FC, 0xD800CC, 0xE40058, 0xF83800, 0xE45C10,
+               0xAC7C00, 0x00B800, 0x00A800, 0x00A844, 0x008888, 0x000000,
+               0x000000, 0x000000, 0xF8F8F8, 0x3CBCFC, 0x6888FC, 0x9878F8,
+               0xF878F8, 0xF85898, 0xF87858, 0xFCA044, 0xF8B800, 0xB8F818,
+               0x58D854, 0x58F898, 0x00E8D8, 0x787878, 0x000000, 0x000000,
+               0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8, 0xF8B8F8, 0xF8A4C0,
+               0xF0D0B0, 0xFCE0A8, 0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8,
+               0x00FCFC, 0xF8D8F8, 0x000000, 0x000000]
 
 
 class PPU:
@@ -58,7 +61,8 @@ class PPU:
         self.buffer2007 = 0
         self.scanline = 0
         self.cycle = 0
-        self.display_buffer = np.zeros((NES_WIDTH, NES_HEIGHT), dtype=np.uint32)  # pixels for screen
+        # pixels for screen
+        self.display_buffer = np.zeros((NES_WIDTH, NES_HEIGHT), dtype=np.uint32)
 
     # rendering reference https://wiki.nesdev.com/w/index.php/PPU_rendering
     # status reference http://wiki.nesdev.com/w/index.php/PPU_registers#PPUSTATUS
@@ -72,7 +76,8 @@ class PPU:
         if (self.scanline == 241) and (self.cycle == 1):
             self.status |= 0b10000000  # set vblank
         if (self.scanline == 261) and (self.cycle == 1):
-            self.status |= 0b00011111  # vblank off, clear sprite zero, clear sprite overflow
+            # vblank off, clear sprite zero, clear sprite overflow
+            self.status |= 0b00011111
 
         self.cycle += 1
         if self.cycle > 340:
@@ -92,7 +97,8 @@ class PPU:
                 attry = y // 4
                 attribute_address = attribute_table_address + attry * 8 + attrx
                 attribute_entry = self.read_memory(attribute_address)
-                block = (y & 0x02) | ((x & 0x02) >> 1)  # https://forums.nesdev.com/viewtopic.php?f=10&t=13315
+                # https://forums.nesdev.com/viewtopic.php?f=10&t=13315
+                block = (y & 0x02) | ((x & 0x02) >> 1)
                 attribute_bits = 0
                 if block == 0:
                     attribute_bits = (attribute_entry & 0b00000011) << 2
@@ -150,7 +156,8 @@ class PPU:
                     if not flip_x:
                         x_loc = 7 - x_loc
 
-                    bit1and0 = (((bit1s >> x_loc) & 1) << 1) | (((bit0s >> x_loc) & 1) << 0)
+                    bit1and0 = (((bit1s >> x_loc) & 1) << 1) | (
+                            ((bit0s >> x_loc) & 1) << 0)
                     if bit1and0 == 0:  # transparent pixel... skip
                         continue
 
@@ -166,7 +173,7 @@ class PPU:
                         continue  # background sprite shouldn't draw over opaque pixels
 
                     color = bit3and2 | bit1and0
-                    color = self.read_memory(0x3F10 + color)  # pull from palette
+                    color = self.read_memory(0x3F10 + color)  # from palette
                     self.display_buffer[x, y] = NES_PALETTE[color]
 
     def read_register(self, address: int) -> int:
@@ -184,10 +191,11 @@ class PPU:
             else:
                 value = self.read_memory(self.addr)
                 self.buffer2007 = self.read_memory(self.addr - 0x1000)
-            self.addr += self.address_increment  # every read to $2007 there is an increment
+            # every read to $2007 there is an increment
+            self.addr += self.address_increment
             return value
         else:
-            raise LookupError(f"Error: Unrecognized PPU register read {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU read {address:X}")
 
     def write_register(self, address: int, value: int):
         if address == 0x2000:  # Control1
@@ -208,7 +216,8 @@ class PPU:
             self.spr_address += 1
         elif address == 0x2005:  # scroll
             pass
-        elif address == 0x2006:  # based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
+        elif address == 0x2006:
+            # based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
             if not self.addr_write_latch:  # first write
                 self.addr = (self.addr & 0x00FF) | ((value & 0xFF) << 8)
             else:  # second write
@@ -218,7 +227,7 @@ class PPU:
             self.write_memory(self.addr, value)
             self.addr += self.address_increment
         else:
-            raise LookupError(f"Error: Unrecognized PPU register write {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU write {address:X}")
 
     def read_memory(self, address: int) -> int:
         address = address % 0x4000  # mirror >0x4000
@@ -240,7 +249,7 @@ class PPU:
                 address = address - 0x10
             return self.palette[address]
         else:
-            raise LookupError(f"Error: Unrecognized PPU address read at {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU read at {address:X}")
 
     def write_memory(self, address: int, value: int):
         address = address % 0x4000  # mirror >0x4000
@@ -262,4 +271,4 @@ class PPU:
                 address = address - 0x10
             self.palette[address] = value
         else:
-            raise LookupError(f"Error: Unrecognized PPU address read at {address:X}")
+            raise LookupError(f"Error: Unrecognized PPU write at {address:X}")

@@ -48,7 +48,7 @@ class Brainfuck:
                         instruction_index = self.find_bracket_match(instruction_index, False)
             instruction_index += 1
 
-    # Find the location of the corresponding matching bracket to the one at *start*
+    # Find the location of the corresponding bracket to the one at *start*
     # If *forward* is true go to the right looking for a matching "]"
     # Otherwise do the reverse
     def find_bracket_match(self, start: int, forward: bool) -> int:
@@ -66,7 +66,7 @@ class Brainfuck:
                 in_between_brackets += 1
             location += direction
         # Didn't find a match
-        print(f"Error: could not find matching bracket for {start_bracket} at {start}.")
+        print(f"Error: could not find match for {start_bracket} at {start}.")
         return start
 
 

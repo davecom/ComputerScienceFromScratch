@@ -21,16 +21,20 @@ from typing import Callable
 from NESEmulator.ppu import PPU, SPR_RAM_SIZE
 from NESEmulator.rom import ROM
 
-MemMode = Enum("MemMode", "DUMMY ABSOLUTE ABSOLUTE_X ABSOLUTE_Y ACCUMULATOR IMMEDIATE "
-                          "IMPLIED INDEXED_INDIRECT INDIRECT INDIRECT_INDEXED RELATIVE "
-                          "ZEROPAGE ZEROPAGE_X ZEROPAGE_Y")
+MemMode = Enum("MemMode", "DUMMY ABSOLUTE ABSOLUTE_X ABSOLUTE_Y ACCUMULATOR "
+                          "IMMEDIATE IMPLIED INDEXED_INDIRECT INDIRECT "
+                          "INDIRECT_INDEXED RELATIVE ZEROPAGE ZEROPAGE_X "
+                          "ZEROPAGE_Y")
 
-InstructionType = Enum("InstructionType", "ADC AHX ALR ANC AND ARR ASL AXS BCC BCS BEQ BIT "
-                                          "BMI BNE BPL BRK BVC BVS CLC CLD CLI CLV CMP CPX "
-                                          "CPY DCP DEC DEX DEY EOR INC INX INY ISC JMP JSR "
-                                          "KIL LAS LAX LDA LDX LDY LSR NOP ORA PHA PHP PLA "
-                                          "PLP RLA ROL ROR RRA RTI RTS SAX SBC SEC SED SEI "
-                                          "SHX SHY SLO SRE STA STX STY TAS TAX TAY TSX TXA "
+InstructionType = Enum("InstructionType", "ADC AHX ALR ANC AND ARR ASL AXS "
+                                          "BCC BCS BEQ BIT BMI BNE BPL BRK "
+                                          "BVC BVS CLC CLD CLI CLV CMP CPX "
+                                          "CPY DCP DEC DEX DEY EOR INC INX "
+                                          "INY ISC JMP JSR KIL LAS LAX LDA "
+                                          "LDX LDY LSR NOP ORA PHA PHP PLA "
+                                          "PLP RLA ROL ROR RRA RTI RTS SAX "
+                                          "SBC SEC SED SEI SHX SHY SLO SRE "
+                                          "STA STX STY TAS TAX TAY TSX TXA "
                                           "TXS TYA XAA")
 
 
@@ -79,7 +83,8 @@ class CPU:
         self.Y: int = 0
         self.SP: int = STACK_POINTER_RESET
         self.PC: int = self.read_memory(RESET_VECTOR, MemMode.ABSOLUTE) | \
-                       (self.read_memory(RESET_VECTOR + 1, MemMode.ABSOLUTE) << 8)
+                       (self.read_memory(RESET_VECTOR + 1,
+                                         MemMode.ABSOLUTE) << 8)
         # Flags
         self.C: bool = False  # Carry
         self.Z: bool = False  # Zero
@@ -371,7 +376,8 @@ class CPU:
 
     # arithmetic shift left
     def ASL(self, instruction: Instruction, data: int):
-        src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+        src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
+            self.read_memory(data, instruction.mode))
         self.C = bool(src >> 7)  # carry is set to 7th bit
         src = (src << 1) & 0xFF
         self.setZN(src)
@@ -556,7 +562,8 @@ class CPU:
 
     # logical shift right
     def LSR(self, instruction: Instruction, data: int):
-        src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+        src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
+            self.read_memory(data, instruction.mode))
         self.C = bool(src & 1)  # carry is set to 0th bit
         src >>= 1
         self.setZN(src)
@@ -580,7 +587,8 @@ class CPU:
 
     # push status
     def PHP(self, instruction: Instruction, data: int):
-        self.B = True  # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        self.B = True
         self.stack_push(self.status)
         self.B = False
 
@@ -595,7 +603,8 @@ class CPU:
 
     # rotate one bit left
     def ROL(self, instruction: Instruction, data: int):
-        src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+        src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
+            self.read_memory(data, instruction.mode))
         old_c = self.C
         self.C = bool((src >> 7) & 1)  # carry is set to 7th bit
         src = ((src << 1) | old_c) & 0xFF
@@ -607,7 +616,8 @@ class CPU:
 
     # rotate one bit right
     def ROR(self, instruction: Instruction, data: int):
-        src = self.A if instruction.mode == MemMode.ACCUMULATOR else self.read_memory(data, instruction.mode)
+        src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
+            self.read_memory(data, instruction.mode))
         old_c = self.C
         self.C = bool(src & 1)  # carry is set to 0th bit
         src = ((src >> 1) | (old_c << 7)) & 0xFF
@@ -639,7 +649,8 @@ class CPU:
     def SBC(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         signed_result = self.A - src - (1 - self.C)
-        self.V = bool((self.A ^ src) & (self.A ^ signed_result) & 0x80)  # set overflow
+        # set overflow
+        self.V = bool((self.A ^ src) & (self.A ^ signed_result) & 0x80)
         self.A = (self.A - src - (1 - self.C)) % 256
         self.C = not (signed_result < 0)  # set carry
         self.setZN(self.A)
@@ -712,16 +723,16 @@ class CPU:
         instruction = self.instructions[opcode]
         data = 0
         for i in range(1, instruction.length):
-            data |= (self.read_memory(self.PC + i, MemMode.ABSOLUTE) << ((i - 1) * 8))
+            data |= (self.read_memory(self.PC + i,
+                                      MemMode.ABSOLUTE) << ((i - 1) * 8))
 
-        # Alternative way to call that doesn't require direct function pointers
-        # getattr(self, instruction.type.name)(instruction, data)
         instruction.method(instruction, data)
 
         if not self.jumped:
             self.PC += instruction.length
-        elif instruction.type in [InstructionType.BCC, InstructionType.BCS, InstructionType.BEQ,
-                                  InstructionType.BMI, InstructionType.BNE, InstructionType.BPL,
+        elif instruction.type in [InstructionType.BCC, InstructionType.BCS,
+                                  InstructionType.BEQ, InstructionType.BMI,
+                                  InstructionType.BNE, InstructionType.BPL,
                                   InstructionType.BVC, InstructionType.BVS]:
             # branch instructions are +1 ticks if they succeeded
             self.cpu_ticks += 1
@@ -744,8 +755,9 @@ class CPU:
                 address = (data + self.Y) & 0xFFFF
                 self.page_crossed = different_pages(address, address - self.Y)
             case MemMode.INDEXED_INDIRECT:
-                ls = self.ram[(data + self.X) & 0xFF]  # 0xFF for zero-page wrapping
-                ms = self.ram[(data + self.X + 1) & 0xFF]  # 0xFF for zero-page wrapping
+                # 0xFF for zero-page wrapping in next two lines
+                ls = self.ram[(data + self.X) & 0xFF]
+                ms = self.ram[(data + self.X + 1) & 0xFF]
                 address = (ms << 8) | ls
             case MemMode.INDIRECT:
                 ls = self.ram[data]
@@ -754,14 +766,15 @@ class CPU:
                     ms = self.ram[data & 0xFF00]
                 address = (ms << 8) | ls
             case MemMode.INDIRECT_INDEXED:
-                ls = self.ram[data & 0xFF]  # 0xFF for zero-page wrapping
-                ms = self.ram[(data + 1) & 0xFF]  # 0xFF for zero-page wrapping
+                # 0xFF for zero-page wrapping in next two lines
+                ls = self.ram[data & 0xFF]
+                ms = self.ram[(data + 1) & 0xFF]
                 address = (ms << 8) | ls
                 address = (address + self.Y) & 0xFFFF
                 self.page_crossed = different_pages(address, address - self.Y)
             case MemMode.RELATIVE:
-                address = (self.PC + 2 + data) & 0xFFFF if (data < 0x80) else (self.PC + 2 + (
-                        data - 256)) & 0xFFFF  # signed
+                address = (self.PC + 2 + data) & 0xFFFF if (data < 0x80) \
+                    else (self.PC + 2 + (data - 256)) & 0xFFFF  # signed
             case MemMode.ZEROPAGE:
                 address = data
             case MemMode.ZEROPAGE_X:
@@ -778,7 +791,7 @@ class CPU:
         # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
         if address < 0x2000:  # main ram 2 KB goes up to 0x800
             return self.ram[address % 0x800]  # mirrors for next 6 KB
-        elif address < 0x4000:  # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
+        elif address < 0x4000:  # 2000-2007 is PPU, mirrors every 8 bytes
             temp = ((address % 8) | 0x2000)  # get data from ppu register
             return self.ppu.read_register(temp)
         elif address == 0x4016:  # Joypad 1 status
@@ -818,13 +831,14 @@ class CPU:
         # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
         if address < 0x2000:  # main ram 2 KB goes up to 0x800
             self.ram[address % 0x800] = value  # mirrors for next 6 KB
-        elif address < 0x3FFF:  # 2000-2007 is PPU, up to 3FFF mirrors it every 8 bytes
+        elif address < 0x3FFF:  # 2000-2007 is PPU, mirrors every 8 bytes
             temp = ((address % 8) | 0x2000)  # write data to ppu register
             self.ppu.write_register(temp, value)
         elif address == 0x4014:  # DMA Transfer of Sprite Data
-            from_address = value * 0x100  # this is the address to start copying from
-            for i in range(SPR_RAM_SIZE):  # copy all 256 bytes over to sprite ram
-                self.ppu.spr[i] = self.read_memory((from_address + i), MemMode.ABSOLUTE)
+            from_address = value * 0x100  # address to start copying from
+            for i in range(SPR_RAM_SIZE):  # copy all 256 bytes to sprite ram
+                self.ppu.spr[i] = self.read_memory((from_address + i),
+                                                   MemMode.ABSOLUTE)
             # stall for 512 cycles while this completes
             self.stall = 512
         elif address == 0x4016:  # Joypad 1
@@ -860,14 +874,16 @@ class CPU:
         self.Z = bool(temp & 0b00000010)
         self.I = bool(temp & 0b00000100)
         self.D = bool(temp & 0b00001000)
-        self.B = False  # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        self.B = False
         self.V = bool(temp & 0b01000000)
         self.N = bool(temp & 0b10000000)
 
     def trigger_NMI(self):
         self.stack_push((self.PC >> 8) & 0xFF)
         self.stack_push(self.PC & 0xFF)
-        self.B = True  # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        self.B = True
         self.stack_push(self.status)
         self.B = False
         self.I = True
@@ -878,7 +894,9 @@ class CPU:
     def log(self) -> str:
         opcode = self.read_memory(self.PC, MemMode.ABSOLUTE)
         instruction = self.instructions[opcode]
-        data1 = "  " if instruction.length < 2 else f"{self.read_memory(self.PC + 1, MemMode.ABSOLUTE):02X}"
-        data2 = "  " if instruction.length < 3 else f"{self.read_memory(self.PC + 2, MemMode.ABSOLUTE):02X}"
+        data1 = "  " if instruction.length < 2 else f"{self.read_memory(self.PC + 1, 
+                                                                        MemMode.ABSOLUTE):02X}"
+        data2 = "  " if instruction.length < 3 else f"{self.read_memory(self.PC + 2, 
+                                                                        MemMode.ABSOLUTE):02X}"
         return f"{self.PC:04X}  {opcode:02X} {data1} {data2}  {instruction.type.name}{29 * ' '}" \
                f"A:{self.A:02X} X:{self.X:02X} Y:{self.Y:02X} P:{self.status:02X} SP:{self.SP:02X}"

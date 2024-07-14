@@ -41,7 +41,7 @@ class Statement(Node):
 
 
 # A numeric expression is something that can be computed into a number
-# This is a super class of literals, variables and simple arithmetic operations
+# This is a super class of literals, variables & simple arithmetic operations
 @dataclass(frozen=True)
 class NumericExpression(Node):
     pass
@@ -120,7 +120,7 @@ class ReturnStatement(Statement):
     pass
 
 
-# A PRINT statement with all the things that it is meant to print (comma separated)
+# A PRINT statement with all that it is meant to print (comma separated)
 @dataclass(frozen=True)
 class PrintStatement(Statement):
     printables: list[str | NumericExpression]

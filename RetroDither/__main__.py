@@ -37,8 +37,8 @@ def prepare(file_name: str) -> Image.Image:
 
 if __name__ == "__main__":
     argument_parser = ArgumentParser("RetroDither")
-    argument_parser.add_argument("image_file", help="The input image file.")
-    argument_parser.add_argument("output_file", help="The resulting MacPaint file.")
+    argument_parser.add_argument("image_file", help="Input image file.")
+    argument_parser.add_argument("output_file", help="Resulting MacPaint file.")
     argument_parser.add_argument('-g', '--gif', default=False, action='store_true',
                                  help='Create an output gif as well.')
     arguments = argument_parser.parse_args()

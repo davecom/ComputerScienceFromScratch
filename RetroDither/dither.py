@@ -27,8 +27,9 @@ class PatternPart(NamedTuple):
     denominator: int
 
 
-ATKINSON = [PatternPart(1, 0, 1, 8), PatternPart(2, 0, 1, 8), PatternPart(-1, 1, 1, 8),
-            PatternPart(0, 1, 1, 8), PatternPart(1, 1, 1, 8), PatternPart(0, 2, 1, 8)]
+ATKINSON = [PatternPart(1, 0, 1, 8), PatternPart(2, 0, 1, 8),
+            PatternPart(-1, 1, 1, 8), PatternPart(0, 1, 1, 8),
+            PatternPart(1, 1, 1, 8), PatternPart(0, 2, 1, 8)]
 
 
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)

@@ -93,7 +93,8 @@ def run(rom: ROM, name: str):
 if __name__ == "__main__":
     # Parse the file argument
     file_parser = ArgumentParser("NESEmulator")
-    file_parser.add_argument("rom_file", help="A file containing an NES game in iNES format.")
+    file_parser.add_argument("rom_file",
+                             help="An NES game file in iNES format.")
     arguments = file_parser.parse_args()
     game = ROM(arguments.rom_file)
     run(game, arguments.rom_file)

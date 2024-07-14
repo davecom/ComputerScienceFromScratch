@@ -125,7 +125,7 @@ class Impressionist:
             return False
 
         if experiment():
-            # Try expanding every direction, keep expanding in any directions that are better
+            # Try expanding every direction, keep going in better directions
             for index in range(len(coordinates)):
                 for amount in (-1, 1):
                     while True:
