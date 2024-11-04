@@ -29,19 +29,10 @@
 from NanoBASIC.tokenizer import Token
 from typing import cast
 from NanoBASIC.nodes import *
+from NanoBASIC.errors import ParserError
 
 
 class Parser:
-    class ParserError(Exception):
-        def __init__(self, message: str, token: Token):
-            self.message = message
-            self.line_num = token.line_num
-            self.column = token.col_start
-
-        def __str__(self):
-            return (f"{self.message} Occurred at line {self.line_num} "
-                    f"and column {self.column}")
-
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.token_index: int = 0
@@ -53,8 +44,8 @@ class Parser:
     @property
     def current(self) -> Token:
         if self.out_of_tokens:
-            raise (Parser.ParserError(f"No tokens after "
-                                      f"{self.previous.kind}", self.previous))
+            raise (ParserError(f"No tokens after "
+                               f"{self.previous.kind}", self.previous))
         return self.tokens[self.token_index]
 
     @property
@@ -65,8 +56,8 @@ class Parser:
         if self.current.kind is kind:
             self.token_index += 1
             return self.previous
-        raise Parser.ParserError(f"Expected {kind} after {self.previous}"
-                                 f"but got {self.current}.", self.current)
+        raise ParserError(f"Expected {kind} after {self.previous}"
+                          f"but got {self.current}.", self.current)
 
     def parse(self) -> list[Statement]:
         statements: list[Statement] = []
@@ -93,8 +84,8 @@ class Parser:
                 return self.parse_gosub(line_id)
             case TokenType.RETURN_T:
                 return self.parse_return(line_id)
-        raise Parser.ParserError("Expected to find start of statement.",
-                                 self.current)
+        raise ParserError("Expected to find start of statement.",
+                          self.current)
 
     # PRINT "COMMA",SEPARATED,7154
     def parse_print(self, line_id: int) -> PrintStatement:
@@ -110,8 +101,8 @@ class Parser:
                 printables.append(expression)
                 last_col = expression.col_end
             else:
-                raise Parser.ParserError("Only strings and numeric expressions "
-                                         "allowed in print list.", self.current)
+                raise ParserError("Only strings and numeric expressions "
+                                  "allowed in print list.", self.current)
             # Comma means there's more to print
             if not self.out_of_tokens and self.current.kind is TokenType.COMMA:
                 self.consume(TokenType.COMMA)
@@ -166,15 +157,15 @@ class Parser:
     # NUMERIC_EXPRESSION BOOLEAN_OPERATOR NUMERIC_EXPRESSION
     def parse_boolean_expression(self) -> BooleanExpression:
         left = self.parse_numeric_expression()
-        if self.current.kind in [TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.EQUAL,
-                                 TokenType.LESS, TokenType.LESS_EQUAL, TokenType.NOT_EQUAL]:
+        if self.current.kind in {TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.EQUAL,
+                                 TokenType.LESS, TokenType.LESS_EQUAL, TokenType.NOT_EQUAL}:
             operator = self.consume(self.current.kind)
             right = self.parse_numeric_expression()
             return BooleanExpression(line_num=left.line_num,
                                      col_start=left.col_start, col_end=right.col_end,
                                      operator=operator.kind, left_expr=left, right_expr=right)
-        raise Parser.ParserError(f"Expected boolean operator but found "
-                                 f"{self.current.kind}.", self.current)
+        raise ParserError(f"Expected boolean operator but found "
+                          f"{self.current.kind}.", self.current)
 
     def parse_numeric_expression(self) -> NumericExpression:
         left = self.parse_term()
@@ -235,7 +226,7 @@ class Parser:
             self.consume(TokenType.OPEN_PAREN)
             expression = self.parse_numeric_expression()
             if self.current.kind is not TokenType.CLOSE_PAREN:
-                raise Parser.ParserError("Expected matching close parenthesis.", self.current)
+                raise ParserError("Expected matching close parenthesis.", self.current)
             self.consume(TokenType.CLOSE_PAREN)
             return expression
         elif self.current.kind is TokenType.MINUS:
@@ -244,4 +235,4 @@ class Parser:
             return UnaryOperation(line_num=minus.line_num,
                                   col_start=minus.col_start, col_end=expression.col_end,
                                   operator=TokenType.MINUS, expr=expression)
-        raise Parser.ParserError("Unexpected token in numeric expression.", self.current)
+        raise ParserError("Unexpected token in numeric expression.", self.current)

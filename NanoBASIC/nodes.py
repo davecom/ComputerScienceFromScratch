@@ -47,7 +47,7 @@ class NumericExpression(Node):
     pass
 
 
-# A numeric expression with two operands like +, -, *, and /
+# A numeric expression with two operands like 2 + 2 or 8 / 4
 @dataclass(frozen=True)
 class BinaryOperation(NumericExpression):
     operator: TokenType
@@ -58,7 +58,7 @@ class BinaryOperation(NumericExpression):
         return f"{self.left_expr} {self.operator} {self.right_expr}"
 
 
-# A numeric expression with one operand like -
+# A numeric expression with one operand like -4
 @dataclass(frozen=True)
 class UnaryOperation(NumericExpression):
     operator: TokenType

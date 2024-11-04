@@ -20,6 +20,7 @@
 import unittest
 import sys
 import os
+from pathlib import Path
 from io import StringIO
 from Brainfuck.brainfuck import Brainfuck
 
@@ -37,7 +38,7 @@ class BrainfuckTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Change working directory to this file so we can easily access
         # the Examples directory where the test Brainfuck code resides
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(Path(__file__).resolve().parent)
 
     def test_hello_world(self):
         program_output = run("../Brainfuck/Examples/hello_world_verbose.bf")

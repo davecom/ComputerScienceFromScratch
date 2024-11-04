@@ -18,6 +18,7 @@
 # Tries running multiple different tests to verify the correctness of our emulator.
 import unittest
 import os
+from pathlib import Path
 from NESEmulator.cpu import CPU
 from NESEmulator.ppu import PPU
 from NESEmulator.rom import ROM
@@ -27,7 +28,7 @@ class CPUTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Change working directory to this file so we can easily access
         # the Tests directory where the test ROMs and logs reside
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(Path(__file__).resolve().parent)
 
     def test_nes_test(self):
         # Create machinery that we are testing

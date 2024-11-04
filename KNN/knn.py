@@ -55,7 +55,7 @@ class KNN[DP: DataPoint]:
         neighbors = self.nearest(k, data_point)
         return Counter(neighbor.kind for neighbor in neighbors).most_common(1)[0][0]
 
-    # Predict a  numeric property of a data point based on the k nearest neighbors
+    # Predict a numeric property of a data point based on the k nearest neighbors
     # Find the average of that property from the neighbors and return it
     def predict(self, k: int, data_point: DP, property_name: str) -> float:
         neighbors = self.nearest(k, data_point)

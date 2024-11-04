@@ -19,6 +19,7 @@
 import unittest
 import os
 import csv
+from pathlib import Path
 from KNN.knn import KNN
 from KNN.fish import Fish
 from KNN.digit import Digit
@@ -27,7 +28,7 @@ from KNN.digit import Digit
 class FishTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Change working directory to this file to get datasets
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(Path(__file__).resolve().parent)
 
     def test_nearest(self):
         k: int = 3

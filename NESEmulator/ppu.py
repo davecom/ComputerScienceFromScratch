@@ -41,7 +41,7 @@ class PPU:
         # PPU Memory
         self.spr = array('B', [0] * SPR_RAM_SIZE)  # sprite ram
         self.nametables = array('B', [0] * NAMETABLE_SIZE)  # nametable ram
-        self.palette = array('B', [0] * PALETTE_SIZE)  # pallete ram
+        self.palette = array('B', [0] * PALETTE_SIZE)  # palette ram
         # Registers
         self.addr = 0  # main PPU address register
         self.addr_write_latch = False

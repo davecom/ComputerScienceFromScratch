@@ -36,7 +36,7 @@ class ROM:
                 print("Invalid ROM Header Signature")
             else:
                 print("Valid ROM Header Signature")
-            # Untangle Mapper - one nybble in flags6 and one nybble in flags7
+            # Untangle Mapper - one nibble in flags6 and one nibble in flags7
             self.mapper = (self.header.flags7 & 0xF0) | (
                     (self.header.flags6 & 0xF0) >> 4)
             print(f"Mapper {self.mapper}")

@@ -20,6 +20,7 @@
 import unittest
 import sys
 import os
+from pathlib import Path
 from io import StringIO
 from NanoBASIC.executioner import execute
 
@@ -37,7 +38,7 @@ class NanoBASICTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Change working directory to this file so we can easily access
         # the Examples directory where the test NanoBASIC code resides
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        os.chdir(Path(__file__).resolve().parent)
 
     def test_print1(self):
         program_output = run("../NanoBASIC/Examples/print1.bas")

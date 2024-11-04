@@ -21,20 +21,11 @@
 # just an array of statement nodes; each node is something of a tree in itself. The interpreter
 # translates the meaning of each statement node into Python code that can be run "live."
 from NanoBASIC.nodes import *
+from NanoBASIC.errors import InterpreterError
 from collections import deque
 
 
 class Interpreter:
-    class InterpreterError(Exception):
-        def __init__(self, message: str, node: Node):
-            self.message = message
-            self.line_num = node.line_num
-            self.column = node.col_start
-
-        def __str__(self):
-            return (f"{self.message} Occurred at line {self.line_num} "
-                    f"and column {self.column}")
-
     def __init__(self, statements: list[Statement]):
         self.statements = statements
         self.variable_table: dict[str, int] = {}
@@ -75,17 +66,17 @@ class Interpreter:
                 if (line_index := self.find_line_index(go_to_line_id)) is not None:
                     self.statement_index = line_index
                 else:
-                    raise Interpreter.InterpreterError("No GOTO line id.", self.current)
+                    raise InterpreterError("No GOTO line id.", self.current)
             case GoSubStatement(line_expr=line_expr):
                 go_sub_line_id = self.evaluate_numeric(line_expr)
                 if (line_index := self.find_line_index(go_sub_line_id)) is not None:
                     self.subroutine_stack.append(self.statement_index + 1)  # Setup for RETURN
                     self.statement_index = line_index
                 else:
-                    raise Interpreter.InterpreterError("No GOSUB line id.", self.current)
+                    raise InterpreterError("No GOSUB line id.", self.current)
             case ReturnStatement():
                 if not self.subroutine_stack:  # Check if the stack is empty
-                    raise Interpreter.InterpreterError("RETURN without GOSUB.", self.current)
+                    raise InterpreterError("RETURN without GOSUB.", self.current)
                 self.statement_index = self.subroutine_stack.pop()
             case PrintStatement(printables=printables):
                 accumulated_string: str = ""
@@ -104,8 +95,8 @@ class Interpreter:
                 else:
                     self.statement_index += 1
             case _:
-                raise Interpreter.InterpreterError(f"Unexpected item {self.current} "
-                                                   f"in statement list.", self.current)
+                raise InterpreterError(f"Unexpected item {self.current} "
+                                       f"in statement list.", self.current)
 
     def evaluate_numeric(self, numeric_expression: NumericExpression) -> int:
         match numeric_expression:
@@ -115,14 +106,14 @@ class Interpreter:
                 if name in self.variable_table:
                     return self.variable_table[name]
                 else:
-                    raise Interpreter.InterpreterError(f"Var {name} used "
-                                                       f"before initialized.", numeric_expression)
+                    raise InterpreterError(f"Var {name} used "
+                                           f"before initialized.", numeric_expression)
             case UnaryOperation(operator=operator, expr=expr):
                 if operator is TokenType.MINUS:
                     return -self.evaluate_numeric(expr)
                 else:
-                    raise Interpreter.InterpreterError(f"Expected - "
-                                                       f"but got {operator}.", numeric_expression)
+                    raise InterpreterError(f"Expected - "
+                                           f"but got {operator}.", numeric_expression)
             case BinaryOperation(operator=operator, left_expr=left, right_expr=right):
                 if operator is TokenType.PLUS:
                     return self.evaluate_numeric(left) + self.evaluate_numeric(right)
@@ -133,11 +124,11 @@ class Interpreter:
                 elif operator is TokenType.DIVIDE:
                     return self.evaluate_numeric(left) // self.evaluate_numeric(right)
                 else:
-                    raise Interpreter.InterpreterError(f"Unexpected binary operator "
-                                                       f"{operator}.", numeric_expression)
+                    raise InterpreterError(f"Unexpected binary operator "
+                                           f"{operator}.", numeric_expression)
             case _:
-                raise Interpreter.InterpreterError("Expected numeric expression.",
-                                                   numeric_expression)
+                raise InterpreterError("Expected numeric expression.",
+                                       numeric_expression)
 
     def evaluate_boolean(self, boolean_expression: BooleanExpression) -> bool:
         left = self.evaluate_numeric(boolean_expression.left_expr)
@@ -156,5 +147,5 @@ class Interpreter:
             case TokenType.NOT_EQUAL:
                 return left != right
             case _:
-                raise Interpreter.InterpreterError(f"Unexpected boolean operator "
-                                                   f"{boolean_expression.operator}.", boolean_expression)
+                raise InterpreterError(f"Unexpected boolean operator "
+                                       f"{boolean_expression.operator}.", boolean_expression)
