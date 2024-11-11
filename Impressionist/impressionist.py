@@ -143,7 +143,7 @@ class Impressionist:
         output_size = (int(original_width * ratio), int(original_height * ratio))
         output_image = Image.new("RGB", output_size, average_color)
         output_draw = ImageDraw.Draw(output_image)
-        svg = SVG(*output_size, average_color) if vector else None
+        svg = SVG(*output_size, average_color) if vector else None  # type: ignore
         animation_frames = [] if animation_length > 0 else None
         for coordinate_list, color in self.shapes:
             coordinates = [int(x * ratio) for x in coordinate_list]

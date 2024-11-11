@@ -42,19 +42,20 @@ def dither(image: Image.Image) -> array:
             row = r + part.dr
             if col < 0 or col >= image.width or row >= image.height:
                 continue
+            current_pixel: float = image.getpixel((col, row))  # type: ignore
             # Add *error_part* to the pixel at (*col*, *row*) in *image*
             error_part = (error * part.numerator) // part.denominator
-            image.putpixel((col, row), image.getpixel((col, row)) + error_part)
+            image.putpixel((col, row), current_pixel + error_part)
 
     result = array('B', [0] * (image.width * image.height))
     for y in range(image.height):
         for x in range(image.width):
-            old_pixel = image.getpixel((x, y))
+            old_pixel: float = image.getpixel((x, y))  # type: ignore
             # Every new pixel is either solid white or solid black
             # since this is all that the original Macintosh supported
             new_pixel = 255 if old_pixel > THRESHOLD else 0
             result[y * image.width + x] = new_pixel
-            difference = (old_pixel - new_pixel)
+            difference = int(old_pixel - new_pixel)
             # Disperse error amongst nearby upcoming pixels
             diffuse(x, y, difference, ATKINSON)
 
