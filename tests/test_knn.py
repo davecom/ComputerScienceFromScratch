@@ -31,7 +31,7 @@ class FishTestCase(unittest.TestCase):
 
     def test_nearest(self):
         k: int = 3
-        fish_knn = KNN(Fish, str(self.data_file))
+        fish_knn = KNN(Fish, self.data_file)
         test_fish: Fish = Fish("", 0.0, 30.0, 32.5, 38.0, 12.0, 5.0)
         nearest_fish: list[Fish] = fish_knn.nearest(k, test_fish)
         self.assertEqual(len(nearest_fish), k)
@@ -42,7 +42,7 @@ class FishTestCase(unittest.TestCase):
 
     def test_classify(self):
         k: int = 5
-        fish_knn = KNN(Fish, str(self.data_file))
+        fish_knn = KNN(Fish, self.data_file)
         test_fish: Fish = Fish("", 0.0, 20.0, 23.5, 24.0, 10.0, 4.0)
         classify_fish: str = fish_knn.classify(k, test_fish)
         self.assertEqual(classify_fish, "Parkki")

@@ -15,7 +15,7 @@
 # limitations under the License.
 from KNN.knn import KNN
 from KNN.digit import Digit
-import os
+from pathlib import Path
 import sys
 import pygame
 import numpy as np
@@ -33,9 +33,9 @@ def run():
     digit_pixels = np.zeros((PIXEL_HEIGHT, PIXEL_WIDTH, 3),
                             dtype=np.uint32)
     # Load the training data
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    digits_knn = KNN(Digit, './datasets/digits/digits.csv',
-                     has_header=False)
+    digits_file = (Path(__file__).resolve().parent
+                   / "datasets" / "digits" / "digits.csv")
+    digits_knn = KNN(Digit, digits_file, has_header=False)
     # Startup Pygame, create the window
     pygame.init()
     screen = pygame.display.set_mode(size=(PIXEL_WIDTH, PIXEL_HEIGHT),
