@@ -180,7 +180,7 @@ class PPU:
         if address == 0x2002:
             self.addr_write_latch = False
             current = self.status
-            self.status &= 0b01111111  # clear vblank on read to $2002
+            self.status &= 0b01111111  # clear vblank on read to 0x2002
             return current
         elif address == 0x2004:
             return self.spr[self.spr_address]
@@ -191,7 +191,7 @@ class PPU:
             else:
                 value = self.read_memory(self.addr)
                 self.buffer2007 = self.read_memory(self.addr - 0x1000)
-            # every read to $2007 there is an increment
+            # every read to 0x2007 there is an increment
             self.addr += self.address_increment
             return value
         else:

@@ -56,7 +56,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/01-basics.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -70,7 +70,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/02-implied.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -84,7 +84,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/10-branches.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -98,7 +98,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/11-stack.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -112,7 +112,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/12-jmp_jsr.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -126,7 +126,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/13-rts.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -140,7 +140,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/14-rti.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -154,7 +154,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/15-brk.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
@@ -168,7 +168,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM("../NESEmulator/Tests/instr_test-v5/rom_singles/16-special.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Tests run as long as $6000 is 80, and then $6000 is result code; 0 means success
+        # Tests run as long as 0x6000 is 80, and then 0x6000 is result code; 0 means success
         rom.prg_ram[0] = 0x80
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()

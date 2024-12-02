@@ -48,46 +48,31 @@ def run(rom: ROM, name: str):
             if (ppu.scanline == 241) and (ppu.cycle == 2) and ppu.generate_nmi:
                 cpu.trigger_NMI()
         ticks += new_ticks
-        # Handle keyboard events as joypad changes
+
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                match event.key:
-                    case pygame.K_LEFT:
-                        cpu.joypad1.left = True
-                    case pygame.K_RIGHT:
-                        cpu.joypad1.right = True
-                    case pygame.K_UP:
-                        cpu.joypad1.up = True
-                    case pygame.K_DOWN:
-                        cpu.joypad1.down = True
-                    case pygame.K_x:
-                        cpu.joypad1.a = True
-                    case pygame.K_z:
-                        cpu.joypad1.b = True
-                    case pygame.K_s:
-                        cpu.joypad1.start = True
-                    case pygame.K_a:
-                        cpu.joypad1.select = True
-            elif event.type == pygame.KEYUP:
-                match event.key:
-                    case pygame.K_LEFT:
-                        cpu.joypad1.left = False
-                    case pygame.K_RIGHT:
-                        cpu.joypad1.right = False
-                    case pygame.K_UP:
-                        cpu.joypad1.up = False
-                    case pygame.K_DOWN:
-                        cpu.joypad1.down = False
-                    case pygame.K_x:
-                        cpu.joypad1.a = False
-                    case pygame.K_z:
-                        cpu.joypad1.b = False
-                    case pygame.K_s:
-                        cpu.joypad1.start = False
-                    case pygame.K_a:
-                        cpu.joypad1.select = False
-            elif event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 sys.exit()
+            # Handle keyboard events as joypad changes
+            if event.type not in {pygame.KEYDOWN, pygame.KEYUP}:
+                continue
+            is_keydown = event.type == pygame.KEYDOWN
+            match event.key:
+                case pygame.K_LEFT:
+                    cpu.joypad1.left = is_keydown
+                case pygame.K_RIGHT:
+                    cpu.joypad1.right = is_keydown
+                case pygame.K_UP:
+                    cpu.joypad1.up = is_keydown
+                case pygame.K_DOWN:
+                    cpu.joypad1.down = is_keydown
+                case pygame.K_x:
+                    cpu.joypad1.a = is_keydown
+                case pygame.K_z:
+                    cpu.joypad1.b = is_keydown
+                case pygame.K_s:
+                    cpu.joypad1.start = is_keydown
+                case pygame.K_a:
+                    cpu.joypad1.select = is_keydown
 
 
 if __name__ == "__main__":

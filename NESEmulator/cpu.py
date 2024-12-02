@@ -730,10 +730,10 @@ class CPU:
 
         if not self.jumped:
             self.PC += instruction.length
-        elif instruction.type in [InstructionType.BCC, InstructionType.BCS,
+        elif instruction.type in {InstructionType.BCC, InstructionType.BCS,
                                   InstructionType.BEQ, InstructionType.BMI,
                                   InstructionType.BNE, InstructionType.BPL,
-                                  InstructionType.BVC, InstructionType.BVS]:
+                                  InstructionType.BVC, InstructionType.BVS}:
             # branch instructions are +1 ticks if they succeeded
             self.cpu_ticks += 1
         self.cpu_ticks += instruction.ticks

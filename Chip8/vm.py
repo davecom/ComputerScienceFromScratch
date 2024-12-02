@@ -115,7 +115,7 @@ class VM:
                 old_bit = self.display_buffer[px, py] & 1
                 if new_bit & old_bit:  # If both set, flip white -> black
                     flipped_black = True
-                # Chip 8 draws by XORing, which flips everything
+                # Chip 8 draws by XORing
                 new_pixel = new_bit ^ old_bit
                 self.display_buffer[px, py] = WHITE if new_pixel else BLACK
         # set flipped flag for collision detection
