@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 import csv
 from typing import Protocol, Self
 from collections import Counter
@@ -29,14 +30,14 @@ class DataPoint(Protocol):
 
 
 class KNN[DP: DataPoint]:
-    def __init__(self, data_point_type: type[DP], file_path: str,
+    def __init__(self, data_point_type: type[DP], file_path: str | Path,
                  has_header: bool = True) -> None:
         self.data_point_type = data_point_type
         self.data_points = []
         self._read_csv(file_path, has_header)
 
     # Read a CSV file and return a list of data points
-    def _read_csv(self, file_path: str, has_header: bool) -> None:
+    def _read_csv(self, file_path: str | Path, has_header: bool) -> None:
         with open(file_path, 'r') as f:
             reader = csv.reader(f)
             if has_header:

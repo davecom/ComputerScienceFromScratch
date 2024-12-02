@@ -13,8 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+
+
 class Brainfuck:
-    def __init__(self, file_name: str):
+    def __init__(self, file_name: str | Path):
         # Open text file and store in instance variable
         with open(file_name, "r") as text_file:
             self.source_code: str = text_file.read()

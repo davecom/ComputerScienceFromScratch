@@ -17,9 +17,8 @@
 # DESCRIPTION
 # Tries running multiple different tests to verify the correctness of our KNN implementation.
 import unittest
-import os
-import csv
 from pathlib import Path
+import csv
 from KNN.knn import KNN
 from KNN.fish import Fish
 from KNN.digit import Digit
@@ -27,12 +26,12 @@ from KNN.digit import Digit
 
 class FishTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        # Change working directory to this file to get datasets
-        os.chdir(Path(__file__).resolve().parent)
+        self.data_file = (Path(__file__).resolve().parent.parent
+                          / "KNN" / "datasets" / "fish" / "fish.csv")
 
     def test_nearest(self):
         k: int = 3
-        fish_knn = KNN(Fish, '../KNN/datasets/fish/fish.csv')
+        fish_knn = KNN(Fish, str(self.data_file))
         test_fish: Fish = Fish("", 0.0, 30.0, 32.5, 38.0, 12.0, 5.0)
         nearest_fish: list[Fish] = fish_knn.nearest(k, test_fish)
         self.assertEqual(len(nearest_fish), k)
@@ -43,14 +42,14 @@ class FishTestCase(unittest.TestCase):
 
     def test_classify(self):
         k: int = 5
-        fish_knn = KNN(Fish, '../KNN/datasets/fish/fish.csv')
+        fish_knn = KNN(Fish, str(self.data_file))
         test_fish: Fish = Fish("", 0.0, 20.0, 23.5, 24.0, 10.0, 4.0)
         classify_fish: str = fish_knn.classify(k, test_fish)
         self.assertEqual(classify_fish, "Parkki")
 
     def test_predict(self):
         k: int = 5
-        fish_knn = KNN(Fish, '../KNN/datasets/fish/fish.csv')
+        fish_knn = KNN(Fish, self.data_file)
         test_fish: Fish = Fish("", 0.0, 20.0, 23.5, 24.0, 10.0, 4.0)
         predict_fish: float = fish_knn.predict(k, test_fish, "weight")
         self.assertEqual(predict_fish, 165.0)
@@ -58,15 +57,16 @@ class FishTestCase(unittest.TestCase):
 
 class DigitsTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        # Change working directory to this file to get datasets
-        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        self.data_file = (Path(__file__).resolve().parent.parent
+                          / "KNN" / "datasets" / "digits" / "digits.csv")
+        self.test_file = (Path(__file__).resolve().parent.parent
+                          / "KNN" / "datasets" / "digits" / "digits_test.csv")
 
     def test_digits_test_set(self):
         k: int = 1
-        digits_knn = KNN(Digit, '../KNN/datasets/digits/digits.csv',
-                         has_header=False)
+        digits_knn = KNN(Digit, self.data_file, has_header=False)
         test_data_points: list[Digit] = []
-        with open('../KNN/datasets/digits/digits_test.csv', 'r') as f:
+        with open(self.test_file, 'r') as f:
             reader = csv.reader(f)
             for row in reader:
                 test_data_points.append(Digit.from_string_data(row))

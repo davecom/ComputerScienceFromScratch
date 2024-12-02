@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from struct import unpack
 from collections import namedtuple
 from array import array
@@ -27,8 +28,8 @@ PRG_RAM_SIZE = 8192
 
 
 class ROM:
-    def __init__(self, filename: str):
-        with open(filename, "rb") as file:
+    def __init__(self, file_name: str | Path):
+        with open(file_name, "rb") as file:
             # Read Header and Check Signature "NES"
             self.header = Header._make(unpack("!LBBBBBBB5s",
                                               file.read(HEADER_SIZE)))

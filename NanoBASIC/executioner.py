@@ -13,12 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from NanoBASIC.tokenizer import tokenize
 from NanoBASIC.parser import Parser
 from NanoBASIC.interpreter import Interpreter
 
 
-def execute(file_name: str):
+def execute(file_name: str | Path):
     # Load the text file from the argument
     # Tokenize, parse, and execute it
     with open(file_name, "r") as text_file:
