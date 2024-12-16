@@ -4,13 +4,13 @@ This repository contains all of the source code for the book *[Fun Computer Scie
 
 | Project       | Chapter | Section                       | Description                                                                                                                                                              |
 |---------------|---------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Brainfuck](#brainfuck)     | 1       | Interpreters                  | An interpreter for the one of the simplest possible programming languages, Brainfuck.                                                                                    |
-| [NanoBASIC](#nanobasic)     | 2       | Interpreters                  | An interpreter for Nano BASIC, a dialect of Tiny BASIC—a programming language that was used during the personal computer revolution.                                     |
-| [RetroDither](#retrodither)   | 3       | Computer Art                  | A program that converts modern photos for display on a classic 1980s Mac by performing 1-bit (black & white) Atkinson dithering and converting them to MacPaint format.  |
-| [Impressionist](#impressionist) | 4       | Computer Art                  | Impressionist uses a simple stochastic hill climbing algorithm to create abstract art from photographs that (sometimes) looks like the work of an impressionist painter. |
-| [Chip8](#chip8)         | 5       | Emulators                     | An implementation of the CHIP-8 virtual machine that can play all of the 1970s games that were released for CHIP-8.                                                      |
-| [NESEmulator](#nesemulator)   | 6       | Emulators                     | The simplest possible NES emulator with support for playing real games but lacking sound, performance, compatibility with most mappers, and several other features.      |
-| [KNN](#knn)           | 7 & 8   | Super Simple Machine Learning | You draw a digit and the program can interpret your drawing (KNN classification) and/or complete it (KNN regression).                                                    |
+| [Brainfuck](#brainfuck-chapter-1)     | 1       | Interpreters                  | An interpreter for the one of the simplest possible programming languages, Brainfuck.                                                                                    |
+| [NanoBASIC](#nanobasic-chapter-2)     | 2       | Interpreters                  | An interpreter for Nano BASIC, a dialect of Tiny BASIC—a programming language that was used during the personal computer revolution.                                     |
+| [RetroDither](#retrodither-chapter-3)   | 3       | Computer Art                  | A program that converts modern photos for display on a classic 1980s Mac by performing 1-bit (black & white) Atkinson dithering and converting them to MacPaint format.  |
+| [Impressionist](#impressionist-chapter-4) | 4       | Computer Art                  | Impressionist uses a simple stochastic hill climbing algorithm to create abstract art from photographs that (sometimes) looks like the work of an impressionist painter. |
+| [Chip8](#chip8-chapter-5)         | 5       | Emulators                     | An implementation of the CHIP-8 virtual machine that can play all of the 1970s games that were released for CHIP-8.                                                      |
+| [NESEmulator](#nesemulator-chapter-6)   | 6       | Emulators                     | The simplest possible NES emulator with support for playing real games but lacking sound, performance, compatibility with most mappers, and several other features.      |
+| [KNN](#knn-chapters-7--8)           | 7 & 8   | Super Simple Machine Learning | You draw a digit and the program can interpret your drawing (KNN classification) and/or complete it (KNN regression).                                                    |
 
 ## Get the Book
 
