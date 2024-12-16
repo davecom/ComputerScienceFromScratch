@@ -1,16 +1,26 @@
 # Fun Computer Science Projects in Python
 
-Source for the book *Fun Computer Science Projects in Python* by [David Kopec](https://davekopec.com).
+This repository contains all of the source code for the book *[Fun Computer Science Projects in Python](https://nostarch.com/fun-python-projects)* by [David Kopec](https://davekopec.com) and published by No Starch Press. The book, intended for intermediate to advanced Python programmers, features 7 projects of varying complexity from the realm of interpreters, emulators, computer art, and simple machine learning. In the table below is a description of the 7 projects and further down in this README there are directions for running (and testing) each of them. The projects are compatible with Python 3.12 and above.
+
+| Project       | Chapter | Section                       | Description                                                                                                                                                              |
+|---------------|---------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Brainfuck](#brainfuck)     | 1       | Interpreters                  | An interpreter for the one of the simplest possible programming languages, Brainfuck.                                                                                    |
+| [NanoBASIC](#nanobasic)     | 2       | Interpreters                  | An interpreter for Nano BASIC, a dialect of Tiny BASIC—a programming language that was used during the personal computer revolution.                                     |
+| [RetroDither](#retrodither)   | 3       | Computer Art                  | A program that converts modern photos for display on a classic 1980s Mac by performing 1-bit (black & white) Atkinson dithering and converting them to MacPaint format.  |
+| [Impressionist](#impressionist) | 4       | Computer Art                  | Impressionist uses a simple stochastic hill climbing algorithm to create abstract art from photographs that (sometimes) looks like the work of an impressionist painter. |
+| [Chip8](#chip8)         | 5       | Emulators                     | An implementation of the CHIP-8 virtual machine that can play all of the 1970s games that were released for CHIP-8.                                                      |
+| [NESEmulator](#nesemulator)   | 6       | Emulators                     | The simplest possible NES emulator with support for playing real games but lacking sound, performance, compatibility with most mappers, and several other features.      |
+| [KNN](#knn)           | 7 & 8   | Super Simple Machine Learning | You draw a digit and the program can interpret your drawing (KNN classification) and/or complete it (KNN regression).                                                    |
 
 ## Get the Book
 
-## Authorship and License
-
-The code in this repository is Copyright 2024 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. Please read the license for details and other requirements. 
+[The book is available now, in its entirety, from No Starch Press.](https://nostarch.com/fun-python-projects) Although this is technically an "Early Access" eBook edition, it is essentially the same exact book as will be published by No Starch Press in print form in mid 2025. You can choose to either purchase the eBook now, or pre-purchase the print book which will also give you immediate access to the eBook.
 
 ## Running and Testing Each Project
 
-The following directions assume you are in the root directory of the repository in a terminal and that your Python command is `python` (on some systems it is `python3`). The code is written against Python 3.12, although most of it will run with Python 3.9+.
+The following directions assume you are in the root directory of the repository in a terminal and that your Python command is `python` (on some systems it is `python3`). The code is tested against Python 3.12 and 3.13. It will not work with earlier versions. 
+
+**Please note that each project is run as a module from the main repository using the `-m` option.**
 
 ### Brainfuck (Chapter 1)
 
@@ -54,6 +64,8 @@ For example:
 
 ### RetroDither (Chapter 3)
 
+<img src="figures/figure3_2.png" alt="RetroDither MacPaint Beach Scene" height="200">
+
 Dithers images into 1 bit black & white and exports them to MacPaint format.
 
 #### Requirements
@@ -73,6 +85,8 @@ Additional options:
 `-g` output a .gif format version as well
 
 ### Impressionist (Chapter 4)
+
+<img src="figures/figure4_7.png" alt="Impressionist NYC Skyline" height="200">
 
 Computationally draws abstract approximations of images using vector shapes.
 
@@ -111,6 +125,8 @@ Additional options:
 
 ### Chip8 (Chapter 5)
 
+<img src="figures/figure5_4.png" alt="Chip8 PacMan" height="200">
+
 A Chip8 virtual machine.
 
 #### Requirements
@@ -131,6 +147,8 @@ For example:
 `python -m tests.test_chip8`
 
 ### NESEmulator (Chapter 6)
+
+<img src="figures/figure6_8.png" alt="NES Emulator Brix" height="200">
 
 A simple [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) emulator that can play some basic public domain games.
 
@@ -155,6 +173,8 @@ For example:
 
 ### KNN (Chapters 7 & 8)
 
+<img src="figures/figure8_3.png" alt="KNN Digit Recognizer" height="200">
+
 A handwritten digit recognizer using the K-nearest neighbors algorithm.
 
 #### Requirements
@@ -173,4 +193,8 @@ Then use the key commands "c" to classify, "p" to predict, and "e" to erase.
 `python -m tests.test_knn`
 
 ## Type Hints
-The code in this repository uses the latest type hinting features in Python 3.12. If you are using an older version of Python, you may need to remove some of the type hints to run the code. All the type hints in the source code were checked using [Pyright](https://github.com/microsoft/pyright).
+The code in this repository uses the latest type hinting features in Python 3.12 and above. If you are using an older version of Python, you may be able to run the code by removing some of the type hints, but no support is offered for that endeavor. All the type hints in the source code were checked using [Pyright](https://github.com/microsoft/pyright).
+
+## Authorship and License
+
+The code in this repository is Copyright 2024 David Kopec and released under the terms of the Apache License 2.0. That means you can reuse the code, but you must give credit to David Kopec. Please read the license for details and other requirements. 
