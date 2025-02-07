@@ -1,6 +1,6 @@
 # Computer Science from Scratch
 
-This repository contains all of the source code for the book *[Computer Science from Scratch: Building Interpreters, Art, Emulators and ML in Python](https://nostarch.com/fun-python-projects)* by [David Kopec](https://davekopec.com) and published by No Starch Press. The book, intended for intermediate to advanced Python programmers, features 7 projects of varying complexity from the realm of interpreters, emulators, computer art, and simple machine learning. In the table below is a description of the 7 projects and further down in this README there are directions for running (and testing) each of them. The projects are compatible with Python 3.12 and above.
+This repository contains all of the source code for the book *[Computer Science from Scratch: Building Interpreters, Art, Emulators and ML in Python](https://nostarch.com/computer-science-from-scratch)* by [David Kopec](https://davekopec.com) and published by No Starch Press. The book, intended for intermediate to advanced Python programmers, features 7 projects of varying complexity from the realm of interpreters, emulators, computer art, and simple machine learning. In the table below is a description of the 7 projects and further down in this README there are directions for running (and testing) each of them. The projects are compatible with Python 3.12 and above.
 
 | Project       | Chapter | Section                       | Description                                                                                                                                                              |
 |---------------|---------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -14,7 +14,7 @@ This repository contains all of the source code for the book *[Computer Science 
 
 ## Get the Book
 
-[The book is available now, in its entirety, from No Starch Press.](https://nostarch.com/fun-python-projects) Although this is technically an "Early Access" eBook edition, it is essentially the same exact book as will be published by No Starch Press in print form in mid 2025. You can choose to either purchase the eBook now, or pre-purchase the print book which will also give you immediate access to the eBook.
+[The book is available now, in its entirety, from No Starch Press.](https://nostarch.com/computer-science-from-scratch) Although this is technically an "Early Access" eBook edition, it is essentially the same exact book as will be published by No Starch Press in print form in mid 2025. You can choose to either purchase the eBook now, or pre-purchase the print book which will also give you immediate access to the eBook.
 
 ## Running and Testing Each Project
 
