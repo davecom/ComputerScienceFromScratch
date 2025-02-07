@@ -1,5 +1,5 @@
 # tests/test_retrodither.py
-# From Fun Computer Science Projects in Python
+# From Computer Science from Scratch
 # Copyright 2022 David Kopec
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

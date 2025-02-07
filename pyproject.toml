@@ -3,10 +3,10 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "FunComputerScienceProjectsInPython"
+name = "ComputerScienceFromScratch"
 authors = [{name = "David Kopec", email = "david@oaksnow.com"}]
 version = "1.0.0"
-description = "Source code from the book Fun Computer Science Projects in Python"
+description = "Source code from the book Computer Science from Scratch"
 requires-python = ">=3.12"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.urls]
-Home = "https://github.com/davecom/FunComputerScienceProjectsInPython"
+Home = "https://github.com/davecom/ComputerScienceFromScratch"
 
 [tool.flit.module]
-name = "funcomputerscienceprojectsinpython"
+name = "computersciencefromscratch"
