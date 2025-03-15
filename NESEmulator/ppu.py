@@ -38,16 +38,16 @@ NES_PALETTE = [0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020,
 class PPU:
     def __init__(self, rom: ROM):
         self.rom = rom
-        # PPU Memory
-        self.spr = array('B', [0] * SPR_RAM_SIZE)  # sprite ram
-        self.nametables = array('B', [0] * NAMETABLE_SIZE)  # nametable ram
-        self.palette = array('B', [0] * PALETTE_SIZE)  # palette ram
+        # PPU memory
+        self.spr = array('B', [0] * SPR_RAM_SIZE)  # sprite RAM
+        self.nametables = array('B', [0] * NAMETABLE_SIZE)  # nametable RAM
+        self.palette = array('B', [0] * PALETTE_SIZE)  # palette RAM
         # Registers
         self.addr = 0  # main PPU address register
         self.addr_write_latch = False
         self.status = 0
         self.spr_address = 0
-        # Variables controlled by PPU Control Registers
+        # Variables controlled by PPU control registers
         self.nametable_address = 0
         self.address_increment = 1
         self.spr_pattern_table_address = 0
@@ -61,13 +61,13 @@ class PPU:
         self.buffer2007 = 0
         self.scanline = 0
         self.cycle = 0
-        # pixels for screen
+        # Pixels for screen
         self.display_buffer = np.zeros((NES_WIDTH, NES_HEIGHT), dtype=np.uint32)
 
-    # rendering reference https://wiki.nesdev.com/w/index.php/PPU_rendering
-    # status reference http://wiki.nesdev.com/w/index.php/PPU_registers#PPUSTATUS
+    # rendering reference https://wiki.nesdev.org/w/index.php/PPU_rendering
+    # status reference http://wiki.nesdev.org/w/index.php/PPU_registers#PPUSTATUS
     def step(self):
-        # our simplified PPU draws just once per frame
+        # Our simplified PPU draws just once per frame
         if (self.scanline == 240) and (self.cycle == 256):
             if self.show_background:
                 self.draw_background()
@@ -76,7 +76,7 @@ class PPU:
         if (self.scanline == 241) and (self.cycle == 1):
             self.status |= 0b10000000  # set vblank
         if (self.scanline == 261) and (self.cycle == 1):
-            # vblank off, clear sprite zero, clear sprite overflow
+            # Vblank off, clear sprite zero, clear sprite overflow
             self.status |= 0b00011111
 
         self.cycle += 1
@@ -121,7 +121,7 @@ class PPU:
                         x_screen_loc = x * 8 + fine_x
                         y_screen_loc = y * 8 + fine_y
                         transparent = ((pixel & 3) == 0)
-                        # if the background is transparent use the first color in the palette
+                        # If the background is transparent use the first color in the palette
                         color = self.palette[0] if transparent else self.palette[pixel]
                         self.display_buffer[x_screen_loc, y_screen_loc] = NES_PALETTE[color]
 
@@ -161,13 +161,13 @@ class PPU:
                     if bit1and0 == 0:  # transparent pixel... skip
                         continue
 
-                    # this is not transparent, is it a sprite zero hit therefore?
-                    # check left 8 pixel clipping is not off
+                    # This is not transparent. Is it a sprite zero hit therefore?
+                    # Check that left 8 pixel clipping is not off.
                     if (i == 0) and (not background_transparent) and (not (x < 8 and (
                             not self.left_8_sprite_show or not self.left_8_background_show))
                                 and self.show_background and self.show_sprites):
                         self.status |= 0b01000000
-                    # need to do this after sprite zero checking so we still count background
+                    # Need to do this after sprite zero checking so we still count background
                     # sprites for sprite zero checks
                     if background_sprite and not background_transparent:
                         continue  # background sprite shouldn't draw over opaque pixels
@@ -191,7 +191,7 @@ class PPU:
             else:
                 value = self.read_memory(self.addr)
                 self.buffer2007 = self.read_memory(self.addr - 0x1000)
-            # every read to 0x2007 there is an increment
+            # Every read to 0x2007 there is an increment
             self.addr += self.address_increment
             return value
         else:
@@ -217,7 +217,7 @@ class PPU:
         elif address == 0x2005:  # scroll
             pass
         elif address == 0x2006:
-            # based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
+            # Based on http://wiki.nesdev.com/w/index.php/PPU_scrolling
             if not self.addr_write_latch:  # first write
                 self.addr = (self.addr & 0x00FF) | ((value & 0xFF) << 8)
             else:  # second write

@@ -40,9 +40,9 @@ def bytes_to_bits(original: array) -> array:
     return bits_array
 
 
-# Convert the array of bytes into bits using the helper function
+# Convert the array of bytes into bits using the helper function.
 # Pad any missing spots with white bits due to the original
-# image having a smaller size than 576x720
+# image having a smaller size than 576x720.
 def prepare(data: array, width: int, height: int) -> array:
     bits_array = array('B')
     for row in range(height):
@@ -59,8 +59,8 @@ def prepare(data: array, width: int, height: int) -> array:
 
 
 # https://en.wikipedia.org/wiki/PackBits
-# MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH)
-# In other words there are line boundaries
+# MacPaint expects RLE to happen on a per-line basis (MAX_WIDTH).
+# In other words there are line boundaries.
 def run_length_encode(original_data: array) -> array:
     # Find how many of the same bytes are in a row from *start*
     def take_same(source: array, start: int) -> int:
@@ -95,8 +95,8 @@ def macbinary_header(outfile: str, data_size: int) -> array:
     macbinary = array('B', [0] * MACBINARY_LENGTH)
     filename = Path(outfile).stem
     filename = filename[:63] if len(filename) > 63 else filename  # limit to 63 characters max
-    macbinary[1] = len(filename)  # file name length
-    macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman"))  # file name
+    macbinary[1] = len(filename)  # filename length
+    macbinary[2:(2 + len(filename))] = array("B", filename.encode("mac_roman"))  # filename
     macbinary[65:69] = array("B", "PNTG".encode("mac_roman"))  # file type
     macbinary[69:73] = array("B", "MPNT".encode("mac_roman"))  # file creator
     macbinary[83:87] = array("B", data_size.to_bytes(4, byteorder='big'))  # size of data fork

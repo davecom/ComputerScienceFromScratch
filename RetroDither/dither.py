@@ -35,7 +35,7 @@ ATKINSON = [PatternPart(1, 0, 1, 8), PatternPart(2, 0, 1, 8),
 # Assumes we are working with a grayscale image (Mode "L" in Pillow)
 # Returns an array of dithered pixels (255 for white, 0 for black)
 def dither(image: Image.Image) -> array:
-    # Distribute error amongst nearby pixels
+    # Distribute error among nearby pixels
     def diffuse(c: int, r: int, error: int, pattern: list[PatternPart]):
         for part in pattern:
             col = c + part.dc

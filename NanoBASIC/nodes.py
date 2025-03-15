@@ -31,17 +31,17 @@ class Node:
 
 
 # All statements in NanoBASIC have a line number identifier
-# that the programmer puts in before the statement (*line_id*)
+# that the programmer puts in before the statement (*line_id*).
 # This is a little confusing because there's also the "physical"
 # line number (*line_num*), that actual count of how many lines down
-# in the file where the statement occurs
+# in the file where the statement occurs.
 @dataclass(frozen=True)
 class Statement(Node):
     line_id: int
 
 
-# A numeric expression is something that can be computed into a number
-# This is a super class of literals, variables & simple arithmetic operations
+# A numeric expression is something that can be computed into a number.
+# This is a super class of literals, variables & simple arithmetic operations.
 @dataclass(frozen=True)
 class NumericExpression(Node):
     pass
@@ -58,7 +58,7 @@ class BinaryOperation(NumericExpression):
         return f"{self.left_expr} {self.operator} {self.right_expr}"
 
 
-# A numeric expression with one operand like -4
+# A numeric expression with one operand, like -4
 @dataclass(frozen=True)
 class UnaryOperation(NumericExpression):
     operator: TokenType
@@ -80,9 +80,9 @@ class VarRetrieve(NumericExpression):
     name: str
 
 
-# A boolean expression can be computed to a true or false value
+# A boolean expression can be computed to a true or false value.
 # It takes two numeric expressions, *left_expr* and *right_expr*, and compares
-# them using a boolean *operator*
+# them using a boolean *operator*.
 @dataclass(frozen=True)
 class BooleanExpression(Node):
     operator: TokenType

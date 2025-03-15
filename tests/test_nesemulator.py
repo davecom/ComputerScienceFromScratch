@@ -33,7 +33,7 @@ class CPUTestCase(unittest.TestCase):
         rom = ROM(self.test_folder / "nestest" / "nestest.nes")
         ppu = PPU(rom)
         cpu = CPU(ppu, rom)
-        # Setup tests
+        # Set up tests
         cpu.PC = 0xC000  # special starting location for tests
         with open(self.test_folder / "nestest" / "nestest.log") as f:
             correct_lines = f.readlines()
@@ -61,7 +61,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of basics test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_implied(self):
         # Create machinery that we are testing
@@ -75,7 +75,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of implied test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_branches(self):
         # Create machinery that we are testing
@@ -89,7 +89,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of braches test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_stack(self):
         # Create machinery that we are testing
@@ -103,7 +103,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of stack test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_jmp_jsr(self):
         # Create machinery that we are testing
@@ -117,7 +117,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of jmp_jsr test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_rts(self):
         # Create machinery that we are testing
@@ -131,7 +131,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of rts test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_rti(self):
         # Create machinery that we are testing
@@ -145,7 +145,7 @@ class CPUTestCase(unittest.TestCase):
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of rti test is {rom.prg_ram[0]} not 0")
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
 
     def test_blargg_instr_test_v5_brk(self):
         # Create machinery that we are testing
@@ -157,7 +157,7 @@ class CPUTestCase(unittest.TestCase):
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of brk test is {rom.prg_ram[0]} not 0")
 
@@ -171,7 +171,7 @@ class CPUTestCase(unittest.TestCase):
         while rom.prg_ram[0] == 0x80:  # go until first unofficial opcode test
             cpu.step()
         message = bytes(rom.prg_ram[4:]).decode("utf-8")
-        print(message[0:message.index("\0")])  # Message ends with null terminator
+        print(message[0:message.index("\0")])  # message ends with null terminator
         self.assertEqual(0, rom.prg_ram[0],
                          f"Result code of special test is {rom.prg_ram[0]} not 0")
 

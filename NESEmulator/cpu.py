@@ -359,7 +359,7 @@ class CPU:
             Instruction(InstructionType.ISC, self.unimplemented, MemMode.ABSOLUTE_X, 0, 7, 0),
         ]
 
-    # add memory to accumulator with carry
+    # Add memory to accumulator with carry
     def ADC(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         signed_result = src + self.A + self.C
@@ -368,13 +368,13 @@ class CPU:
         self.C = signed_result > 0xFF
         self.setZN(self.A)
 
-    # bitwise AND with accumulator
+    # Bitwise AND with accumulator
     def AND(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         self.A = self.A & src
         self.setZN(self.A)
 
-    # arithmetic shift left
+    # Arithmetic shift left
     def ASL(self, instruction: Instruction, data: int):
         src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
             self.read_memory(data, instruction.mode))
@@ -386,7 +386,7 @@ class CPU:
         else:
             self.write_memory(data, instruction.mode, src)
 
-    # branch if carry clear
+    # Branch if carry clear
     def BCC(self, instruction: Instruction, data: int):
         if not self.C:
             self.PC = self.address_for_mode(data, instruction.mode)
@@ -398,41 +398,41 @@ class CPU:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # branch on result zero
+    # Branch on result zero
     def BEQ(self, instruction: Instruction, data: int):
         if self.Z:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # bit test bits in memory with accumulator
+    # Bit test bits in memory with accumulator
     def BIT(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         self.V = bool((src >> 6) & 1)
         self.Z = ((src & self.A) == 0)
         self.N = ((src >> 7) == 1)
 
-    # branch on result minus
+    # Branch on result minus
     def BMI(self, instruction: Instruction, data: int):
         if self.N:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # branch on result not zero
+    # Branch on result not zero
     def BNE(self, instruction: Instruction, data: int):
         if not self.Z:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # branch on result plus
+    # Branch on result plus
     def BPL(self, instruction: Instruction, data: int):
         if not self.N:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # force break
+    # Force break
     def BRK(self, instruction: Instruction, data: int):
         self.PC += 2
-        # push pc to stack
+        # push PC to stack
         self.stack_push((self.PC >> 8) & 0xFF)
         self.stack_push(self.PC & 0xFF)
         # push status to stack
@@ -445,122 +445,122 @@ class CPU:
                   (self.read_memory(IRQ_BRK_VECTOR + 1, MemMode.ABSOLUTE) << 8)
         self.jumped = True
 
-    # branch on overflow clear
+    # Branch on overflow clear
     def BVC(self, instruction: Instruction, data: int):
         if not self.V:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # branch on overflow set
+    # Branch on overflow set
     def BVS(self, instruction: Instruction, data: int):
         if self.V:
             self.PC = self.address_for_mode(data, instruction.mode)
             self.jumped = True
 
-    # clear carry
+    # Clear carry
     def CLC(self, instruction: Instruction, data: int):
         self.C = False
 
-    # clear decimal
+    # Clear decimal
     def CLD(self, instruction: Instruction, data: int):
         self.D = False
 
-    # clear interrupt
+    # Clear interrupt
     def CLI(self, instruction: Instruction, data: int):
         self.I = False
 
-    # clear overflow
+    # Clear overflow
     def CLV(self, instruction: Instruction, data: int):
         self.V = False
 
-    # compare accumulator
+    # Compare accumulator
     def CMP(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         self.C = self.A >= src
         self.setZN(self.A - src)
 
-    # compare X register
+    # Compare X register
     def CPX(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         self.C = self.X >= src
         self.setZN(self.X - src)
 
-    # compare Y register
+    # Compare Y register
     def CPY(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         self.C = self.Y >= src
         self.setZN(self.Y - src)
 
-    # decrement memory
+    # Decrement memory
     def DEC(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         src = (src - 1) & 0xFF
         self.write_memory(data, instruction.mode, src)
         self.setZN(src)
 
-    # decrement X
+    # Decrement X
     def DEX(self, instruction: Instruction, data: int):
         self.X = (self.X - 1) & 0xFF
         self.setZN(self.X)
 
-    # decrement Y
+    # Decrement Y
     def DEY(self, instruction: Instruction, data: int):
         self.Y = (self.Y - 1) & 0xFF
         self.setZN(self.Y)
 
-    # exclusive or memory with accumulator
+    # Exclusive or memory with accumulator
     def EOR(self, instruction: Instruction, data: int):
         self.A ^= self.read_memory(data, instruction.mode)
         self.setZN(self.A)
 
-    # increment memory
+    # Increment memory
     def INC(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         src = (src + 1) & 0xFF
         self.write_memory(data, instruction.mode, src)
         self.setZN(src)
 
-    # increment X
+    # Increment X
     def INX(self, instruction: Instruction, data: int):
         self.X = (self.X + 1) & 0xFF
         self.setZN(self.X)
 
-    # increment Y
+    # Increment Y
     def INY(self, instruction: Instruction, data: int):
         self.Y = (self.Y + 1) & 0xFF
         self.setZN(self.Y)
 
-    # jump
+    # Jump
     def JMP(self, instruction: Instruction, data: int):
         self.PC = self.address_for_mode(data, instruction.mode)
         self.jumped = True
 
-    # jump to subroutine
+    # Jump to subroutine
     def JSR(self, instruction: Instruction, data: int):
         self.PC += 2
-        # push pc to stack
+        # Push PC to stack
         self.stack_push((self.PC >> 8) & 0xFF)
         self.stack_push(self.PC & 0xFF)
-        # jump to subroutine
+        # Jump to subroutine
         self.PC = self.address_for_mode(data, instruction.mode)
         self.jumped = True
 
-    # load accumulator with memory
+    # Load accumulator with memory
     def LDA(self, instruction: Instruction, data: int):
         self.A = self.read_memory(data, instruction.mode)
         self.setZN(self.A)
 
-    # load X with memory
+    # Load X with memory
     def LDX(self, instruction: Instruction, data: int):
         self.X = self.read_memory(data, instruction.mode)
         self.setZN(self.X)
 
-    # load Y with memory
+    # Load Y with memory
     def LDY(self, instruction: Instruction, data: int):
         self.Y = self.read_memory(data, instruction.mode)
         self.setZN(self.Y)
 
-    # logical shift right
+    # Logical shift right
     def LSR(self, instruction: Instruction, data: int):
         src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
             self.read_memory(data, instruction.mode))
@@ -572,36 +572,36 @@ class CPU:
         else:
             self.write_memory(data, instruction.mode, src)
 
-    # no op
+    # No op
     def NOP(self, instruction: Instruction, data: int):
         pass
 
-    # or memory with accumulator
+    # Or memory with accumulator
     def ORA(self, instruction: Instruction, data: int):
         self.A |= self.read_memory(data, instruction.mode)
         self.setZN(self.A)
 
-    # push accumulator
+    # Push accumulator
     def PHA(self, instruction: Instruction, data: int):
         self.stack_push(self.A)
 
     # push status
     def PHP(self, instruction: Instruction, data: int):
-        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # https://nesdev.org/the%20'B'%20flag%20&%20BRK%20instruction.txt
         self.B = True
         self.stack_push(self.status)
         self.B = False
 
-    # pull accumulator
+    # Pull accumulator
     def PLA(self, instruction: Instruction, data: int):
         self.A = self.stack_pop()
         self.setZN(self.A)
 
-    # pull status
+    # Pull status
     def PLP(self, instruction: Instruction, data: int):
         self.set_status(self.stack_pop())
 
-    # rotate one bit left
+    # Rotate one bit left
     def ROL(self, instruction: Instruction, data: int):
         src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
             self.read_memory(data, instruction.mode))
@@ -614,7 +614,7 @@ class CPU:
         else:
             self.write_memory(data, instruction.mode, src)
 
-    # rotate one bit right
+    # Rotate one bit right
     def ROR(self, instruction: Instruction, data: int):
         src = self.A if instruction.mode == MemMode.ACCUMULATOR else (
             self.read_memory(data, instruction.mode))
@@ -627,83 +627,83 @@ class CPU:
         else:
             self.write_memory(data, instruction.mode, src)
 
-    # return from interrupt
+    # Return from interrupt
     def RTI(self, instruction: Instruction, data: int):
-        # pull Status out
+        # Pull status out
         self.set_status(self.stack_pop())
-        # pull PC out
+        # Pull PC out
         lb = self.stack_pop()
         hb = self.stack_pop()
         self.PC = ((hb << 8) | lb)
         self.jumped = True
 
-    # return from subroutine
+    # Return from subroutine
     def RTS(self, instruction: Instruction, data: int):
-        # pull PC out
+        # Pull PC out
         lb = self.stack_pop()
         hb = self.stack_pop()
         self.PC = ((hb << 8) | lb) + 1  # 1 past last instruction
         self.jumped = True
 
-    # subtract with carry
+    # Subtract with carry
     def SBC(self, instruction: Instruction, data: int):
         src = self.read_memory(data, instruction.mode)
         signed_result = self.A - src - (1 - self.C)
-        # set overflow
+        # Set overflow
         self.V = bool((self.A ^ src) & (self.A ^ signed_result) & 0x80)
         self.A = (self.A - src - (1 - self.C)) % 256
         self.C = not (signed_result < 0)  # set carry
         self.setZN(self.A)
 
-    # set carry
+    # Set carry
     def SEC(self, instruction: Instruction, data: int):
         self.C = True
 
-    # set decimal
+    # Set decimal
     def SED(self, instruction: Instruction, data: int):
         self.D = True
 
-    # set interrupt
+    # Set interrupt
     def SEI(self, instruction: Instruction, data: int):
         self.I = True
 
-    # store accumulator
+    # Store accumulator
     def STA(self, instruction: Instruction, data: int):
         self.write_memory(data, instruction.mode, self.A)
 
-    # store X register
+    # Store X register
     def STX(self, instruction: Instruction, data: int):
         self.write_memory(data, instruction.mode, self.X)
 
-    # store Y register
+    # Store Y register
     def STY(self, instruction: Instruction, data: int):
         self.write_memory(data, instruction.mode, self.Y)
 
-    # transfer A to X
+    # Transfer A to X
     def TAX(self, instruction: Instruction, data: int):
         self.X = self.A
         self.setZN(self.X)
 
-    # transfer A to Y
+    # Transfer A to Y
     def TAY(self, instruction: Instruction, data: int):
         self.Y = self.A
         self.setZN(self.Y)
 
-    # transfer stack pointer to X
+    # Transfer stack pointer to X
     def TSX(self, instruction: Instruction, data: int):
         self.X = self.SP
         self.setZN(self.X)
 
-    # transfer X to A
+    # Transfer X to A
     def TXA(self, instruction: Instruction, data: int):
         self.A = self.X
         self.setZN(self.A)
 
-    # transfer X to SP
+    # Transfer X to SP
     def TXS(self, instruction: Instruction, data: int):
         self.SP = self.X
 
-    # transfer Y to A
+    # Transfer Y to A
     def TYA(self, instruction: Instruction, data: int):
         self.A = self.Y
         self.setZN(self.A)
@@ -734,7 +734,7 @@ class CPU:
                                   InstructionType.BEQ, InstructionType.BMI,
                                   InstructionType.BNE, InstructionType.BPL,
                                   InstructionType.BVC, InstructionType.BVS}:
-            # branch instructions are +1 ticks if they succeeded
+            # Branch instructions are +1 ticks if they succeeded
             self.cpu_ticks += 1
         self.cpu_ticks += instruction.ticks
         if self.page_crossed:
@@ -794,7 +794,7 @@ class CPU:
         elif address < 0x4000:  # 2000-2007 is PPU, mirrors every 8 bytes
             temp = ((address % 8) | 0x2000)  # get data from ppu register
             return self.ppu.read_register(temp)
-        elif address == 0x4016:  # Joypad 1 status
+        elif address == 0x4016:  # joypad 1 status
             if self.joypad1.strobe:
                 return self.joypad1.a
             self.joypad1.read_count += 1
@@ -818,8 +818,8 @@ class CPU:
                 case _:
                     return 0x41
         elif address < 0x6000:
-            return 0  # Unimplemented other kinds of IO
-        else:  # Addresses from 0x6000 to 0xFFFF are from the cartridge
+            return 0  # unimplemented other kinds of IO
+        else:  # addresses from 0x6000 to 0xFFFF are from the cartridge
             return self.rom.read_cartridge(address)
 
     def write_memory(self, location: int, mode: MemMode, value: int):
@@ -828,27 +828,27 @@ class CPU:
             return
 
         address = self.address_for_mode(location, mode)
-        # Memory map at http://wiki.nesdev.com/w/index.php/CPU_memory_map
-        if address < 0x2000:  # main ram 2 KB goes up to 0x800
+        # Memory map at https://wiki.nesdev.org/w/index.php/CPU_memory_map
+        if address < 0x2000:  # main RAM 2 KB goes up to 0x800
             self.ram[address % 0x800] = value  # mirrors for next 6 KB
         elif address < 0x3FFF:  # 2000-2007 is PPU, mirrors every 8 bytes
-            temp = ((address % 8) | 0x2000)  # write data to ppu register
+            temp = ((address % 8) | 0x2000)  # write data to PPU register
             self.ppu.write_register(temp, value)
-        elif address == 0x4014:  # DMA Transfer of Sprite Data
+        elif address == 0x4014:  # DMA transfer of sprite data
             from_address = value * 0x100  # address to start copying from
             for i in range(SPR_RAM_SIZE):  # copy all 256 bytes to sprite ram
                 self.ppu.spr[i] = self.read_memory((from_address + i),
                                                    MemMode.ABSOLUTE)
-            # stall for 512 cycles while this completes
+            # Stall for 512 cycles while this completes
             self.stall = 512
-        elif address == 0x4016:  # Joypad 1
+        elif address == 0x4016:  # joypad 1
             if self.joypad1.strobe and (not bool(value & 1)):
                 self.joypad1.read_count = 0
             self.joypad1.strobe = bool(value & 1)
             return
         elif address < 0x6000:
-            return  # Unimplemented other kinds of IO
-        else:  # Addresses from 0x6000 to 0xFFFF are from the cartridge
+            return  # unimplemented other kinds of IO
+        else:  # addresses from 0x6000 to 0xFFFF are from the cartridge
             # We haven't implemented support for cartridge RAM
             return self.rom.write_cartridge(address, value)
 
@@ -874,7 +874,7 @@ class CPU:
         self.Z = bool(temp & 0b00000010)
         self.I = bool(temp & 0b00000100)
         self.D = bool(temp & 0b00001000)
-        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # https://nesdev.org/the%20'B'%20flag%20&%20BRK%20instruction.txt
         self.B = False
         self.V = bool(temp & 0b01000000)
         self.N = bool(temp & 0b10000000)
@@ -882,12 +882,12 @@ class CPU:
     def trigger_NMI(self):
         self.stack_push((self.PC >> 8) & 0xFF)
         self.stack_push(self.PC & 0xFF)
-        # http://nesdev.com/the%20'B'%20flag%20&%20BRK%20instruction.txt
+        # https://nesdev.org/the%20'B'%20flag%20&%20BRK%20instruction.txt
         self.B = True
         self.stack_push(self.status)
         self.B = False
         self.I = True
-        # set PC to NMI vector
+        # Set PC to NMI vector
         self.PC = (self.read_memory(NMI_VECTOR, MemMode.ABSOLUTE)) | \
                   (self.read_memory(NMI_VECTOR + 1, MemMode.ABSOLUTE) << 8)
 

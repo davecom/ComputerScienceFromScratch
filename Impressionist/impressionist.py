@@ -166,4 +166,5 @@ class Impressionist:
         if animation_frames is not None:
             animation_frames[0].save(out_file + ".gif", save_all=True,
                                      append_images=animation_frames[1:], optimize=False,
-                                     duration=animation_length, loop=0, transparency=0, disposal=2)
+                                     duration=animation_length, loop=0,
+                                     transparency=0, disposal=2)

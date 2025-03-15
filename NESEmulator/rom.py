@@ -30,7 +30,7 @@ PRG_RAM_SIZE = 8192
 class ROM:
     def __init__(self, file_name: str | Path):
         with open(file_name, "rb") as file:
-            # Read Header and Check Signature "NES"
+            # Read header and check signature "NES"
             self.header = Header._make(unpack("!LBBBBBBB5s",
                                               file.read(HEADER_SIZE)))
             if self.header.signature != 0x4E45531A:
@@ -52,12 +52,12 @@ class ROM:
             # Check mirroring from flags6 bit 0
             self.vertical_mirroring = bool(self.header.flags6 & 1)
             print(f"Has vertical mirroring {self.vertical_mirroring}")
-            # Read PRG_ROM & CHR_ROM, in multiples of 16K and 8K respectively
+            # Read PRG_ROM & CHR_ROM, in multiples of 16K and 8K, respectively
             self.prg_rom = file.read(PRG_ROM_BASE_UNIT_SIZE *
                                      self.header.prg_rom_size)
             self.chr_rom = file.read(CHR_ROM_BASE_UNIT_SIZE *
                                      self.header.chr_rom_size)
-            self.prg_ram = array('B', [0] * PRG_RAM_SIZE)  # ram
+            self.prg_ram = array('B', [0] * PRG_RAM_SIZE)  # RAM
 
     def read_mapper0(self, address: int) -> int:
         if address < 0x2000:

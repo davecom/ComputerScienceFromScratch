@@ -36,7 +36,7 @@ def run():
     digits_file = (Path(__file__).resolve().parent
                    / "datasets" / "digits" / "digits.csv")
     digits_knn = KNN(Digit, digits_file, has_header=False)
-    # Startup Pygame, create the window
+    # Start up Pygame, create the window
     pygame.init()
     screen = pygame.display.set_mode(size=(PIXEL_WIDTH, PIXEL_HEIGHT),
                                      flags=pygame.SCALED | pygame.RESIZABLE)
@@ -59,7 +59,8 @@ def run():
                     pixels = digit_pixels.transpose((1, 0, 2))[:, :, 0].flatten() * P_TO_D
                     predicted_pixels = digits_knn.predict_array(K, Digit("", pixels), "pixels")
                     predicted_pixels = predicted_pixels.reshape((PIXEL_HEIGHT, PIXEL_WIDTH)).transpose((1, 0)) * D_TO_P
-                    digit_pixels = np.stack((predicted_pixels, predicted_pixels, predicted_pixels), axis=2)
+                    digit_pixels = np.stack((predicted_pixels, predicted_pixels,
+                                             predicted_pixels), axis=2)
             # Handle mouse events
             elif ((event.type == pygame.MOUSEBUTTONDOWN) or
                   (event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0])):

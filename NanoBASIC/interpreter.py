@@ -37,7 +37,7 @@ class Interpreter:
         return self.statements[self.statement_index]
 
     # Returns the index of a *line_id* using a binary search,
-    # or None if not found; Assumes the statements list is sorted
+    # or None if not found; assumes the statements list is sorted
     def find_line_index(self, line_id: int) -> int | None:
         low: int = 0
         high: int = len(self.statements) - 1
